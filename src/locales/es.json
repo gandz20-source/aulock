@@ -1,0 +1,36 @@
+{
+    "nexus": {
+        "title": "AuLock Nexus",
+        "subtitle": "Tu centro de control educativo",
+        "cards": {
+            "edu": {
+                "title": "Bienestar y Foco Académico",
+                "description": "Herramientas para potenciar tu aprendizaje y concentración.",
+                "action": "Explorar"
+            },
+            "lab": {
+                "title": "Laboratorio de Vibe Coding",
+                "description": "Crea, experimenta y programa con la ayuda de Ada.",
+                "action": "Entrar al Lab"
+            },
+            "family": {
+                "title": "Salud Mental y Hogar",
+                "description": "Recursos para el equilibrio y bienestar familiar.",
+                "action": "Ver Recursos"
+            }
+        }
+    },
+    "lab": {
+        "title": "AuLock Vibe-Studio",
+        "xp_label": "XP Tech",
+        "ada": {
+            "name": "Ada",
+            "role": "Vibe Copilot",
+            "intro": "¡Hola! Soy Ada, tu copiloto de Vibe Coding. Dime qué quieres crear y yo escribiré el código por ti. ¡Toca los límites de la tecnología!"
+        },
+        "preview": {
+            "title": "Vista Previa",
+            "placeholder": "Tu creación aparecerá aquí..."
+        }
+    }
+}

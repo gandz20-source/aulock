@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Aulock Tracker</string>
+    <string name="title_activity_main">Aulock Tracker</string>
+    <string name="package_name">com.aulock.tracker</string>
+    <string name="custom_url_scheme">com.aulock.tracker</string>
+</resources>

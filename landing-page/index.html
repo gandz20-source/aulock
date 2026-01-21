@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuLock - Redefine la Concentración. Transforma el Aprendizaje.</title>
+    <meta name="description"
+        content="La única plataforma que utiliza tecnología NFC para verificar la concentración, optimizando el rendimiento académico mediante bloques de estudio enfocados.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="nav container">
+            <div class="nav__logo">
+                <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3B82F6" />
+                            <stop offset="100%" style="stop-color:#8B5CF6" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d="M20 5C11.716 5 5 11.716 5 20C5 28.284 11.716 35 20 35C28.284 35 35 28.284 35 20C35 11.716 28.284 5 20 5Z"
+                        fill="url(#logoGradient)" opacity="0.2" />
+                    <path
+                        d="M20 10C14.477 10 10 14.477 10 20C10 25.523 14.477 30 20 30C25.523 30 30 25.523 30 20C30 14.477 25.523 10 20 10Z"
+                        stroke="url(#logoGradient)" stroke-width="2" fill="none" />
+                    <path d="M20 15V20L23 23" stroke="url(#logoGradient)" stroke-width="2.5" stroke-linecap="round" />
+                    <circle cx="20" cy="20" r="2" fill="url(#logoGradient)" />
+                </svg>
+                <span class="logo-text">Au<span class="logo-accent">Lock</span></span>
+            </div>
+
+            <ul class="nav__menu" id="navMenu">
+                <li class="nav__item"><a href="#solucion" class="nav__link">Solución</a></li>
+                <li class="nav__item"><a href="#ciencia" class="nav__link">Ciencia</a></li>
+                <li class="nav__item"><a href="#contacto" class="nav__link">Contacto</a></li>
+            </ul>
+
+            <button class="nav__toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero__container container">
+            <div class="hero__content">
+                <div class="hero__badge">
+                    <svg class="badge-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span>Tecnología NFC Innovadora</span>
+                </div>
+
+                <h1 class="hero__title">
+                    <span class="title-line">AuLock: Redefine la</span>
+                    <span class="title-line title-gradient">Concentración.</span>
+                    <span class="title-line">Transforma el Aprendizaje.</span>
+                </h1>
+
+                <p class="hero__description">
+                    La única plataforma que utiliza tecnología NFC para verificar la concentración,
+                    optimizando el rendimiento académico mediante bloques de estudio enfocados.
+                </p>
+
+                <div class="hero__cta">
+                    <button class="btn btn-primary" id="ctaButton">
+                        <span>Solicitar más información</span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
+                            <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <a href="https://youtube.com/shorts/" target="_blank" class="btn btn-secondary" id="demoVideoLink">
+                        <svg class="btn-icon-left" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                            <path d="M10 8l6 4-6 4V8z" fill="currentColor" />
+                        </svg>
+                        <span>Ver Demo</span>
+                    </a>
+                </div>
+
+                <div class="hero__stats">
+                    <div class="stat">
+                        <div class="stat__number">95%</div>
+                        <div class="stat__label">Mejora en Concentración</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat__number">10K+</div>
+                        <div class="stat__label">Estudiantes Activos</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat__number">4.9★</div>
+                        <div class="stat__label">Valoración Promedio</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero__visual">
+                <div class="visual-card">
+                    <div class="card-glow"></div>
+                    <img src="images/students-hero.jpg" alt="Estudiantes usando AuLock" class="product-image">
+                    <div class="floating-badge badge-1">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                                fill="currentColor" />
+                        </svg>
+                        <span>NFC Verified</span>
+                    </div>
+                    <div class="floating-badge badge-2">
+                        <div class="pulse-dot"></div>
+                        <span>En Vivo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero__background">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+    </section>
+
+    <!-- Product Showcase Section -->
+    <section class="section product-showcase">
+        <div class="container">
+            <div class="showcase-grid">
+                <div class="showcase-item">
+                    <img src="images/product-specs.jpg" alt="Especificaciones AuLock" class="showcase-image">
+                </div>
+                <div class="showcase-item">
+                    <img src="images/study-table.jpg" alt="Estudiantes concentrados con AuLock" class="showcase-image">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="section solution" id="solucion">
+        <div class="container">
+            <div class="section__header">
+                <span class="section__tag">Nuestra Solución</span>
+                <h2 class="section__title">Tecnología que Potencia el Enfoque</h2>
+                <p class="section__description">
+                    AuLock combina hardware NFC con software inteligente para crear
+                    un ecosistema completo de gestión de concentración.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" />
+                            <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Verificación NFC</h3>
+                    <p class="feature-description">
+                        Estuche inteligente que verifica automáticamente cuando el estudiante
+                        está en modo concentración.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Bloques de Estudio</h3>
+                    <p class="feature-description">
+                        Sistema de intervalos optimizados basado en investigación científica
+                        sobre concentración.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M3 3v18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            <path d="M7 16l4-4 3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Analytics Avanzados</h3>
+                    <p class="feature-description">
+                        Dashboard completo con métricas de rendimiento, tendencias y
+                        recomendaciones personalizadas.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor"
+                                stroke-width="2" />
+                            <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor"
+                                stroke-width="2" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Gestión Institucional y DAEM</h3>
+                    <p class="feature-description">
+                        Plataforma integral para Direcciones y DAEM: obtenga datos precisos para la gestión educativa y
+                        tome decisiones basadas en evidencia.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" stroke="currentColor" stroke-width="2" />
+                            <path d="M12 7v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Inclusión Real (TEA/NEEP)</h3>
+                    <p class="feature-description">
+                        Entorno libre de distracciones ideal para estudiantes con necesidades especiales (TEA/TDAH),
+                        facilitando la autorregulación y el foco.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Science Section -->
+    <section class="section science" id="ciencia">
+        <div class="container">
+            <div class="science__content">
+                <div class="science__text">
+                    <span class="section__tag">Respaldado por Ciencia</span>
+                    <h2 class="section__title">Fundamentos Neurocientíficos</h2>
+                    <p class="science__description">
+                        AuLock está basado en décadas de investigación sobre atención,
+                        concentración y aprendizaje efectivo.
+                    </p>
+
+                    <div class="science__points">
+                        <div class="science__point">
+                            <div class="point-icon-wrapper">
+                                <svg class="science-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                            </div>
+                            <div class="point-content">
+                                <h4>Principio de la Técnica Pomodoro</h4>
+                                <p><strong>El concepto:</strong> AuLock utiliza el bloqueo de dispositivos para
+                                    estructurar el aprendizaje en intervalos de tiempo dedicados, fomentando ciclos de
+                                    alta concentración seguidos de breves descansos cerebrales.</p>
+                                <p><strong>Beneficio:</strong> Evita el agotamiento cognitivo y mejora la retención de
+                                    datos a largo plazo al segmentar el estudio de manera eficiente.</p>
+                            </div>
+                        </div>
+
+                        <div class="science__point">
+                            <div class="point-icon-wrapper">
+                                <svg class="science-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z" />
+                                    <path
+                                        d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z" />
+                                </svg>
+                            </div>
+                            <div class="point-content">
+                                <h4>Psicología del "Deep Work"</h4>
+                                <p><strong>El concepto:</strong> Al eliminar la posibilidad física de acceder a las
+                                    notificaciones mediante tecnología NFC, se suprime la "interrupción constante".</p>
+                                <p><strong>Beneficio:</strong> Permite al cerebro alcanzar estados de flujo (flow) donde
+                                    la resolución de problemas complejos se vuelve más efectiva.</p>
+                            </div>
+                        </div>
+
+                        <div class="science__point">
+                            <div class="point-icon-wrapper">
+                                <svg class="science-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                                    <path d="M8 10h.01" />
+                                    <path d="M12 10h.01" />
+                                    <path d="M16 10h.01" />
+                                </svg>
+                            </div>
+                            <div class="point-content">
+                                <h4>Aprendizaje Socrático Mediante IA</h4>
+                                <p><strong>El concepto:</strong> La IA de AuLock no entrega respuestas directas, sino
+                                    que actúa como un tutor que guía mediante preguntas (Método Socrático).</p>
+                                <p><strong>Beneficio:</strong> Fuerza al estudiante a realizar el proceso de
+                                    razonamiento, logrando un aprendizaje significativo no memorístico.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="science__visual">
+                    <div class="science-image-wrapper">
+                        <!-- Visual representation of reports -->
+                        <div class="data-preview-card">
+                            <div class="preview-header">
+                                <div class="preview-dot red"></div>
+                                <div class="preview-dot yellow"></div>
+                                <div class="preview-dot green"></div>
+                            </div>
+                            <div class="preview-body">
+                                <div class="chart-placeholder">
+                                    <div class="bar" style="height: 60%"></div>
+                                    <div class="bar" style="height: 80%"></div>
+                                    <div class="bar" style="height: 40%"></div>
+                                    <div class="bar" style="height: 90%"></div>
+                                </div>
+                                <div class="preview-label">Nivel de Concentración por Curso</div>
+                            </div>
+                        </div>
+                        <img src="images/science-lab.jpg" alt="Innovación educativa con AuLock" class="science-image"
+                            style="opacity: 0.5; mix-blend-mode: overlay;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Intelligence Section -->
+    <section class="section data-intelligence" id="datos">
+        <div class="container">
+            <div class="section__header">
+                <span class="section__tag">Inteligencia Educativa</span>
+                <h2 class="section__title">Datos para la Gestión Directiva</h2>
+                <p class="section__description">
+                    AuLock convierte la interacción en el aula en información accionable para la toma de decisiones
+                    estratégicas.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M2 12h5l3 5 4-11 5 9h5" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Monitoreo del Clima Escolar</h3>
+                    <p class="feature-description">
+                        Métricas en tiempo real sobre niveles de concentración y ansiedad digital. Identifique
+                        dificultades de enfoque por jornada o nivel.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M21 21v-2a4 4 0 0 0-3-3.87M15.73 6.64a4 4 0 0 0-5.46 0l-3.35 3.35a4 4 0 0 0 0 5.66L9 17.76a4 4 0 0 0 5.66 0l3.35-3.35a4 4 0 0 0 0-5.66" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Reportes Predictivos</h3>
+                    <p class="feature-description">
+                        IA adaptativa que detecta "lagunas cognitivas" y patrones de aprendizaje antes de las
+                        evaluaciones, permitiendo intervenciones tempranas.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <path d="M3 9h18" />
+                            <path d="M9 21V9" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Evidencia para DAEM</h3>
+                    <p class="feature-description">
+                        Dashboard automatizado que justifica la inversión con datos de uso, mejora en tiempos efectivos
+                        y progreso en nivelación académica.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z" />
+                            <path d="M12 7v6" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Seguimiento Inclusión (PIE/TEA)</h3>
+                    <p class="feature-description">
+                        Datos específicos sobre el progreso de alumnos con NEEP, facilitando informes precisos para
+                        equipos multidisciplinarios.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ecosystem Section -->
+    <section class="section ecosystem" id="ecosistema">
+        <div class="container">
+            <div class="section__header">
+                <span class="section__tag">Ecosistema AuLock</span>
+                <h2 class="section__title">Un Ecosistema de Acompañamiento Integral</h2>
+                <p class="section__description">
+                    Transformamos la interacción educativa mediante tres pilares fundamentales que potencian el
+                    aprendizaje activo.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Pillar A: IA Adaptativa -->
+                <div class="feature-card ecosystem-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
+                            <path
+                                d="M5 22v-6.57a2 2 0 0 1 1.07-1.78l.83-.39a2 2 0 0 0 1.1-1.79V10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.46a2 2 0 0 0 1.1 1.79l.83.39A2 2 0 0 1 19 15.43V22" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">IA Adaptativa y Tutores Especializados</h3>
+                    <p class="feature-description">
+                        Sistema de Tutores IA diseñados bajo el método socrático, no un buscador genérico.
+                    </p>
+                    <ul class="ecosystem-list">
+                        <li><strong>Squads de Especialidad:</strong> Acompañamiento específico en Matemáticas, Ciencias,
+                            Lenguaje e Historia.</li>
+                        <li><strong>Nivelación Personalizada:</strong> Ajuste automático de complejidad para cerrar
+                            brechas individuales.</li>
+                    </ul>
+                </div>
+
+                <!-- Pillar B: Interacción Activa -->
+                <div class="feature-card ecosystem-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Metodología de Interacción Activa</h3>
+                    <p class="feature-description">
+                        Transformamos al estudiante de receptor pasivo a protagonista de su aprendizaje.
+                    </p>
+                    <ul class="ecosystem-list">
+                        <li><strong>Debate Asistido:</strong> Fomenta el pensamiento crítico defendiendo ideas ante la
+                            IA.</li>
+                        <li><strong>Preguntas Guía:</strong> La IA guía al alumno a descubrir la solución por sí mismo.
+                        </li>
+                        <li><strong>Desafíos de Creación:</strong> Proyectos originales usando IA como herramienta de
+                            apoyo.</li>
+                    </ul>
+                </div>
+
+                <!-- Pillar C: Control de Mando Docente -->
+                <div class="feature-card ecosystem-card">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">El "Control de Mando" para el Docente</h3>
+                    <p class="feature-description">
+                        Herramientas avanzadas para la gestión pedagógica y recuperación del rol mentor.
+                    </p>
+                    <ul class="ecosystem-list">
+                        <li><strong>Dashboard de Clima:</strong> Datos en tiempo real sobre alumnos en "Deep Work".</li>
+                        <li><strong>Recuperación del Aula:</strong> Delega la nivelación a la IA para enfocarse en la
+                            mentoría humana.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="section benefits">
+        <div class="container">
+            <div class="benefits-content">
+                <div class="benefits-image">
+                    <img src="images/teacher-student.jpg" alt="Profesores y estudiantes con AuLock"
+                        class="benefit-image">
+                </div>
+                <div class="benefits-text">
+                    <span class="section__tag">Beneficios Comprobados</span>
+                    <h2 class="section__title">¡Usa AuLock y Gana Puntos!</h2>
+                    <p class="benefits__description">
+                        Acumula horas usando AuLock en clase junto a tus compañeros.
+                        ¡El curso con más horas ganará un punto extra en la próxima evaluación!
+                    </p>
+                    <ul class="benefits-list">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
+                                    stroke-width="2" />
+                            </svg>
+                            <span>Bloquea señal 2G-5G / Wi-Fi / Bluetooth</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
+                                    stroke-width="2" />
+                            </svg>
+                            <span>Seguro y resistente para uso diario</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
+                                    stroke-width="2" />
+                            </svg>
+                            <span>Compatible con todos los teléfonos</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
+                                    stroke-width="2" />
+                            </svg>
+                            <span>Uso educativo certificado</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="section about-us" id="nosotros">
+        <div class="container">
+            <div class="section__header">
+                <span class="section__tag">Quiénes Somos</span>
+                <h2 class="section__title">Experiencia con Propósito</h2>
+                <p class="section__description">
+                    Desde la alta seguridad industrial hacia la innovación educativa.
+                </p>
+            </div>
+
+            <div class="about-grid">
+                <div class="about-history">
+                    <div class="history-content">
+                        <h3>Nuestra Trayectoria</h3>
+                        <p>
+                            Nuestra trayectoria nace bajo el alero de <strong>Comercializadora Kadosh Ltda.</strong>,
+                            donde lideramos proyectos de alta complejidad técnica, destacando la implementación de
+                            sistemas de seguridad para la <strong>Octava Zona de Carabineros</strong>. En 2016, dimos un
+                            salto hacia la innovación en seguridad industrial, diseñando tecnología de vanguardia para
+                            la prevención de accidentes en <strong>Celulosa Arauco</strong>.
+                        </p>
+                        <p>
+                            Como <strong>Seguridad y Tecnología Chile</strong>, hemos consolidado nuestra experiencia
+                            optimizando plantas de producción y colaborando con <strong>Pesquera Camanchaca</strong>.
+                        </p>
+                        <p>
+                            Desde 2025, volcamos esta experiencia técnica en <strong>AuLock</strong>, evolucionando de
+                            una respuesta a la adicción móvil a un ecosistema educativo que devuelve el control de la
+                            atención a las nuevas generaciones.
+                        </p>
+                    </div>
+
+                    <div class="institutional-logos">
+                        <div class="logo-item">
+                            <!-- Placeholder for Carabineros Logo -->
+                            <div class="logo-placeholder">Logo Carabineros</div>
+                            <!-- <img src="images/logo-carabineros.png" alt="Carabineros de Chile" class="partner-logo"> -->
+                        </div>
+                        <div class="logo-item">
+                            <!-- Placeholder for Arauco Logo -->
+                            <div class="logo-placeholder">Logo Arauco</div>
+                            <!-- <img src="images/logo-arauco.png" alt="Celulosa Arauco" class="partner-logo"> -->
+                        </div>
+                        <div class="logo-item">
+                            <!-- Placeholder for Camanchaca Logo -->
+                            <div class="logo-placeholder">Logo Camanchaca</div>
+                            <!-- <img src="images/logo-camanchaca.png" alt="Pesquera Camanchaca" class="partner-logo"> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mission-vision-wrapper">
+                    <div class="mv-card mission">
+                        <div class="mv-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10" />
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                <path d="M2 12h20" />
+                            </svg>
+                        </div>
+                        <h3>Misión</h3>
+                        <p>
+                            Combatir la dependencia digital en adolescentes, transformando el aula en un espacio libre
+                            de distracciones. A través de tecnología de restricción física y técnicas de concentración,
+                            buscamos elevar el rendimiento académico y devolver al estudiante la capacidad de enfocarse
+                            en su aprendizaje.
+                        </p>
+                    </div>
+
+                    <div class="mv-card vision">
+                        <div class="mv-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </div>
+                        <h3>Visión</h3>
+                        <p>
+                            Aspiramos a transformar la educación en Chile, fomentando el pensamiento crítico, la
+                            observación y la creatividad.
+                        </p>
+                        <blockquote class="vision-highlight">
+                            "En un mundo donde la Inteligencia Artificial está asumiendo las tareas informáticas y
+                            técnicas, enseñar solo ciencias y matemáticas ya no es suficiente. Existe una capacidad que
+                            la IA no puede replicar: la creación humana. Sin embargo, las pantallas apagan el deseo de
+                            crear. Nuestra visión es formar generaciones capaces de dominar las herramientas del futuro
+                            sin ser dominadas por ellas."
+                        </blockquote>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section contact" id="contacto">
+        <div class="container">
+            <div class="contact__card">
+                <div class="contact__content">
+                    <h2 class="contact__title">¿Listo para Transformar el Aprendizaje?</h2>
+                    <p class="contact__description">
+                        Únete a miles de estudiantes y educadores que ya están mejorando
+                        su concentración con AuLock.
+                    </p>
+
+                    <form class="contact__form" id="contactForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input type="text" id="name" placeholder="Nombre completo" required>
+                            </div>
+                            <div class="form-group">
+                                <input type="email" id="email" placeholder="Email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <select id="role" required>
+                                <option value="">Soy un...</option>
+                                <option value="student">Estudiante</option>
+                                <option value="teacher">Profesor</option>
+                                <option value="parent">Padre/Madre</option>
+                                <option value="institution">Institución Educativa</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <textarea id="message" rows="4"
+                                placeholder="Cuéntanos sobre tu interés en AuLock..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <span>Solicitar Demostración</span>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
+                                <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="contact__info">
+                    <div class="info-item">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
+                        <div>
+                            <div class="info-label">Email</div>
+                            <div class="info-value"><a href="mailto:gonzalo@aulock.cl">gonzalo@aulock.cl</a></div>
+                            <div class="info-value"><a href="mailto:contacto@aulock.cl">contacto@aulock.cl</a></div>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div>
+                            <div class="info-label">WhatsApp</div>
+                            <div class="info-value"><a
+                                    href="https://wa.me/56974379993?text=Hola,%20me%20gustaría%20recibir%20más%20información%20sobre%20AuLock%20para%20mi%20institución"
+                                    target="_blank">+569 7437 9993</a></div>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor"
+                                stroke-width="2" />
+                            <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2" />
+                        </svg>
+                        <div>
+                            <div class="info-label">Ubicación</div>
+                            <div class="info-value">Concepción, Chile (Cobertura Nacional)</div>
+                        </div>
+                    </div>
+
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="LinkedIn">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14m-.5 15.5v-5.3a3.26 3.26 0 00-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 011.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 001.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 00-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Twitter">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M22.46 6c-.85.38-1.78.64-2.75.76a4.86 4.86 0 002.11-2.67c-.94.56-1.98.96-3.09 1.18a4.82 4.82 0 00-8.21 4.4A13.68 13.68 0 013.16 4.9a4.82 4.82 0 001.49 6.43 4.8 4.8 0 01-2.18-.6v.06a4.82 4.82 0 003.86 4.73 4.86 4.86 0 01-2.17.08 4.82 4.82 0 004.5 3.35 9.67 9.67 0 01-5.98 2.06c-.39 0-.77-.02-1.15-.07a13.65 13.65 0 007.4 2.17c8.88 0 13.73-7.36 13.73-13.74 0-.21 0-.42-.01-.62a9.8 9.8 0 002.41-2.5z" />
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 011.25 1.25A1.25 1.25 0 0117.25 8 1.25 1.25 0 0116 6.75a1.25 1.25 0 011.25-1.25M12 7a5 5 0 015 5 5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5m0 2a3 3 0 00-3 3 3 3 0 003 3 3 3 0 003-3 3 3 0 00-3-3z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__content">
+                <div class="footer__brand">
+                    <div class="nav__logo">
+                        <svg class="logo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M20 10C14.477 10 10 14.477 10 20C10 25.523 14.477 30 20 30C25.523 30 30 25.523 30 20C30 14.477 25.523 10 20 10Z"
+                                stroke="url(#logoGradient)" stroke-width="2" fill="none" />
+                            <path d="M20 15V20L23 23" stroke="url(#logoGradient)" stroke-width="2.5"
+                                stroke-linecap="round" />
+                            <circle cx="20" cy="20" r="2" fill="url(#logoGradient)" />
+                        </svg>
+                        <span class="logo-text">Au<span class="logo-accent">Lock</span></span>
+                    </div>
+                    <p class="footer__tagline">Transformando el aprendizaje a través de la concentración verificada.</p>
+                </div>
+
+                <div class="footer__links">
+                    <div class="footer__column">
+                        <h4>Producto</h4>
+                        <a href="#solucion">Características</a>
+                        <a href="#ciencia">Ciencia</a>
+                        <a href="#">Precios</a>
+                        <a href="#">FAQ</a>
+                    </div>
+
+                    <div class="footer__column">
+                        <h4>Empresa</h4>
+                        <a href="#">Sobre Nosotros</a>
+                        <a href="#">Blog</a>
+                        <a href="#">Carreras</a>
+                        <a href="#contacto">Contacto</a>
+                    </div>
+
+                    <div class="footer__column">
+                        <h4>Legal</h4>
+                        <a href="#">Privacidad</a>
+                        <a href="#">Términos</a>
+                        <a href="#">Cookies</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer__bottom">
+                <p>&copy; 2024 AuLock. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Contact Modal -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal">
+            <button class="modal-close" id="modalClose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+            <div class="modal-content">
+                <h2 class="modal-title">Solicitar Información</h2>
+                <p class="modal-subtitle">Déjanos tus datos y te contactaremos a la brevedad.</p>
+
+                <form class="contact__form" id="modalForm">
+                    <!-- 1. Identificación -->
+                    <div class="form-group">
+                        <label for="modalName">Nombre Completo *</label>
+                        <input type="text" id="modalName" required placeholder="Ej: Juan Pérez">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalEmail">Correo Institucional *</label>
+                            <input type="email" id="modalEmail" required placeholder="nombre@institucion.cl">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalPhone">Teléfono de Contacto *</label>
+                            <input type="tel" id="modalPhone" required placeholder="+56 9 XXXXXXXX">
+                        </div>
+                    </div>
+
+                    <!-- 2. Información Geográfica -->
+                    <div class="form-group">
+                        <label for="modalRegion">Región *</label>
+                        <select id="modalRegion" required>
+                            <option value="">Seleccione una Región</option>
+                            <option value="Arica y Parinacota">Arica y Parinacota</option>
+                            <option value="Tarapacá">Tarapacá</option>
+                            <option value="Antofagasta">Antofagasta</option>
+                            <option value="Atacama">Atacama</option>
+                            <option value="Coquimbo">Coquimbo</option>
+                            <option value="Valparaíso">Valparaíso</option>
+                            <option value="Metropolitana">Metropolitana</option>
+                            <option value="O'Higgins">O'Higgins</option>
+                            <option value="Maule">Maule</option>
+                            <option value="Ñuble">Ñuble</option>
+                            <option value="Biobío">Biobío</option>
+                            <option value="Araucanía">Araucanía</option>
+                            <option value="Los Ríos">Los Ríos</option>
+                            <option value="Los Lagos">Los Lagos</option>
+                            <option value="Aysén">Aysén</option>
+                            <option value="Magallanes">Magallanes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalCity">Ciudad *</label>
+                            <input type="text" id="modalCity" required placeholder="Ej: Concepción">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalAddress">Dirección de la Entidad *</label>
+                            <input type="text" id="modalAddress" required placeholder="Calle y Número">
+                        </div>
+                    </div>
+
+                    <!-- 3. Caracterización de la Entidad -->
+                    <div class="form-group">
+                        <label for="modalInstitutionType">Tipo de Institución *</label>
+                        <select id="modalInstitutionType" required>
+                            <option value="">Seleccione Tipo</option>
+                            <option value="Colegio Municipal / SLEP">Colegio Municipal / SLEP</option>
+                            <option value="Colegio Particular Subvencionado">Colegio Particular Subvencionado</option>
+                            <option value="Colegio Particular Pagado">Colegio Particular Pagado</option>
+                            <option value="DAEM / Corporación Municipal">DAEM / Corporación Municipal</option>
+                            <option value="Otra entidad">Otra entidad</option>
+                        </select>
+                    </div>
+
+                    <!-- 4. Mensaje Adicional -->
+                    <div class="form-group">
+                        <label for="modalMessage">Comentarios Adicionales (Opcional)</label>
+                        <textarea id="modalMessage" rows="3" placeholder="¿Alguna duda específica?"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Enviar Solicitud
+                    </button>
+                    <p class="form-note"
+                        style="font-size: 0.8rem; color: var(--color-text-muted); text-align: center; margin-top: 0.5rem;">
+                        Al enviar, sus datos serán recibidos por nuestro equipo comercial.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

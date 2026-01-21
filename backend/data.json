@@ -1,0 +1,62 @@
+{
+  "schools": [
+    {
+      "id": "1",
+      "name": "Colegio San José"
+    },
+    {
+      "id": "1764131590001",
+      "name": "liceo 1 "
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "email": "profe@colegio.cl",
+      "password": "123456",
+      "name": "María González",
+      "role": "teacher",
+      "schoolId": "1"
+    },
+    {
+      "id": "admin1",
+      "email": "admin@aulock.cl",
+      "password": "admin123",
+      "name": "Admin",
+      "role": "admin",
+      "schoolId": null
+    }
+  ],
+  "courses": [
+    {
+      "id": "1",
+      "name": "Matemáticas",
+      "grade": "5° Básico",
+      "schoolId": "1"
+    },
+    {
+      "id": "2",
+      "name": "Lenguaje",
+      "grade": "6° Básico",
+      "schoolId": "1"
+    },
+    {
+      "id": "3",
+      "name": "Ciencias",
+      "grade": "5° Básico",
+      "schoolId": "1"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "1764105936483",
+      "date": "2025-11-13",
+      "duration": 17,
+      "studentsCount": 39,
+      "courseId": "1",
+      "teacherId": "1",
+      "notes": "",
+      "createdAt": "2025-11-25T21:25:36.484Z"
+    }
+  ]
+}
