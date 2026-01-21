@@ -11,7 +11,7 @@ import DemoLayout from '../layouts/DemoLayout';
 import StudentClassLayout from '../layouts/StudentClassLayout';
 
 // Dashboards
-import StudentDashboard from '../pages/StudentDashboard';
+import StudentWorkspace from '../pages/StudentWorkspace'; // NEW CACHE-BUSTED DASHBOARD
 import TeacherDashboard from '../pages/TeacherDashboard';
 import ParentDashboard from '../components/ParentDashboard';
 import AICampus from '../pages/AICampus';
@@ -61,10 +61,10 @@ const LayoutSwitcher = () => {
     // The user wants 'alumno' to ALWAYS see StudentClassLayout immediately. 
     // If the platform is 'tutor', they might see something else, but for now let's prioritize the Class Experience.
     const isStudent = role === 'alumno';
-    if (isStudent && (platform === 'school' || !platform)) {
+    if (isStudent) {
         return (
             <StudentClassLayout>
-                <StudentDashboard />
+                <StudentWorkspace />
             </StudentClassLayout>
         );
     }
@@ -101,7 +101,7 @@ const LayoutSwitcher = () => {
     if (platform === 'demo') {
         return (
             <DemoLayout>
-                {(role === 'profesor' || role === 'superadmin') ? <TeacherDashboard /> : <StudentDashboard />}
+                {(role === 'profesor' || role === 'superadmin') ? <TeacherDashboard /> : <StudentWorkspace />}
             </DemoLayout>
         );
     }
