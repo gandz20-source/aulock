@@ -13,8 +13,12 @@ import StudentClassLayout from '../layouts/StudentClassLayout';
 // Dashboards
 import StudentDashboard from '../pages/StudentDashboard';
 import TeacherDashboard from '../pages/TeacherDashboard';
+import ParentDashboard from '../components/ParentDashboard';
 import AICampus from '../pages/AICampus';
 import UniversityDashboard from '../pages/UniversityDashboard';
+
+// Import University Layout
+import UniversityLayout from '../layouts/UniversityLayout';
 
 const LayoutSwitcher = () => {
     const { profile } = useAuth();
@@ -38,18 +42,36 @@ const LayoutSwitcher = () => {
 
     const role = profile.role?.toLowerCase();
 
-    // 1. SCHOOL PLATFORM (Official AuLock)
+    // 1. UNIVERSITY CHECK (Top Priority based on Profile)
+    if (profile.academic_stage === 'UNIVERSITY') {
+        return (
+            <UniversityLayout>
+                <UniversityDashboard />
+            </UniversityLayout>
+        );
+    }
+
+    // 2. PARENT CHECK
+    if (role === 'apoderado' || role === 'parent') {
+        return <ParentDashboard />;
+    }
+
+    // 3. STUDENT CHECK (Force StudentClassLayout for all students unless specifically in another mode)
+    // If we want to allow platform switching, we keep it, but maybe verify default behavior.
+    // The user wants 'alumno' to ALWAYS see StudentClassLayout immediately. 
+    // If the platform is 'tutor', they might see something else, but for now let's prioritize the Class Experience.
+    const isStudent = role === 'alumno';
+    if (isStudent && (platform === 'school' || !platform)) {
+        return (
+            <StudentClassLayout>
+                <StudentDashboard />
+            </StudentClassLayout>
+        );
+    }
+
+    // 4. PLATFORM SPECIFIC (Legacy/Specific modes)
     if (platform === 'school') {
-        const isStudent = role === 'alumno';
-
-        if (isStudent) {
-            return (
-                <StudentClassLayout>
-                    <StudentDashboard />
-                </StudentClassLayout>
-            );
-        }
-
+        // Teacher fallback
         return (
             <SchoolLayout>
                 <TeacherDashboard />
@@ -57,9 +79,7 @@ const LayoutSwitcher = () => {
         );
     }
 
-    // 2. TUTOR PLATFORM (Focus on AI)
     if (platform === 'tutor') {
-        // Both students and teachers go to AI Campus for now in Tutor mode
         return (
             <TutoringLayout>
                 <AICampus />
@@ -67,37 +87,18 @@ const LayoutSwitcher = () => {
         );
     }
 
-    // 3. PRE-U PLATFORM (Includes University Partner)
     if (platform === 'preu') {
-        const isUniversity = profile.academic_stage === 'UNIVERSITY';
-
-        if (isUniversity) {
-            return (
-                <PreULayout>
-                    <UniversityDashboard />
-                </PreULayout>
-            );
-        }
-
         return (
             <PreULayout>
                 <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-10">
                     <h1 className="text-3xl font-black text-purple-700 mb-4">Pre-Universitario Nexus</h1>
-                    <p className="text-slate-600 mb-8 max-w-md text-center">
-                        Bienvenido al módulo de preparación intensiva. Los simuladores PAES y el ranking nacional se están cargando...
-                    </p>
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-700"></div>
-                    <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-800 text-sm max-w-md">
-                        <p><strong>¿Ya estás en la U?</strong> Contacta a soporte para activar tu modo <em>University Partner</em>.</p>
-                    </div>
                 </div>
             </PreULayout>
         );
     }
 
-    // 4. DEMO / HOMESCHOOL PLATFORM
     if (platform === 'demo') {
-        // Teachers act as "Parents/Tutors" here
         return (
             <DemoLayout>
                 {(role === 'profesor' || role === 'superadmin') ? <TeacherDashboard /> : <StudentDashboard />}
@@ -105,7 +106,6 @@ const LayoutSwitcher = () => {
         );
     }
 
-    // Fallback default
     return <Navigate to="/app/student-dashboard" replace />;
 };
 
