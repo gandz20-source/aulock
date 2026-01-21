@@ -60,7 +60,9 @@ const LayoutSwitcher = () => {
     // If we want to allow platform switching, we keep it, but maybe verify default behavior.
     // The user wants 'alumno' to ALWAYS see StudentClassLayout immediately. 
     // If the platform is 'tutor', they might see something else, but for now let's prioritize the Class Experience.
-    const isStudent = role === 'alumno';
+    // 3. STUDENT CHECK (Force StudentClassLayout for all students unless specifically in another mode)
+    // We check for both 'alumno' and 'student' to avoid database inconsistency issues.
+    const isStudent = role === 'alumno' || role === 'student';
     if (isStudent) {
         return (
             <StudentClassLayout>
