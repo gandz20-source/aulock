@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import TeacherDashboard from './TeacherDashboard'; // Reuse existing dashboard for Teacher
-import StudentDashboard from './StudentDashboard'; // Reuse existing dashboard for Student
+import StudentWorkspace from './StudentWorkspace'; // NEW WORKSPACE
 import { Loader } from 'lucide-react';
 
 const LiveClass = () => {
@@ -50,7 +50,7 @@ const LiveClass = () => {
 
     // Check for Student roles
     if (['alumno', 'student'].includes(normalizedRole)) {
-        return <StudentDashboard />;
+        return <StudentWorkspace />;
     }
 
     // Fallback if role exists but is unknown

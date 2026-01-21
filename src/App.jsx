@@ -7,7 +7,7 @@ import ProtectedLayout from './layouts/ProtectedLayout'; // New layout for /app
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import QRLogin from './pages/QRLogin';
-import StudentDashboard from './pages/StudentDashboard';
+import StudentWorkspace from './pages/StudentWorkspace';
 import TeacherDashboard from './pages/TeacherDashboard';
 import AICampus from './pages/AICampus';
 import ChatInterface from './pages/ChatInterface';
@@ -72,7 +72,7 @@ function App() {
                 path="student-dashboard"
                 element={
                   <ProtectedRoute allowedRoles={['alumno']}>
-                    <StudentDashboard />
+                    <StudentWorkspace />
                   </ProtectedRoute>
                 }
               />
