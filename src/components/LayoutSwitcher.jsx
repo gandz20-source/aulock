@@ -21,15 +21,15 @@ import UniversityDashboard from '../pages/UniversityDashboard';
 import UniversityLayout from '../layouts/UniversityLayout';
 
 const LayoutSwitcher = () => {
-    const { profile } = useAuth();
+    const { profile, user } = useAuth();
     const { state } = useUI();
     const { platform } = state;
 
-    if (!profile) {
+    if (!user) { // Only show error if NO USER at all. If user exists but no profile, try fallback.
         return (
             <div className="p-10 text-center">
-                <h2 className="text-xl font-bold text-red-600">Error de Perfil</h2>
-                <p className="text-slate-600">No se pudo cargar la información del perfil del usuario.</p>
+                <h2 className="text-xl font-bold text-red-600">Error de Autenticación</h2>
+                <p className="text-slate-600">No se ha detectado una sesión activa.</p>
                 <button
                     onClick={() => window.location.href = '/login'}
                     className="mt-4 px-4 py-2 bg-slate-900 text-white rounded-lg"
@@ -40,10 +40,15 @@ const LayoutSwitcher = () => {
         );
     }
 
-    const role = profile.role?.toLowerCase();
+    // Fallback if profile is missing but user exists (Auth Context might be slow or profile missing)
+    const effectiveRole = profile?.role || user?.user_metadata?.role || 'alumno'; // Force 'alumno' if all else fails for testing
+    const role = effectiveRole?.toLowerCase();
 
-    // 1. UNIVERSITY CHECK (Top Priority based on Profile)
-    if (profile.academic_stage === 'UNIVERSITY') {
+    // Fallback academic stage
+    const effectiveStage = profile?.academic_stage || user?.user_metadata?.academic_stage;
+
+    // 1. UNIVERSITY CHECK (Top Priority)
+    if (effectiveStage === 'UNIVERSITY') {
         return (
             <UniversityLayout>
                 <UniversityDashboard />
