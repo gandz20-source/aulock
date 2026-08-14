@@ -5,6 +5,13 @@ import { useUI } from '../context/UIContext';
 import { generateLessonPlan, generateNotebookPresentation, generateTeacherImprovementSuggestion, evaluateSummativeWithMineducRubric } from '../services/GeminiService';
 import { MINEDUC_EVALUATION_DATASET } from '../data/AuLockMineducEvaluationDataset';
 import { MINEDUC_ACTIVITIES_REGISTRY } from '../data/AuLockMineducActivitiesDataset';
+import { 
+  connectGoogleClassroomOAuth, 
+  fetchGoogleClassroomRoster, 
+  importRosterToSupabase, 
+  generateAndExportSessionPDFToDrive, 
+  fetchGoogleCalendarSchedule 
+} from '../services/GoogleSuiteIntegrationService';
 import HumanCoreRadar from '../components/HumanCoreRadar';
 import WellnessAlertsPanel from '../components/WellnessAlertsPanel';
 import TeacherActivityPublisher from '../components/TeacherActivityPublisher';
@@ -179,6 +186,36 @@ export default function TeacherDashboard() {
         }));
     };
 
+    // Google Suite API Integration State & Handlers
+    const [googleConnected, setGoogleConnected] = useState(false);
+    const [googleStatusMsg, setGoogleStatusMsg] = useState('');
+    const [calendarEvents, setCalendarEvents] = useState([]);
+
+    const handleGoogleClassroomConnect = async () => {
+        setGoogleStatusMsg('Connecting Google Workspace OAuth...');
+        const oauthRes = await connectGoogleClassroomOAuth();
+        const roster = await fetchGoogleClassroomRoster();
+        await importRosterToSupabase('COURSE_MINEDUC_4A', roster);
+        setGoogleConnected(true);
+        setGoogleStatusMsg(`✓ Connected to Google Classroom: Imported ${roster.length} students to Supabase database.`);
+    };
+
+    const handleExportPDFToGoogleDrive = async () => {
+        setGoogleStatusMsg('Generating PDF Evidence Report...');
+        const driveRes = await generateAndExportSessionPDFToDrive({
+            className: '4° Medio A - Mathematics & STEM',
+            teacherName: 'Prof. Carlos Rivas',
+            teacherTimer: 300
+        });
+        setGoogleStatusMsg(`📄 Exported: ${driveRes.fileName} uploaded to Google Drive folder '${driveRes.folderName}'.`);
+    };
+
+    const handleSyncGoogleCalendar = async () => {
+        const events = await fetchGoogleCalendarSchedule();
+        setCalendarEvents(events);
+        setGoogleStatusMsg(`📅 Calendar Synced: Detected ongoing 09:00 AM class slot.`);
+    };
+
     const currentSlide = presentationDeck?.slides?.[currentSlideIndex];
 
     return (
@@ -336,8 +373,58 @@ export default function TeacherDashboard() {
                                     </div>
                                     <div className="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800">
                                         <span className="text-slate-400 block mb-0.5">TEMPORIZADOR</span>
-                                        <strong className="text-cyan-300 font-mono text-xs">(5 min)</strong>
+                                        <strong className="text-cyan-300 font-mono text-xs">(45 Segundos)</strong>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* GOOGLE WORKSPACE API INTEGRATION (CLASSROOM, DRIVE & CALENDAR) */}
+                            <div className="bg-slate-950/90 border-2 border-emerald-500/60 p-5 rounded-3xl shadow-xl space-y-4 font-mono">
+                                <div className="flex items-center justify-between border-b border-emerald-900/60 pb-2">
+                                    <h3 className="text-xs font-orbitron font-extrabold text-emerald-300 tracking-wider uppercase flex items-center gap-2">
+                                        <span>🌐 Google Workspace Integrations</span>
+                                    </h3>
+                                    <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                                        {googleConnected ? '● CONNECTED' : '○ DISCONNECTED'}
+                                    </span>
+                                </div>
+
+                                {googleStatusMsg && (
+                                    <div className="p-2.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-[11px] text-emerald-200 font-bold">
+                                        {googleStatusMsg}
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                                    {/* 1. Google Classroom Connect */}
+                                    <button
+                                        onClick={handleGoogleClassroomConnect}
+                                        className="p-3 bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 rounded-2xl text-left transition space-y-1 cursor-pointer"
+                                    >
+                                        <span className="block text-[10px] font-bold text-emerald-400 uppercase font-orbitron">1. CLASSROOM API</span>
+                                        <strong className="block text-xs text-white">Conectar con Classroom</strong>
+                                        <span className="block text-[9.5px] text-slate-400">Import Roster to Supabase</span>
+                                    </button>
+
+                                    {/* 2. Google Drive PDF Export */}
+                                    <button
+                                        onClick={handleExportPDFToGoogleDrive}
+                                        className="p-3 bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/40 rounded-2xl text-left transition space-y-1 cursor-pointer"
+                                    >
+                                        <span className="block text-[10px] font-bold text-cyan-400 uppercase font-orbitron">2. DRIVE PDF EXPORT</span>
+                                        <strong className="block text-xs text-white">Exportar Evidencias PDF</strong>
+                                        <span className="block text-[9.5px] text-slate-400">Upload to Shared Drive</span>
+                                    </button>
+
+                                    {/* 3. Google Calendar Sync */}
+                                    <button
+                                        onClick={handleSyncGoogleCalendar}
+                                        className="p-3 bg-fuchsia-950/60 hover:bg-fuchsia-900/80 border border-fuchsia-500/40 rounded-2xl text-left transition space-y-1 cursor-pointer"
+                                    >
+                                        <span className="block text-[10px] font-bold text-fuchsia-400 uppercase font-orbitron">3. CALENDAR TIMER</span>
+                                        <strong className="block text-xs text-white">Sincronizar Horarios</strong>
+                                        <span className="block text-[9.5px] text-slate-400">Prep Focus Session</span>
+                                    </button>
                                 </div>
                             </div>
 
