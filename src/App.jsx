@@ -47,6 +47,7 @@ function App() {
               <Route path="/academic-passport" element={<AcademicPassport />} />
               <Route path="/core-intelligence" element={<AuLockCoreIntelligence />} />
               <Route path="/school-dashboard" element={<Colegio360MasterDashboard />} />
+              <Route path="/school-admin" element={<SchoolAdminDashboard />} />
               <Route path="/colegio-360-master" element={<Colegio360MasterDashboard />} />
               <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
               <Route path="/student-dashboard" element={<StudentWorkspace />} />
