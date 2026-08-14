@@ -12,16 +12,17 @@ export const FocusModeProvider = ({ children }) => {
         startedAt: new Date().toLocaleTimeString()
     });
 
-    // 1. Synchronized Focus Engine States
+    // 1. Client-Side Page Visibility & Focus Engine States
     const [isTeacherActive, setIsTeacherActive] = useState(true);
     const [teacherTimer, setTeacherTimer] = useState(0);
     const [studentFocusTime, setStudentFocusTime] = useState(0);
-    const [studentFocusScore, setStudentFocusScore] = useState(100);
+    const [studentFocusScore, setStudentFocusScore] = useState(100); // Initial Student Score = 100
     const [tabExitCount, setTabExitCount] = useState(0);
     const [isTabFocused, setIsTabFocused] = useState(true);
-    const [weeklyBonus, setWeeklyBonus] = useState(false);
+    const [weeklyBonus, setWeeklyBonus] = useState(true); // Weekly_Bonus flag
+    const [showWarningModal, setShowWarningModal] = useState(false);
 
-    // 2. Live Question Synchronization State
+    // 2. Live Questions Synchronization
     const [activeLiveQuestion, setActiveLiveQuestion] = useState({
         id: 'Q_LIVE_1',
         title: 'Formative Question: Solve x² - 5x + 6 = 0',
@@ -41,7 +42,7 @@ export const FocusModeProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, [isTeacherActive]);
 
-    // Student Focus Timer & Page Visibility Audit (Loss of focus = -3 points)
+    // Page Visibility API Audit (document.visibilityState === 'hidden')
     useEffect(() => {
         let focusInterval = null;
 
@@ -52,19 +53,24 @@ export const FocusModeProvider = ({ children }) => {
         }
 
         const handleVisibilityChange = () => {
-            if (document.hidden) {
+            if (document.visibilityState === 'hidden' || document.hidden) {
+                // 1. Pause student focus timer
                 setIsTabFocused(false);
                 setTabExitCount(prev => prev + 1);
-                // Deduct 3 points when focus is lost
+
+                // 2. Deduct 3 points immediately
                 setStudentFocusScore(prev => {
-                    const newScore = Math.max(0, prev - 3);
-                    if (newScore < 100) setWeeklyBonus(false);
-                    return newScore;
+                    const updatedScore = Math.max(0, prev - 3);
+                    if (updatedScore < 100) setWeeklyBonus(false); // Flag Weekly_Bonus false if score drops below 100
+                    return updatedScore;
                 });
-                console.warn("⚠️ FOCUS LOST: Student minimized/left tab. Deducted 3 points.");
+
+                // 3. Trigger warning alert modal
+                setShowWarningModal(true);
+                console.warn("⚠️ ¡Atención! Has salido de la pantalla. -3 puntos de enfoque.");
             } else {
                 setIsTabFocused(true);
-                console.info("👁️ FOCUS RESTORED: Student returned to application.");
+                console.info("👁️ Focus restored. Personal focus timer resumed.");
             }
         };
 
@@ -75,43 +81,32 @@ export const FocusModeProvider = ({ children }) => {
         };
     }, [isTeacherActive, isTabFocused]);
 
-    // Check Weekly Bonus Eligibility (Maintained 100 Points)
-    useEffect(() => {
-        if (studentFocusScore === 100 && tabExitCount === 0) {
-            setWeeklyBonus(true);
-        } else {
-            setWeeklyBonus(false);
-        }
-    }, [studentFocusScore, tabExitCount]);
-
-    // Handle Student Answer to Live Question (+2 Points Reward)
+    // 3. Live Questions & Point Recovery (+2 points up to max 100)
     const submitLiveAnswer = (selectedIndex) => {
         if (activeLiveQuestion && selectedIndex === activeLiveQuestion.correctIndex) {
-            setStudentFocusScore(prev => Math.min(100, prev + 2));
-            console.info("✅ CORRECT ANSWER: Added 2 points back to student score!");
+            setStudentFocusScore(prev => Math.min(100, prev + 2)); // Score never exceeds 100 max
+            console.info("✅ Correct answer! +2 points added back to focus score.");
             return { success: true, pointsAwarded: 2 };
         }
         return { success: false, pointsAwarded: 0 };
     };
 
-    // Teacher Trigger for Live Question
     const triggerLiveQuestion = (questionObject) => {
         setActiveLiveQuestion(questionObject);
-        console.info("🚀 TEACHER TRIGGERED LIVE QUESTION across student screens.");
     };
 
-    // End Class & Sync Final Score to Supabase
+    // 4. Class Completion & Supabase Sync (`student_session_metrics`)
     const endClassAndSyncSupabase = async () => {
         setIsTeacherActive(false);
         const focusEfficiencyRatio = teacherTimer > 0 ? (studentFocusTime / teacherTimer) * 100 : 100;
         const finalScore = Math.round((studentFocusScore * 0.7) + (focusEfficiencyRatio * 0.3));
 
-        const syncPayload = {
+        const sessionPayload = {
             student_name: 'Juan Carlos Pérez',
-            class_name: currentSession?.className || 'STEM Mathematics',
+            class_name: currentSession?.className || 'Mathematics & STEM',
             teacher_timer_sec: teacherTimer,
-            effective_focus_sec: studentFocusTime,
-            tab_exits: tabExitCount,
+            total_time_focused: studentFocusTime,
+            tab_switch_count: tabExitCount,
             final_focus_score: finalScore,
             weekly_bonus: weeklyBonus,
             synced_at: new Date().toISOString()
@@ -119,24 +114,25 @@ export const FocusModeProvider = ({ children }) => {
 
         try {
             if (supabase) {
-                await supabase.from('student_focus_metrics').insert([syncPayload]);
+                // Upsert to student_session_metrics table
+                await supabase.from('student_session_metrics').insert([sessionPayload]);
             }
-            console.info("☁️ SUPABASE SYNC COMPLETE:", syncPayload);
+            console.info("☁️ SUPABASE: Saved session to student_session_metrics:", sessionPayload);
         } catch (error) {
             console.warn("Supabase Sync fallback:", error.message);
         }
 
-        return syncPayload;
+        return sessionPayload;
     };
 
-    // NFC Event Handler
+    const closeWarningModal = () => setShowWarningModal(false);
+
     const handleNfcEvent = async (eventPayload) => {
-        const { tagId } = eventPayload;
         if (!isPhoneInCase) {
             setIsPhoneInCase(true);
             setIsTeacherActive(true);
         } else {
-            if (window.confirm("End focus session and un-tap phone case?")) {
+            if (window.confirm("End focus session and release NFC case?")) {
                 setIsPhoneInCase(false);
                 endClassAndSyncSupabase();
             }
@@ -155,6 +151,8 @@ export const FocusModeProvider = ({ children }) => {
             tabExitCount,
             isTabFocused,
             weeklyBonus,
+            showWarningModal,
+            closeWarningModal,
             activeLiveQuestion,
             submitLiveAnswer,
             triggerLiveQuestion,
@@ -163,6 +161,32 @@ export const FocusModeProvider = ({ children }) => {
             setIsPhoneInCase
         }}>
             {children}
+
+            {/* ⚠️ VISUAL WARNING ALERT MODAL */}
+            {showWarningModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                    <div className="bg-gray-950 border-2 border-red-500 p-6 md:p-8 rounded-3xl max-w-md w-full text-center space-y-4 shadow-[0_0_50px_rgba(239,68,68,0.5)] font-mono">
+                        <div className="w-16 h-16 bg-red-950/80 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto animate-bounce">
+                            <span className="text-2xl">⚠️</span>
+                        </div>
+                        <h2 className="text-xl font-bold font-orbitron text-red-400 uppercase tracking-wide">
+                            ¡Atención! Focus Lost
+                        </h2>
+                        <p className="text-sm text-red-200 leading-relaxed font-sans">
+                            Has salido de la pantalla o minimizado la aplicación.
+                        </p>
+                        <div className="p-3 bg-red-950/60 border border-red-800 rounded-2xl text-xs font-bold text-red-300 font-orbitron">
+                            📉 Penalización: -3 puntos de enfoque (-3 PS)
+                        </div>
+                        <button
+                            onClick={closeWarningModal}
+                            className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-orbitron font-extrabold text-xs rounded-xl shadow-lg uppercase tracking-wider transition cursor-pointer"
+                        >
+                            Entendido // Volver a Enfoque
+                        </button>
+                    </div>
+                </div>
+            )}
         </FocusModeContext.Provider>
     );
 };
