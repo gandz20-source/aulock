@@ -17,10 +17,10 @@ export default function AfterIAPresentationSlider() {
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
-          <h2 className="text-xs font-orbitron font-extrabold text-cyan-300 uppercase">// BIENVENIDA: RESUMEN ESENCIAL DEL LIBRO "AFTER IA"</h2>
+          <h2 className="text-xs font-orbitron font-extrabold text-cyan-300 uppercase">// WELCOME: ESSENTIAL SUMMARY OF "AFTER IA" BOOK</h2>
         </div>
         <span className="text-[11px] font-orbitron font-bold text-fuchsia-400 bg-fuchsia-950 px-2.5 py-0.5 rounded border border-fuchsia-800">
-          LÁMINA {String(currentIndex + 1).padStart(2, '0')} / {slideImages.length}
+          SLIDE {String(currentIndex + 1).padStart(2, '0')} / {slideImages.length}
         </span>
       </div>
 

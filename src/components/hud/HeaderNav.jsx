@@ -8,8 +8,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 1,
       key: 'profile',
-      title: '1. MI PERFIL',
-      subtitle: '& Bienvenida',
+      title: '1. MY PROFILE',
+      subtitle: '& Welcome',
       color: 'cyan',
       borderClass: 'border-cyan-400 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.35)]',
       bgActive: 'bg-slate-900/90 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.5)]',
@@ -18,8 +18,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 2,
       key: 'afteria',
-      title: '2. DESPUÉS DE IA',
-      subtitle: 'Misiones',
+      title: '2. AFTER AI',
+      subtitle: 'Missions',
       color: 'magenta',
       borderClass: 'border-fuchsia-500 text-fuchsia-400 shadow-[0_0_20px_rgba(217,70,239,0.35)]',
       bgActive: 'bg-slate-900/90 border-fuchsia-500 shadow-[0_0_25px_rgba(217,70,239,0.5)]',
@@ -28,8 +28,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 3,
       key: 'live_classroom',
-      title: '3. AULA EN VIVO',
-      subtitle: 'Convivencia',
+      title: '3. LIVE CLASSROOM',
+      subtitle: 'Focus & Live',
       color: 'green',
       borderClass: 'border-lime-400 text-lime-400 shadow-[0_0_20px_rgba(163,230,53,0.35)]',
       bgActive: 'bg-slate-900/90 border-lime-400 shadow-[0_0_25px_rgba(163,230,53,0.5)]',
@@ -38,8 +38,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 4,
       key: 'tutors',
-      title: '4. TUTORES IA',
-      subtitle: 'por Materia',
+      title: '4. AI TUTORS',
+      subtitle: 'by Subject',
       color: 'blue',
       borderClass: 'border-sky-400 text-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.35)]',
       bgActive: 'bg-slate-900/90 border-sky-400 shadow-[0_0_25px_rgba(56,189,248,0.5)]',
@@ -48,8 +48,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 5,
       key: 'squad',
-      title: '5. M ESCUADRÓN ALFA',
-      subtitle: 'y Guías',
+      title: '5. ALPHA SQUAD',
+      subtitle: 'Peer Guides',
       color: 'orange',
       borderClass: 'border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.35)]',
       bgActive: 'bg-slate-900/90 border-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.5)]',
@@ -58,8 +58,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 6,
       key: 'academic',
-      title: '6. DESEMPEÑO',
-      subtitle: 'y Guías',
+      title: '6. PERFORMANCE',
+      subtitle: 'Analytics',
       color: 'amber',
       borderClass: 'border-amber-500 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.35)]',
       bgActive: 'bg-slate-900/90 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.5)]',
@@ -68,7 +68,7 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 7,
       key: 'passport',
-      title: '7. PASAPORTE AuLock',
+      title: '7. AuLock PASSPORT',
       subtitle: 'AuLock NFC',
       color: 'purple',
       borderClass: 'border-purple-500 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.35)]',
@@ -79,12 +79,12 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
 
   return (
     <div className="w-full font-mono select-none space-y-4 mb-6">
-      {/* 🔴 LÍNEA DE ESTADO RBAC SUPERIOR (Exacta a la imagen) */}
+      {/* 🔴 LÍNEA DE ESTADO RBAC SUPERIOR */}
       <div className="flex flex-wrap items-center justify-between text-[11px] text-cyan-400 border-b border-cyan-900/80 pb-2 px-1 font-mono gap-2">
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
           <span>
-            Arquitectura móvil AuLock RBAC | Usuario: <strong className="text-white font-semibold">Juan Carlos Pérez</strong> | Rol Activo: <strong className="text-cyan-300">[ ALUMNO ]</strong>
+            AuLock Mobile RBAC Architecture | User: <strong className="text-white font-semibold">Juan Carlos Pérez</strong> | Active Role: <strong className="text-cyan-300">[ STUDENT ]</strong>
           </span>
         </div>
 
@@ -94,7 +94,7 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
             onClick={() => navigate('/student-dashboard')}
             className="px-2 py-0.5 rounded bg-cyan-950/90 border border-cyan-400 text-cyan-300 hover:bg-cyan-900 transition flex items-center gap-1"
           >
-            🎓 Rol Alumno ✓
+            🎓 Student Role ✓
           </button>
           <button 
             onClick={() => navigate('/teacher-dashboard')}
