@@ -13,6 +13,7 @@ import AfterIAWorld from '../components/afteria/AfterIAWorld';
 import AfterIAPortal from '../components/afteria/AfterIAPortal';
 import LiveClassroomStudentHUD from '../components/live/LiveClassroomStudentHUD';
 import EliteSocraticWhiteboard from '../components/tutors/EliteSocraticWhiteboard';
+import TEAsisto from '../components/tutors/TEAsisto';
 import FocusModeAuditor from '../components/focus/FocusModeAuditor';
 import AcademicPassport from './AcademicPassport';
 import ClassroomArena from '../components/arena/ClassroomArena';
@@ -647,10 +648,13 @@ const StudentWorkspace = () => {
                     </div>
                 )}
 
-                {/* ==================== PÁGINA 3: AGENTES TUTORES IA MINEDUC (1° - 6° BÁSICO) ==================== */}
+                {/* ==================== PÁGINA 3: AGENTES TUTORES IA & TEAsisto (CALMA & APOYO EMOCIONAL) ==================== */}
                 {activeTab === 'tutors' && (
-                    <div className="animate-in fade-in duration-300">
+                    <div className="space-y-8 animate-in fade-in duration-300">
                         <EliteSocraticWhiteboard />
+
+                        {/* MÓDULO DE APOYO EMOCIONAL & NEURODIVERSIDAD (TEAsisto) */}
+                        <TEAsisto />
                     </div>
                 )}
 
