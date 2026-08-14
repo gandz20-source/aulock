@@ -1,267 +1,294 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../config/supabase';
-import { Loader, Users, MessageCircle, Send, AlertTriangle, Trophy } from 'lucide-react';
+import { 
+    Users, Plus, Trash2, ShieldAlert, Award, TrendingUp, Sparkles, 
+    UserPlus, UserMinus, ArrowUpRight, CheckCircle2, AlertTriangle, 
+    BrainCircuit, HeartHandshake, Link, RefreshCw, Zap
+} from 'lucide-react';
+
+const INITIAL_SQUADS = [
+    {
+        id: 'sq-1',
+        name: 'Squad Alfa STEM',
+        course: '4° Medio A',
+        members: [
+            { id: 'st-1', name: 'Juan Carlos Pérez', strengths: ['Matemáticas (7.0)', 'Idiomas (6.85)'], weaknesses: ['Biología Orgánica (4.38)'], role: 'Líder Lógico' },
+            { id: 'st-2', name: 'Mateo Rojas', strengths: ['Biología & Ciencias (6.80)'], weaknesses: ['Matemáticas Avanzadas (4.50)'], role: 'Tutor de Ciencias' },
+            { id: 'st-3', name: 'Sofía Martínez', strengths: ['Historia & Formación Ciudadana (6.90)'], weaknesses: ['Física Aplicada (4.80)'], role: 'Mentora de Humanidades' }
+        ],
+        synergies: [
+            { student1: 'Juan Carlos Pérez', student2: 'Mateo Rojas', reason: 'Sinergia Perfecta: Juan Carlos apoya en Matemáticas y Mateo en Biología.' }
+        ]
+    },
+    {
+        id: 'sq-2',
+        name: 'Squad Beta Humanidades',
+        course: '4° Medio A',
+        members: [
+            { id: 'st-4', name: 'Camila Silva', strengths: ['Lenguaje & Argumentación (6.90)'], weaknesses: ['Química (4.60)'], role: 'Líder Debate' },
+            { id: 'st-5', name: 'Lucas Fernández', strengths: ['Artes & Creatividad (6.95)'], weaknesses: ['Cálculo (4.40)'], role: 'Diseño' }
+        ],
+        synergies: []
+    }
+];
+
+const AVAILABLE_STUDENTS = [
+    { id: 'st-6', name: 'Valentina Soto', strengths: ['Física & Química (6.70)'], weaknesses: ['Historia (4.50)'], role: 'Estudiante' },
+    { id: 'st-7', name: 'Diego Morales', strengths: ['Programación & Lógica (6.80)'], weaknesses: ['Lenguaje (4.60)'], role: 'Estudiante' }
+];
 
 const Squads = () => {
     const { profile } = useAuth();
-    const [squad, setSquad] = useState(null);
-    const [teammates, setTeammates] = useState([]);
-    const [messages, setMessages] = useState([]);
-    const [newMessage, setNewMessage] = useState('');
-    const [loading, setLoading] = useState(true);
-    const chatEndRef = useRef(null);
+    const [squads, setSquads] = useState(() => {
+        const saved = localStorage.getItem('aulock_squads_v2');
+        return saved ? JSON.parse(saved) : INITIAL_SQUADS;
+    });
 
-    useEffect(() => {
-        if (profile?.id) fetchSquadData();
-    }, [profile]);
+    const [availableStudents] = useState(AVAILABLE_STUDENTS);
+    const [newSquadName, setNewSquadName] = useState('');
+    const [selectedStudentToAdd, setSelectedStudentToAdd] = useState('');
 
-    useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-
-    const fetchSquadData = async () => {
-        try {
-            // 1. Get Membership
-            const { data: membership } = await supabase
-                .from('squad_members')
-                .select('squad_id')
-                .eq('student_id', profile.id)
-                .single();
-
-            if (!membership) {
-                setLoading(false);
-                return;
-            }
-
-            // 2. Get Squad Info
-            const { data: squadData } = await supabase
-                .from('squads')
-                .select('*')
-                .eq('id', membership.squad_id)
-                .single();
-            setSquad(squadData);
-
-            // 3. Get Teammates
-            const { data: members } = await supabase
-                .from('squad_members')
-                .select('*, profiles(full_name, avatar_url, au_coins)')
-                .eq('squad_id', membership.squad_id);
-            setTeammates(members);
-
-            // 4. Get Chat
-            const { data: chat } = await supabase
-                .from('squad_messages')
-                .select('*, profiles(full_name)')
-                .eq('squad_id', membership.squad_id)
-                .order('created_at', { ascending: true });
-            setMessages(chat || []);
-
-            // Subscribe to Chat
-            const channel = supabase
-                .channel(`squad_chat:${membership.squad_id}`)
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'squad_messages', filter: `squad_id=eq.${membership.squad_id}` },
-                    () => fetchMessages(membership.squad_id))
-                .subscribe();
-
-            return () => supabase.removeChannel(channel);
-
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
+    const saveSquads = (updated) => {
+        setSquads(updated);
+        localStorage.setItem('aulock_squads_v2', JSON.stringify(updated));
     };
 
-    const fetchMessages = async (squadId) => {
-        const { data } = await supabase
-            .from('squad_messages')
-            .select('*, profiles(full_name)')
-            .eq('squad_id', squadId)
-            .order('created_at', { ascending: true });
-        if (data) setMessages(data);
-    };
-
-    const handleSendMessage = async (e) => {
+    const handleCreateSquad = (e) => {
         e.preventDefault();
-        if (!newMessage.trim() || !squad) return;
+        if (!newSquadName.trim()) return alert("Por favor ingresa un nombre para el escuadrón.");
 
-        await supabase.from('squad_messages').insert({
-            squad_id: squad.id,
-            sender_id: profile.id,
-            content: newMessage.trim()
-        });
-        setNewMessage('');
+        const newSq = {
+            id: 'sq-' + Date.now(),
+            name: newSquadName,
+            course: '4° Medio A',
+            members: [],
+            synergies: []
+        };
+
+        saveSquads([...squads, newSq]);
+        setNewSquadName('');
     };
 
-    if (loading) return <div className="flex h-screen items-center justify-center"><Loader className="animate-spin text-purple-600" /></div>;
+    const handleAddMember = (squadId, student) => {
+        const updated = squads.map(sq => {
+            if (sq.id === squadId && !sq.members.some(m => m.name === student.name)) {
+                return { ...sq, members: [...sq.members, student] };
+            }
+            return sq;
+        });
+        saveSquads(updated);
+    };
 
-    if (!squad) return (
-        <div className="min-h-screen bg-slate-50 p-6 flex flex-col items-center justify-center text-center">
-            <Users className="w-16 h-16 text-slate-300 mb-4" />
-            <h1 className="text-xl font-bold text-slate-700">Sin Squad Asignado</h1>
-            <p className="text-slate-500 max-w-sm mt-2">Tu profesor aún no te ha asignado a un equipo de trabajo. ¡Ten paciencia!</p>
-        </div>
-    );
+    const handleRemoveMember = (squadId, memberId) => {
+        const updated = squads.map(sq => {
+            if (sq.id === squadId) {
+                return { ...sq, members: sq.members.filter(m => m.id !== memberId) };
+            }
+            return sq;
+        });
+        saveSquads(updated);
+    };
 
-    const totalCoins = teammates.reduce((sum, m) => sum + (m.profiles?.au_coins || 0), 0);
-    const progress = Math.min(100, (totalCoins / 1000) * 100);
+    const handleLinkSynergy = (squadId, student1Name, student2Name) => {
+        const updated = squads.map(sq => {
+            if (sq.id === squadId) {
+                const newSyn = {
+                    student1: student1Name,
+                    student2: student2Name,
+                    reason: `Tutoría de Pares Vinculada: ${student1Name} apoya en Lógica y ${student2Name} en Ciencias.`
+                };
+                return { ...sq, synergies: [...sq.synergies, newSyn] };
+            }
+            return sq;
+        });
+        saveSquads(updated);
+        alert(`🤝 ¡Emparejamiento de mentoría entre ${student1Name} y ${student2Name} registrado con éxito!`);
+    };
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-20 md:pb-6 font-sans">
-            <div className="max-w-5xl mx-auto p-4 md:p-8">
+        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-4 md:p-8 pb-24">
+            <div className="max-w-7xl mx-auto space-y-8">
 
-                {/* Header Card */}
-                <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/60 p-6 mb-8 border border-white relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-purple-100 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 pointer-events-none"></div>
-
-                    <div className="relative z-10 flex justify-between items-start">
+                {/* HEADER */}
+                <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-xl shadow-purple-500/20">
+                            <Users className="w-8 h-8" />
+                        </div>
                         <div>
-                            <span className="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-3 shadow-md shadow-purple-200">
-                                {squad.subject || 'Squad Alpha'}
-                            </span>
-                            <h1 className="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">{squad.name}</h1>
-                            <p className="text-slate-500 font-medium">Misión Semanal en curso</p>
-                        </div>
-                        <div className="bg-yellow-50 p-3 rounded-2xl border border-yellow-100 shadow-sm transform rotate-3">
-                            <Trophy className="w-10 h-10 text-yellow-500 drop-shadow-sm" />
+                            <div className="flex items-center space-x-2">
+                                <h1 className="text-2xl font-black text-white">Gestor de Escuadrones & Tutoría entre Pares</h1>
+                                <span className="bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                                    Emparejamiento por Fortalezas y Debilidades
+                                </span>
+                            </div>
+                            <p className="text-xs text-slate-400 mt-1">
+                                Organiza grupos de trabajo colaborativo, visualiza el diagnóstico académico de cada alumno y crea alianzas de mentoría complementaria.
+                            </p>
                         </div>
                     </div>
 
-                    {/* Progress Bar Premium */}
-                    <div className="mt-8">
-                        <div className="flex justify-between items-end mb-2">
-                            <div>
-                                <span className="text-3xl font-black text-slate-800">{Math.round(progress)}%</span>
-                                <span className="text-sm text-slate-400 font-medium ml-2">Completado</span>
-                            </div>
-                            <span className="text-sm font-bold text-slate-600 bg-slate-100 px-3 py-1 rounded-lg">
-                                {totalCoins} / 1000 AC
-                            </span>
-                        </div>
-                        <div className="w-full bg-slate-100 rounded-full h-5 p-1 shadow-inner">
-                            <div
-                                className="bg-gradient-to-r from-purple-500 via-indigo-500 to-blue-500 h-full rounded-full transition-all duration-1000 shadow-lg shadow-purple-500/30 relative"
-                                style={{ width: `${progress}%` }}
-                            >
-                                <div className="absolute right-0 top-0 bottom-0 w-full bg-white opacity-20 animate-pulse rounded-full"></div>
-                            </div>
-                        </div>
+                    <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 text-xs font-bold text-center">
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Escuadrones Activos</span>
+                        <div className="text-2xl font-black text-purple-400 mt-0.5">{squads.length} Grupos</div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* CREATE SQUAD FORM */}
+                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                    <h3 className="text-sm font-black text-white flex items-center space-x-2">
+                        <Plus className="w-4 h-4 text-purple-400" />
+                        <span>Crear Nuevo Escuadrón</span>
+                    </h3>
 
-                    {/* Left Column: Members & Actions */}
-                    <div className="space-y-6">
-                        {/* Members Card */}
-                        <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6">
-                            <h2 className="font-bold text-slate-700 flex items-center mb-6 text-lg">
-                                <Users className="w-5 h-5 mr-3 text-purple-600" />
-                                Miembros del Squad
-                            </h2>
-                            <div className="space-y-4">
-                                {teammates.map(member => (
-                                    <div key={member.id} className="group flex items-center p-3 rounded-2xl transition-all hover:bg-slate-50 hover:shadow-md border border-transparent hover:border-slate-100">
-                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-md mr-4 transform group-hover:scale-105 transition-transform ${member.id === profile.id
-                                                ? 'bg-gradient-to-br from-purple-600 to-indigo-600'
-                                                : 'bg-slate-200 text-slate-500'
-                                            }`}>
-                                            {member.profiles?.full_name?.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <p className={`font-bold text-sm ${member.id === profile.id ? 'text-purple-700' : 'text-slate-700'}`}>
-                                                {member.profiles?.full_name} {member.id === profile.id && '(Tú)'}
-                                            </p>
-                                            <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">
-                                                {member.role || 'Estudiante'}
-                                            </p>
-                                        </div>
-                                        <div className="ml-auto">
-                                            <span className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
-                                                {member.profiles?.au_coins || 0}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* SOS Button */}
-                        <button className="w-full bg-red-50 hover:bg-red-100 text-red-600 p-6 rounded-3xl border-2 border-red-100 border-dashed flex items-center justify-center group transition-all hover:shadow-lg hover:border-red-300">
-                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-red-200 transition-colors">
-                                <AlertTriangle className="w-6 h-6 text-red-600 group-hover:scale-110 transition-transform" />
-                            </div>
-                            <div className="text-left">
-                                <h3 className="font-bold text-lg">Pedir Ayuda (S.O.S)</h3>
-                                <p className="text-xs text-red-400 font-medium">Notificar al equipo</p>
-                            </div>
+                    <form onSubmit={handleCreateSquad} className="flex flex-col sm:flex-row gap-3">
+                        <input
+                            type="text"
+                            value={newSquadName}
+                            onChange={e => setNewSquadName(e.target.value)}
+                            placeholder="Nombre del Escuadrón (ej. Squad Gamma Robótica)..."
+                            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-purple-500"
+                        />
+                        <button
+                            type="submit"
+                            className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all"
+                        >
+                            Crear Escuadrón
                         </button>
-                    </div>
-
-                    {/* Right Column: Chat */}
-                    <div className="lg:col-span-2 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-[600px] overflow-hidden">
-                        <div className="p-6 border-b border-slate-50 bg-white/80 backdrop-blur-md flex items-center justify-between sticky top-0 z-10">
-                            <div className="flex items-center">
-                                <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 mr-4">
-                                    <MessageCircle className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h2 className="font-bold text-slate-800">Chat de Equipo</h2>
-                                    <p className="text-xs text-slate-400 flex items-center">
-                                        <span className="w-2 h-2 bg-green-400 rounded-full mr-1 animate-pulse"></span>
-                                        En línea
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
-                            {messages.length === 0 && (
-                                <div className="text-center py-10 opacity-50">
-                                    <p className="text-slate-400">Comienza la conversación con tu equipo</p>
-                                </div>
-                            )}
-                            {messages.map(msg => {
-                                const isMe = msg.sender_id === profile.id;
-                                return (
-                                    <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in`}>
-                                        <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]`}>
-                                            <div className={`px-5 py-3 text-sm shadow-sm ${isMe
-                                                    ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-2xl rounded-tr-none'
-                                                    : 'bg-white border border-slate-200 text-slate-700 rounded-2xl rounded-tl-none'
-                                                }`}>
-                                                <p className="leading-relaxed">{msg.content}</p>
-                                            </div>
-                                            {!isMe && <p className="text-[10px] font-bold text-slate-400 mt-1 ml-1">{msg.profiles?.full_name}</p>}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                            <div ref={chatEndRef} />
-                        </div>
-
-                        <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-slate-100">
-                            <div className="relative flex items-center">
-                                <input
-                                    type="text"
-                                    value={newMessage}
-                                    onChange={e => setNewMessage(e.target.value)}
-                                    placeholder="Escribe un mensaje..."
-                                    className="w-full bg-slate-100 border-none rounded-2xl px-6 py-4 pr-16 text-sm focus:ring-2 focus:ring-purple-100 focus:bg-white transition-all outline-none placeholder-slate-400 font-medium"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!newMessage.trim()}
-                                    className="absolute right-2 p-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50 disabled:hover:bg-purple-600 transition-all shadow-md hover:shadow-lg transform active:scale-95"
-                                >
-                                    <Send className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
+                    </form>
                 </div>
+
+                {/* SQUADS CARDS WITH STRENGTHS/WEAKNESSES & PAIRING */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {squads.map(sq => (
+                        <div key={sq.id} className="bg-slate-900 p-6 md:p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6 flex flex-col justify-between">
+                            
+                            <div>
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <span className="text-[10px] font-bold text-purple-300 bg-purple-500/10 border border-purple-500/20 px-2.5 py-0.5 rounded-md">
+                                            {sq.course}
+                                        </span>
+                                        <h3 className="text-xl font-black text-white mt-1">{sq.name}</h3>
+                                        <p className="text-xs text-slate-400">{sq.members.length} Alumnos Integrantes</p>
+                                    </div>
+                                </div>
+
+                                {/* MEMBERS DIAGNOSIS (FORTALEZAS Y DEBILIDADES VISIBLES) */}
+                                <div className="space-y-4 mb-6">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                                        Integrantes & Matriz de Diagnóstico:
+                                    </span>
+
+                                    {sq.members.length > 0 ? (
+                                        sq.members.map(member => (
+                                            <div key={member.id} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <h4 className="text-xs font-bold text-white">{member.name}</h4>
+                                                        <span className="text-[10px] text-indigo-400 font-medium">{member.role}</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => handleRemoveMember(sq.id, member.id)}
+                                                        className="text-rose-400 hover:text-rose-300 text-[10px] font-bold bg-rose-500/10 px-2 py-1 rounded-md border border-rose-500/20 transition-colors flex items-center space-x-1"
+                                                    >
+                                                        <UserMinus className="w-3 h-3" />
+                                                        <span>Quitar</span>
+                                                    </button>
+                                                </div>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
+                                                    {/* Strengths */}
+                                                    <div className="bg-slate-900/80 p-2.5 rounded-xl border border-emerald-500/20">
+                                                        <span className="text-[9px] font-extrabold text-emerald-400 uppercase block mb-0.5">🟢 Fortalezas:</span>
+                                                        <ul className="text-slate-300 space-y-0.5">
+                                                            {member.strengths.map((s, i) => <li key={i}>• {s}</li>)}
+                                                        </ul>
+                                                    </div>
+
+                                                    {/* Weaknesses */}
+                                                    <div className="bg-slate-900/80 p-2.5 rounded-xl border border-rose-500/20">
+                                                        <span className="text-[9px] font-extrabold text-rose-400 uppercase block mb-0.5">🔴 Áreas de Mejora:</span>
+                                                        <ul className="text-slate-300 space-y-0.5">
+                                                            {member.weaknesses.map((w, i) => <li key={i}>• {w}</li>)}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-xs text-slate-500 italic p-4 bg-slate-950 rounded-2xl text-center">
+                                            Sin miembros asignados en este escuadrón.
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* PEER MENTORING RECOMMENDATIONS (EMPAREJAMIENTO INTELIGENTE) */}
+                                {sq.members.length >= 2 && (
+                                    <div className="bg-indigo-950/60 p-4 rounded-2xl border border-indigo-500/30 space-y-3 mb-6">
+                                        <div className="flex items-center space-x-2">
+                                            <HeartHandshake className="w-4 h-4 text-amber-400" />
+                                            <h4 className="text-xs font-bold text-indigo-200">Sugerencia de Tutoría entre Pares (IA AuLock)</h4>
+                                        </div>
+
+                                        <p className="text-[11px] text-slate-300 leading-relaxed">
+                                            <strong>{sq.members[0]?.name}</strong> (Fuerte en Matemáticas) puede apoyar a <strong>{sq.members[1]?.name}</strong>, quien a su vez puede ser su tutor en Ciencias.
+                                        </p>
+
+                                        <button
+                                            onClick={() => handleLinkSynergy(sq.id, sq.members[0]?.name, sq.members[1]?.name)}
+                                            className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition-all shadow flex items-center justify-center space-x-1.5"
+                                        >
+                                            <Link className="w-3.5 h-3.5 text-amber-300" />
+                                            <span>Vincular Pareja de Mentoría Recíproca</span>
+                                        </button>
+
+                                        {sq.synergies?.length > 0 && (
+                                            <div className="pt-2 border-t border-indigo-500/20">
+                                                {sq.synergies.map((syn, idx) => (
+                                                    <p key={idx} className="text-[10px] text-emerald-300 font-semibold bg-emerald-500/10 p-2 rounded-lg">
+                                                        🤝 Pareja Activa: {syn.student1} ↔ {syn.student2}
+                                                    </p>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ADD MEMBER SELECTOR */}
+                            <div className="pt-4 border-t border-slate-800 space-y-2">
+                                <label className="block text-[10px] text-slate-400 font-bold uppercase">Añadir Alumno al Escuadrón:</label>
+                                <div className="flex gap-2">
+                                    <select
+                                        id={`select-st-${sq.id}`}
+                                        className="flex-1 p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-200 outline-none"
+                                    >
+                                        {availableStudents.map(st => (
+                                            <option key={st.id} value={st.id}>
+                                                {st.name} ({st.strengths[0]})
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    <button
+                                        onClick={() => {
+                                            const select = document.getElementById(`select-st-${sq.id}`);
+                                            const stObj = availableStudents.find(s => s.id === select.value);
+                                            if (stObj) handleAddMember(sq.id, stObj);
+                                        }}
+                                        className="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow transition-colors flex items-center space-x-1"
+                                    >
+                                        <UserPlus className="w-3.5 h-3.5" />
+                                        <span>Añadir</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    ))}
+                </div>
+
             </div>
         </div>
     );

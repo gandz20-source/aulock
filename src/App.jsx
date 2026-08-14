@@ -1,9 +1,9 @@
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { LiveClassroomProvider } from './context/LiveClassroomContext';
+import { AuthProvider } from './context/AuthContext';
 import { UIProvider } from './context/UIContext';
-import ProtectedRoute from './components/ProtectedRoute'; // Keep using for role-specific protection
-import ProtectedLayout from './layouts/ProtectedLayout'; // New layout for /app
+import { LiveClassroomProvider } from './context/LiveClassroomContext';
+import { FocusModeProvider } from './context/FocusModeProvider';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import QRLogin from './pages/QRLogin';
@@ -12,7 +12,6 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import AICampus from './pages/AICampus';
 import ChatInterface from './pages/ChatInterface';
 import Store from './pages/Store';
-import Admin from './pages/Admin';
 import Squads from './pages/Squads';
 import DebateArena from './pages/DebateArena';
 import LiveClass from './pages/LiveClass';
@@ -21,171 +20,69 @@ import SubjectDetail from './pages/SubjectDetail';
 import NexusHub from './modules/nexus/NexusHub';
 import VibeStudio from './modules/lab/VibeStudio';
 import PortalSelector from './pages/PortalSelector';
+import SchoolAdminDashboard from './pages/SchoolAdminDashboard';
+import Colegio360MasterDashboard from './pages/Colegio360MasterDashboard';
+import AuLockCoreIntelligence from './pages/AuLockCoreIntelligence';
+import AcademicPassport from './pages/AcademicPassport';
+import AfterIAPortal from './components/afteria/AfterIAPortal';
 import LayoutSwitcher from './components/LayoutSwitcher';
 import DebugBanner from './components/DebugBanner';
-
-
-const AdminDashboard = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
-    <div className="max-w-6xl mx-auto">
-      <h1 className="text-4xl font-bold mb-4">
-        <span className="gradient-text">Panel de Administración</span>
-      </h1>
-      <p className="text-slate-600">Bienvenido al panel de administración. Próximamente más funciones.</p>
-    </div>
-  </div>
-);
 
 function App() {
   return (
     <AuthProvider>
       <UIProvider>
-        <DebugBanner />
         <LiveClassroomProvider>
-          <Routes>
-            {/* --- Public Routes --- */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/portal" element={<PortalSelector />} />
+          <FocusModeProvider>
+            <DebugBanner />
+            <Routes>
+              {/* --- Public Routes --- */}
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/portal" element={<PortalSelector />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/access" element={<QRLogin />} />
+              <Route path="/qr-login" element={<QRLogin />} />
 
-            <Route path="/login" element={<Login />} />
-            <Route path="/access" element={<QRLogin />} />
-            <Route path="/qr-login" element={<QRLogin />} />
+              {/* --- Direct Access Routes --- */}
+              <Route path="/academic-passport" element={<AcademicPassport />} />
+              <Route path="/core-intelligence" element={<AuLockCoreIntelligence />} />
+              <Route path="/school-dashboard" element={<Colegio360MasterDashboard />} />
+              <Route path="/colegio-360-master" element={<Colegio360MasterDashboard />} />
+              <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+              <Route path="/student-dashboard" element={<StudentWorkspace />} />
+              <Route path="/after-ia" element={<AfterIAPortal />} />
+              <Route path="/debate" element={<DebateArena />} />
+              <Route path="/squads" element={<Squads />} />
 
-            {/* --- Protected App Routes --- */}
-            <Route path="/app" element={<ProtectedLayout />}>
+              {/* --- Protected App Routes --- */}
+              <Route path="/app" element={<LayoutSwitcher />}>
+                <Route index element={<LayoutSwitcher />} />
+                <Route path="tutor" element={<AICampus />} />
+                <Route path="pre-u" element={<StudentWorkspace />} />
+                <Route path="school" element={<Colegio360MasterDashboard />} />
+                <Route path="student-dashboard" element={<StudentWorkspace />} />
+                <Route path="ai-campus" element={<AICampus />} />
+                <Route path="ai-chat/:assistantId" element={<ChatInterface />} />
+                <Route path="store" element={<Store />} />
+                <Route path="squads" element={<Squads />} />
+                <Route path="evolution" element={<MyEvolution />} />
+                <Route path="teacher-dashboard" element={<TeacherDashboard />} />
+                <Route path="academic-passport" element={<AcademicPassport />} />
+                <Route path="core-intelligence" element={<AuLockCoreIntelligence />} />
+                <Route path="school-dashboard" element={<Colegio360MasterDashboard />} />
+                <Route path="subject/:id" element={<SubjectDetail />} />
+                <Route path="debate" element={<DebateArena />} />
+                <Route path="live-class" element={<LiveClass />} />
+              </Route>
 
-              {/* The Index uses the LayoutSwitcher */}
-              <Route index element={<LayoutSwitcher />} />
+              {/* Nexus Routes */}
+              <Route path="/nexus" element={<NexusHub />} />
+              <Route path="/nexus/lab" element={<VibeStudio />} />
 
-              {/* Stub / Placeholder Routes */}
-              <Route path="tutor" element={<div className="p-10 text-center font-bold text-slate-500">🚧 Módulo Tutoría Pro (En Construcción)</div>} />
-              <Route path="pre-u" element={<div className="p-10 text-center font-bold text-slate-500">🚧 Módulo Pre-Universitario (En Construcción)</div>} />
-              <Route path="school" element={<Navigate to="/app/student-dashboard" replace />} />
-
-              {/* Student Routes */}
-              <Route
-                path="student-dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno']}>
-                    <StudentWorkspace />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="ai-campus"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno']}>
-                    <AICampus />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="ai-chat/:assistantId"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno']}>
-                    <ChatInterface />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="store"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno']}>
-                    <Store />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="squads"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno']}>
-                    <Squads />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="evolution"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno']}>
-                    <MyEvolution />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Teacher Routes */}
-              <Route
-                path="teacher-dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['profesor']}>
-                    <TeacherDashboard />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Admin Routes */}
-              <Route
-                path="admin-dashboard"
-                element={
-                  <ProtectedRoute allowedRoles={['superadmin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Shared / Common Routes */}
-              <Route
-                path="subject/:id"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno', 'profesor', 'superadmin']}>
-                    <SubjectDetail />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="debate"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno', 'profesor', 'superadmin']}>
-                    <DebateArena />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="live-class"
-                element={
-                  <ProtectedRoute allowedRoles={['alumno', 'profesor', 'superadmin']}>
-                    <LiveClass />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
-
-            {/* Nexus Routes (Hub & Lab) */}
-            <Route
-              path="/nexus"
-              element={
-                <ProtectedRoute allowedRoles={['alumno', 'profesor', 'superadmin']}>
-                  <NexusHub />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/nexus/lab"
-              element={
-                <ProtectedRoute allowedRoles={['alumno', 'profesor', 'superadmin']}>
-                  <VibeStudio />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Legacy/Direct access redirects */}
-            <Route path="/student-dashboard" element={<Navigate to="/app/student-dashboard" replace />} />
-            <Route path="/teacher-dashboard" element={<Navigate to="/app/teacher-dashboard" replace />} />
-            <Route path="/admin-dashboard" element={<Navigate to="/app/admin-dashboard" replace />} />
-
-
-            {/* Catch all */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+              {/* Catch all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </FocusModeProvider>
         </LiveClassroomProvider>
       </UIProvider>
     </AuthProvider>

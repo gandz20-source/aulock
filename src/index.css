@@ -1,6 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@theme {
+  --color-hud-dark: #000000;
+  --color-hud-gray: #1A1A1A;
+  --color-hud-cyan: #38EBCB;
+  --color-hud-magenta: #D946EF;
+  --color-hud-green: #A8FF00;
+  --color-hud-blue: #007BFF;
+  --color-hud-orange: #FF8C00;
+  --color-hud-purple: #9C27B0;
+  --color-hud-red: #EF4444;
+
+  --font-orbitron: 'Orbitron', sans-serif;
+  --font-mono: 'Roboto Mono', monospace;
+}
 
 /* Reset and base styles */
 * {
@@ -10,8 +25,20 @@
 }
 
 :root {
-  /* EdTech Color Palette */
-  --color-primary-50: #eff6ff;
+    /* Paleta de colores base HUD Cyberpunk */
+    --hud-orange: #ff8c00;
+    --hud-green: #a8ff00;
+    --hud-cyan: #38ebcb;
+    --hud-magenta: #d946ef;
+    --hud-blue: #007bff;
+    --hud-dark: #000000;
+
+    /* Efecto de brillo HUD */
+    --hud-glow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
+    --font-hud: 'Orbitron', sans-serif;
+
+    /* EdTech Color Palette */
+    --color-primary-50: #eff6ff;
   --color-primary-100: #dbeafe;
   --color-primary-200: #bfdbfe;
   --color-primary-300: #93c5fd;
@@ -294,4 +321,138 @@ html {
   .input {
     min-height: 44px;
   }
+}
+
+/* Cyberpunk HUD Classes & Keyframe Flicker */
+.ciber-text {
+    margin: 0;
+    font-family: var(--font-hud);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: var(--hud-glow);
+    animation: flicker 3s infinite;
+}
+
+.small-text {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 5px;
+}
+
+@keyframes flicker {
+    0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% { opacity: 1; }
+    20%, 21.999%, 63%, 63.999%, 65%, 69.999% { opacity: 0.8; }
+}
+
+.animate-flicker {
+    animation: flicker 4s infinite alternate;
+}
+
+/* HUD Panel & SVG Borders */
+.hud-panel {
+    position: relative;
+    margin-bottom: 20px;
+    color: var(--hud-cyan);
+    transition: all 0.3s ease;
+}
+
+.hud-svg-border {
+    width: 100%;
+    height: 100%;
+}
+
+.hud-panel.hud-cyan { color: var(--hud-cyan); }
+.hud-panel.hud-orange { color: var(--hud-orange); }
+.hud-panel.hud-green { color: var(--hud-green); }
+.hud-panel.hud-magenta { color: var(--hud-magenta); }
+.hud-panel.hud-blue { color: var(--hud-blue); }
+
+.hud-svg-border path, .hud-svg-border circle {
+    stroke: currentColor;
+    fill: none;
+    filter: drop-shadow(var(--hud-glow));
+}
+
+.hud-divider-line {
+    stroke-dasharray: 5 5;
+}
+
+.data-point {
+    fill: currentColor;
+    stroke: none;
+}
+
+.panel-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 60px;
+    padding-right: 20px;
+}
+
+/* HUD Glowing Separator Lines */
+.hud-separator-cyan {
+    height: 15px;
+    width: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 15'%3E%3Cg stroke='%2338ebcb' fill='none' stroke-width='1.5'%3E%3Cpath d='M0 7 L10 7 M15 7 H285 M290 7 L300 7 M15 3 H285 M15 11 H285'/%3E%3Ccircle cx='10' cy='7' r='2' fill='%2338ebcb'/%3E%3Ccircle cx='290' cy='7' r='2' fill='%2338ebcb'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: contain;
+    margin: 30px 0;
+    filter: drop-shadow(0 0 5px var(--hud-cyan));
+}
+
+.hud-separator-orange {
+    height: 15px;
+    width: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 15'%3E%3Cg stroke='%23ff8c00' fill='none' stroke-width='1.5'%3E%3Cpath d='M0 7 L10 7 M15 7 H285 M290 7 L300 7 M15 3 H285 M15 11 H285'/%3E%3Ccircle cx='10' cy='7' r='2' fill='%23ff8c00'/%3E%3Ccircle cx='290' cy='7' r='2' fill='%23ff8c00'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: contain;
+    margin: 30px 0;
+    filter: drop-shadow(0 0 5px var(--hud-orange));
+}
+
+.hud-separator-magenta {
+    height: 15px;
+    width: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 15'%3E%3Cg stroke='%23d946ef' fill='none' stroke-width='1.5'%3E%3Cpath d='M0 7 L10 7 M15 7 H285 M290 7 L300 7 M15 3 H285 M15 11 H285'/%3E%3Ccircle cx='10' cy='7' r='2' fill='%23d946ef'/%3E%3Ccircle cx='290' cy='7' r='2' fill='%23d946ef'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: contain;
+    margin: 30px 0;
+    filter: drop-shadow(0 0 5px var(--hud-magenta));
+}
+
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+}
+
+/* Fondo de circuito sutil */
+.circuit-bg {
+  background-image: 
+    linear-gradient(to right, rgba(56, 235, 203, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(56, 235, 203, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  position: relative;
+}
+
+.circuit-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(56, 235, 203, 0.1) 1px, transparent 1px);
+    background-size: 100px 100px;
+    pointer-events: none;
 }

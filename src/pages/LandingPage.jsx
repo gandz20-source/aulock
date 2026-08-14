@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import FounderStoryBanner from '../components/FounderStoryBanner';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -198,6 +199,11 @@ const LandingPage = () => {
                     <div className="gradient-orb orb-3"></div>
                 </div>
             </section>
+
+            {/* BANNER HISTORIA DEL FUNDADOR & PARTICIPACIÓN EN XPRIZE */}
+            <div className="container">
+                <FounderStoryBanner />
+            </div>
 
             {/* Product Showcase Section */}
             <section className="section product-showcase">

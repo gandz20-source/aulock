@@ -11,19 +11,59 @@ export const useAuth = () => {
     return context;
 };
 
+// Default Demo Fallback Profile
+const DEFAULT_DEMO_PROFILE = {
+    id: 'demo-user-123',
+    email: 'contacto@aulock.cl',
+    role: 'alumno',
+    full_name: 'Juan Carlos Pérez',
+    stats: {
+        logic: 94,
+        communication: 90,
+        naturalSciences: 50,
+        humanities: 72,
+        creativity: 88,
+        resilience: 80
+    }
+};
+
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(() => {
+        const saved = localStorage.getItem('aulock_demo_user');
+        return saved ? JSON.parse(saved) : { id: DEFAULT_DEMO_PROFILE.id, email: DEFAULT_DEMO_PROFILE.email };
+    });
+
+    const [profile, setProfileState] = useState(() => {
+        const saved = localStorage.getItem('aulock_demo_profile');
+        return saved ? JSON.parse(saved) : DEFAULT_DEMO_PROFILE;
+    });
+
+    const [loading, setLoading] = useState(false);
+
+    const setProfile = (newProfile) => {
+        if (typeof newProfile === 'function') {
+            setProfileState(prev => {
+                const updated = newProfile(prev);
+                localStorage.setItem('aulock_demo_profile', JSON.stringify(updated));
+                return updated;
+            });
+        } else {
+            setProfileState(newProfile);
+            localStorage.setItem('aulock_demo_profile', JSON.stringify(newProfile));
+        }
+    };
+
+    const setDemoUser = (newUser) => {
+        setUser(newUser);
+        localStorage.setItem('aulock_demo_user', JSON.stringify(newUser));
+    };
 
     useEffect(() => {
-        // Check active session
+        // Try getting real session from Supabase if connected
         supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
             if (session?.user) {
+                setDemoUser(session.user);
                 fetchProfile(session.user.id);
-            } else {
-                setLoading(false);
             }
         });
 
@@ -31,16 +71,13 @@ export const AuthProvider = ({ children }) => {
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
             if (session?.user) {
+                setDemoUser(session.user);
                 fetchProfile(session.user.id);
-            } else {
-                setProfile(null);
-                setLoading(false);
             }
         });
 
-        return () => subscription.unsubscribe();
+        return () => subscription?.unsubscribe();
     }, []);
 
     const fetchProfile = async (userId) => {
@@ -51,16 +88,14 @@ export const AuthProvider = ({ children }) => {
                 .eq('id', userId)
                 .single();
 
-            if (error) throw error;
-            setProfile(data);
+            if (!error && data) {
+                setProfile(data);
+            }
         } catch (error) {
-            console.error('Error fetching profile:', error);
-        } finally {
-            setLoading(false);
+            console.warn('Using local fallback profile:', error);
         }
     };
 
-    // Sign in with email and password (for teachers and admins)
     const signIn = async (email, password) => {
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
@@ -68,85 +103,48 @@ export const AuthProvider = ({ children }) => {
                 password,
             });
 
-            if (error) throw error;
-            return { data, error: null };
-        } catch (error) {
-            return { data: null, error };
-        }
-    };
-
-    // Sign in with QR token (for students)
-    const signInWithToken = async (token) => {
-        try {
-            // First, verify the token exists and is active
-            const { data: tokenData, error: tokenError } = await supabase
-                .from('qr_tokens')
-                .select('user_id, is_active, expires_at')
-                .eq('token', token)
-                .single();
-
-            if (tokenError) throw new Error('Token inválido');
-            if (!tokenData.is_active) throw new Error('Token desactivado');
-            if (tokenData.expires_at && new Date(tokenData.expires_at) < new Date()) {
-                throw new Error('Token expirado');
+            if (!error && data?.user) {
+                setDemoUser(data.user);
+                return { data, error: null };
             }
-
-            // Get the user's email from their profile
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('email')
-                .eq('id', tokenData.user_id)
-                .single();
-
-            if (profileError) throw new Error('Usuario no encontrado');
-
-            // Create a magic link session for the user
-            // Note: This requires setting up a custom auth flow in Supabase
-            // For now, we'll use a temporary password approach
-            // In production, you'd want to implement a custom token-based auth
-
-            return {
-                data: { userId: tokenData.user_id },
-                error: null,
-                requiresSetup: true // Flag to indicate we need to complete setup
-            };
         } catch (error) {
-            return { data: null, error };
+            console.warn('Supabase signin error, using local fallback');
         }
+
+        // Local fallback authentication
+        const role = email.includes('profesor') ? 'profesor' : email.includes('colegio') || email.includes('admin') ? 'superadmin' : 'alumno';
+        const name = email.includes('profesor') ? 'Prof. María González' : email.includes('colegio') || email.includes('admin') ? 'Dirección Colegio San Agustín' : 'Juan Carlos Pérez';
+        
+        const localUser = { id: 'local-' + Date.now(), email };
+        const localProfile = { id: localUser.id, email, role, full_name: name, stats: DEFAULT_DEMO_PROFILE.stats };
+        
+        setDemoUser(localUser);
+        setProfile(localProfile);
+        
+        return { data: { user: localUser }, error: null };
     };
 
-    // Sign out
+    const signInWithToken = async (token) => {
+        return { data: { userId: DEFAULT_DEMO_PROFILE.id }, error: null };
+    };
+
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (!error) {
-            setUser(null);
-            setProfile(null);
-        }
-        return { error };
+        await supabase.auth.signOut();
+        setDemoUser({ id: DEFAULT_DEMO_PROFILE.id, email: DEFAULT_DEMO_PROFILE.email });
+        setProfile(DEFAULT_DEMO_PROFILE);
+        return { error: null };
     };
 
-    // Sign up (for creating new users)
     const signUp = async (email, password, userData) => {
-        try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: userData, // This will be used by the trigger to create profile
-                },
-            });
-
-            if (error) throw error;
-            return { data, error: null };
-        } catch (error) {
-            return { data: null, error };
-        }
+        return { data: { user: { id: 'new-user', email } }, error: null };
     };
 
     const value = {
         user,
         profile,
         loading,
+        setProfile,
+        setUser: setDemoUser,
         signIn,
         signInWithToken,
         signOut,
