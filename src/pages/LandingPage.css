@@ -1244,3 +1244,56 @@
    I checked JSX: style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}
    This IS A PROBLEM. I must move these inline styles to CSS classes to make them responsive.
 */
+
+/* Custom Module & Security Badge styles matching Inter design system */
+.landing-page-wrapper .module-list {
+    margin-top: 1rem;
+    padding-left: 0;
+    list-style: none;
+}
+
+.landing-page-wrapper .module-list li {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.landing-page-wrapper .module-highlight-badge {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    color: #A7F3D0;
+    line-height: 1.6;
+}
+
+.landing-page-wrapper .security-badge-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+}
+
+.landing-page-wrapper .security-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1.5px solid rgba(16, 185, 129, 0.4);
+    border-radius: var(--radius-lg);
+    color: #A7F3D0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+    text-align: center;
+}
+
+.landing-page-wrapper .security-icon {
+    width: 24px;
+    height: 24px;
+    color: #34D399;
+    flex-shrink: 0;
+}

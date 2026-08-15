@@ -251,49 +251,51 @@ const LandingPage = () => {
             </section>
 
             {/* SECTION 2: MÓDULOS DESTACADOS (TEASISTO & MOTOR DE ENFOQUE ACTIVO) */}
-            <section className="section data-intelligence bg-slate-900/60 border-y border-slate-800">
-                <div className="container space-y-12">
+            <section className="section">
+                <div className="container">
                     <div className="section__header">
                         <span className="section__tag">🚀 Módulos Destacados</span>
                         <h2 className="section__title">Tutoría Inteligente & Supervisión No Invasiva</h2>
+                        <p className="section__description">
+                            Herramientas diseñadas para acompañar al estudiante y dar visibilidad pedagógica al docente en tiempo real.
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="features-grid">
                         {/* MÓDULO TEASISTO */}
-                        <div className="bg-slate-950 p-8 rounded-3xl border border-cyan-500/30 space-y-4 shadow-xl">
-                            <div className="flex items-center space-x-3">
-                                <span className="text-3xl">🤖</span>
-                                <h3 className="text-xl font-bold font-orbitron text-white">TeAsisto: Tu Compañero de Aprendizaje</h3>
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
+                                    <rect x="4" y="8" width="16" height="12" rx="2" />
+                                    <circle cx="9" cy="13" r="1" fill="currentColor" />
+                                    <circle cx="15" cy="13" r="1" fill="currentColor" />
+                                    <path d="M9 17h6" />
+                                </svg>
                             </div>
-                            <p className="text-sm text-slate-300 leading-relaxed">
+                            <h3 className="feature-title">🤖 TeAsisto: Tu Compañero de Aprendizaje</h3>
+                            <p className="feature-description">
                                 El módulo TeAsisto es nuestro tutor inteligente impulsado por IA. Funciona como un apoyo constante para el alumno durante la clase:
                             </p>
-                            <ul className="space-y-2 text-xs text-slate-300 font-mono">
-                                <li className="flex items-start space-x-2">
-                                    <span className="text-cyan-400 font-bold">✓</span>
-                                    <span><strong>Apoyo proactivo:</strong> Resuelve dudas conceptuales sin dar la respuesta final.</span>
-                                </li>
-                                <li className="flex items-start space-x-2">
-                                    <span className="text-cyan-400 font-bold">✓</span>
-                                    <span><strong>Personalización:</strong> Se adapta al ritmo y perfil de cada estudiante.</span>
-                                </li>
-                                <li className="flex items-start space-x-2">
-                                    <span className="text-cyan-400 font-bold">✓</span>
-                                    <span><strong>Conexión en tiempo real:</strong> El profesor monitorea interacciones para saber en qué conceptos están fallando los alumnos.</span>
-                                </li>
+                            <ul className="module-list">
+                                <li><strong>✓ Apoyo proactivo:</strong> Resuelve dudas conceptuales sin dar la respuesta final.</li>
+                                <li><strong>✓ Personalización:</strong> Se adapta al ritmo y perfil de cada estudiante.</li>
+                                <li><strong>✓ Conexión en tiempo real:</strong> El profesor monitorea interacciones para saber en qué conceptos fallan los alumnos.</li>
                             </ul>
                         </div>
 
                         {/* MÓDULO MOTOR DE ENFOQUE ACTIVO */}
-                        <div className="bg-slate-950 p-8 rounded-3xl border border-emerald-500/30 space-y-4 shadow-xl">
-                            <div className="flex items-center space-x-3">
-                                <span className="text-3xl">🛡️</span>
-                                <h3 className="text-xl font-bold font-orbitron text-white">Motor de Enfoque Activo</h3>
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
                             </div>
-                            <p className="text-sm text-slate-300 leading-relaxed">
-                                Detectamos automáticamente cambios de pantalla o distracciones mediante el <strong>Page Visibility API</strong>. Esto permite al profesor tener una visión real de quién está siguiendo la clase y quién necesita apoyo, fomentando una cultura de responsabilidad digital sin necesidad de vigilancia invasiva.
+                            <h3 className="feature-title">🛡️ Motor de Enfoque Activo</h3>
+                            <p className="feature-description">
+                                Detectamos automáticamente cambios de pantalla o distracciones mediante el <strong>Page Visibility API</strong>. Esto permite al profesor tener una visión real de quién sigue la clase sin necesidad de vigilancia invasiva.
                             </p>
-                            <div className="p-4 bg-emerald-950/60 border border-emerald-800 rounded-2xl text-xs text-emerald-200 font-mono">
+                            <div className="module-highlight-badge">
                                 📈 <strong>Lógica Transparente:</strong> Inicia en 100 PS. La salida de pantalla descuenta 3 puntos y muestra un aviso en vivo; la participación correcta en preguntas del profesor recupera +2 puntos.
                             </div>
                         </div>
@@ -301,71 +303,133 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* SECTION 3: BENEFICIOS INSTITucionales */}
-            <section className="section bg-slate-950">
-                <div className="container space-y-8">
+            {/* SECTION 3: BENEFICIOS INSTITUCIONALES */}
+            <section className="section">
+                <div className="container">
                     <div className="section__header">
                         <span className="section__tag">📊 Impacto Educativo</span>
                         <h2 className="section__title">Lo que AuLock puede hacer por tu colegio</h2>
+                        <p className="section__description">
+                            Resultados tangibles para la gestión institucional, el bienestar estudiantil y la automatización docente.
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
-                            <span className="text-2xl block">📵</span>
-                            <h4 className="font-bold text-white text-sm">Reducir Distracciones</h4>
-                            <p className="text-xs text-slate-400">Elimina el uso inapropiado del teléfono en el aula virtual y presencial.</p>
+                    <div className="features-grid">
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+                                    <line x1="12" y1="2" x2="12" y2="12" />
+                                </svg>
+                            </div>
+                            <h3 className="feature-title">Reducir Distracciones</h3>
+                            <p className="feature-description">
+                                Elimina el uso inapropiado del teléfono celular en el aula virtual y presencial de forma autorregulada.
+                            </p>
                         </div>
-                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
-                            <span className="text-2xl block">⚡</span>
-                            <h4 className="font-bold text-white text-sm">Automatizar Gestión</h4>
-                            <p className="text-xs text-slate-400">Automatiza toma de asistencia y reportes ahorrando horas de trabajo docente.</p>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                                </svg>
+                            </div>
+                            <h3 className="feature-title">Automatizar Gestión</h3>
+                            <p className="feature-description">
+                                Automatiza la toma de asistencia y la generación de reportes, ahorrando horas de trabajo administrativo al docente.
+                            </p>
                         </div>
-                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
-                            <span className="text-2xl block">📈</span>
-                            <h4 className="font-bold text-white text-sm">Métricas Reales</h4>
-                            <p className="text-xs text-slate-400">Provee datos precisos sobre el compromiso estudiantil con tableros intuitivos.</p>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <line x1="18" y1="20" x2="18" y2="10" />
+                                    <line x1="12" y1="20" x2="12" y2="4" />
+                                    <line x1="6" y1="20" x2="6" y2="14" />
+                                </svg>
+                            </div>
+                            <h3 className="feature-title">Métricas Reales</h3>
+                            <p className="feature-description">
+                                Provee datos precisos sobre el compromiso estudiantil con tableros de control intuitivos para directivos.
+                            </p>
                         </div>
-                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
-                            <span className="text-2xl block">📁</span>
-                            <h4 className="font-bold text-white text-sm">Evidencias en Drive</h4>
-                            <p className="text-xs text-slate-400">Genera informes PDF automáticos en Google Drive para el portafolio docente.</p>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                    <line x1="16" y1="13" x2="8" y2="13" />
+                                    <line x1="16" y1="17" x2="8" y2="17" />
+                                    <polyline points="10 9 9 9 8 9" />
+                                </svg>
+                            </div>
+                            <h3 className="feature-title">Evidencias en Drive</h3>
+                            <p className="feature-description">
+                                Genera informes automáticos en formato PDF en Google Drive para fortalecer el portafolio docente.
+                            </p>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* SECTION 4: COMPROMISO DE PRIVACIDAD & SECURITY BADGE */}
-            <section className="section bg-slate-900/80 border-t border-slate-800 py-12">
-                <div className="container max-w-4xl mx-auto space-y-6 text-center">
-                    <span className="text-xs font-bold text-emerald-400 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full uppercase tracking-wider">
-                        🔒 COMPROMISO DE PRIVACIDAD
-                    </span>
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-white font-orbitron">
-                        Tu Data es Sagrada
-                    </h2>
-                    <p className="text-sm text-slate-300 leading-relaxed">
-                        Sabemos que la información académica es sensible. En AuLock, la privacidad no es una opción, es nuestro pilar fundamental:
-                    </p>
+            <section className="section">
+                <div className="container">
+                    <div className="section__header">
+                        <span className="section__tag">🔒 Compromiso de Privacidad</span>
+                        <h2 className="section__title">Tu Data es Sagrada</h2>
+                        <p className="section__description">
+                            Sabemos que la información académica es sensible. En AuLock, la privacidad no es una opción; es nuestro pilar fundamental.
+                        </p>
+                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left text-xs font-mono pt-4">
-                        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-                            <strong className="text-emerald-400 block text-sm">1. Propiedad del Colegio</strong>
-                            <p className="text-slate-400">Toda la información generada (datos de alumnos, notas, métricas) es exclusiva del colegio y del estudiante.</p>
+                    <div className="features-grid">
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                            </div>
+                            <h3 className="feature-title">1. Propiedad del Colegio</h3>
+                            <p className="feature-description">
+                                Toda la información generada (datos de alumnos, notas y métricas) es exclusiva propiedad del colegio y del estudiante.
+                            </p>
                         </div>
-                        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-                            <strong className="text-emerald-400 block text-sm">2. Cero Comercio de Datos</strong>
-                            <p className="text-slate-400">AuLock jamás vende, comparte ni comercializa información personal con fines publicitarios.</p>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                                </svg>
+                            </div>
+                            <h3 className="feature-title">2. Cero Comercio de Datos</h3>
+                            <p className="feature-description">
+                                AuLock jamás vende, comparte ni comercializa información personal para fines publicitarios.
+                            </p>
                         </div>
-                        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
-                            <strong className="text-emerald-400 block text-sm">3. Seguridad de Grado Bancario</strong>
-                            <p className="text-slate-400">Utilizamos encriptación de estándar bancario en Supabase para proteger todos tus datos.</p>
+
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                                    <path d="M6 12h4m4 0h4" />
+                                </svg>
+                            </div>
+                            <h3 className="feature-title">3. Seguridad de Grado Bancario</h3>
+                            <p className="feature-description">
+                                Utilizamos encriptación de estándar bancario en Supabase para asegurar el acceso exclusivo de usuarios autorizados.
+                            </p>
                         </div>
                     </div>
 
                     {/* SECURITY BADGE AT BOTTOM */}
-                    <div className="pt-6">
-                        <div className="inline-flex items-center space-x-3 bg-emerald-950/90 border-2 border-emerald-500/80 px-6 py-3 rounded-2xl shadow-[0_0_25px_rgba(52,211,153,0.4)] text-xs md:text-sm font-bold text-emerald-300 font-mono">
-                            <span className="text-lg">🛡️</span>
+                    <div className="security-badge-wrapper">
+                        <div className="security-badge">
+                            <svg className="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
                             <span>Datos 100% privados y protegidos por Encriptación Institucional Supabase & Google Suite Security</span>
                         </div>
                     </div>
