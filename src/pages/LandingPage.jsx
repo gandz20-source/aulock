@@ -163,8 +163,8 @@ const LandingPage = () => {
                                 <div className="stat__label">Mejora en Concentración</div>
                             </div>
                             <div className="stat">
-                                <div className="stat__number">10K+</div>
-                                <div className="stat__label">Estudiantes Activos</div>
+                                <div className="stat__number">Beta 🚀</div>
+                                <div className="stat__label">Etapa de Desarrollo // Buscando Primeros Usuarios</div>
                             </div>
                             <div className="stat">
                                 <div className="stat__number">4.9★</div>
