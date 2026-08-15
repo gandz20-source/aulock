@@ -18,6 +18,7 @@ import TeacherActivityPublisher from '../components/TeacherActivityPublisher';
 import ClassroomArena from '../components/arena/ClassroomArena';
 import TeacherHeaderNav from '../components/hud/TeacherHeaderNav';
 import TeacherActionBar from '../components/hud/TeacherActionBar';
+import TeacherSquadManager from '../components/TeacherSquadManager';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { 
     BookOpen, Play, Clock, Plus, Trash2, CheckCircle, Users, AlertTriangle, 
@@ -702,7 +703,14 @@ export default function TeacherDashboard() {
                     </div>
                 )}
 
-                {/* ==================== PESTAÑA 3: 3. REPORTES (RADAR & BIENESTAR) ==================== */}
+                {/* ==================== PESTAÑA 3: 3. SQUADS & TEAMS ==================== */}
+                {activeTab === 'squads' && (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                        <TeacherSquadManager />
+                    </div>
+                )}
+
+                {/* ==================== PESTAÑA 4: 4. REPORTES (RADAR & BIENESTAR) ==================== */}
                 {activeTab === 'reports' && (
                     <div className="space-y-8 animate-in fade-in duration-300 font-mono">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -752,6 +760,9 @@ export default function TeacherDashboard() {
                                 </div>
                             )}
                         </div>
+
+                        {/* GESTIÓN DE SQUADS */}
+                        <TeacherSquadManager />
                     </div>
                 )}
 

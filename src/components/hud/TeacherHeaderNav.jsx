@@ -7,9 +7,10 @@ export default function TeacherHeaderNav({ activeTab = 'live', setActiveTab }) {
   const tabs = [
     { id: 1, key: 'live', name: '1. LIVE CLASSROOM', color: 'cyan', border: 'border-cyan-400 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.5)] bg-cyan-950/80' },
     { id: 2, key: 'evaluations', name: '2. EVALUATIONS', color: 'magenta', border: 'border-fuchsia-500 text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.5)] bg-fuchsia-950/80' },
-    { id: 3, key: 'reports', name: '3. REPORTS', color: 'green', border: 'border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] bg-emerald-950/80' },
-    { id: 4, key: 'nexo', name: '4. COEXISTENCE NEXUS', color: 'blue', border: 'border-sky-400 text-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.5)] bg-sky-950/80' },
-    { id: 5, key: 'settings', name: '5. SETTINGS', color: 'orange', border: 'border-amber-500 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.5)] bg-amber-950/80' },
+    { id: 3, key: 'squads', name: '3. SQUADS & TEAMS', color: 'indigo', border: 'border-indigo-400 text-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.5)] bg-indigo-950/80' },
+    { id: 4, key: 'reports', name: '4. REPORTS', color: 'green', border: 'border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] bg-emerald-950/80' },
+    { id: 5, key: 'nexo', name: '5. COEXISTENCE NEXUS', color: 'blue', border: 'border-sky-400 text-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.5)] bg-sky-950/80' },
+    { id: 6, key: 'settings', name: '6. SETTINGS', color: 'orange', border: 'border-amber-500 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.5)] bg-amber-950/80' },
   ];
 
   return (
@@ -54,8 +55,8 @@ export default function TeacherHeaderNav({ activeTab = 'live', setActiveTab }) {
         </div>
       </div>
 
-      {/* 5 NEON HUD TAB BUTTONS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      {/* 6 NEON HUD TAB BUTTONS */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
