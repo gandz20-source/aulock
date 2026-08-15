@@ -241,10 +241,10 @@ export default function TeacherDashboard() {
                                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-cyan-900/60 pb-3">
                                     <div>
                                         <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase block">
-                                            ACTIVIDAD ACTUAL:
+                                            CURRENT ACTIVITY:
                                         </span>
                                         <h2 className="text-xl md:text-2xl font-orbitron font-extrabold text-white tracking-wide">
-                                            Aula en Vivo Dinámica con Múltiples Tipos de Respuesta
+                                            Dynamic Live Classroom with Multiple Response Types
                                         </h2>
                                     </div>
 
@@ -254,19 +254,19 @@ export default function TeacherDashboard() {
                                             onClick={() => setQuestionType('alternatives')}
                                             className={`px-2 py-1 rounded-xl transition ${questionType === 'alternatives' ? 'bg-cyan-500 text-slate-950 font-black' : 'text-slate-400'}`}
                                         >
-                                            Alternativas
+                                            Multiple Choice
                                         </button>
                                         <button 
                                             onClick={() => setQuestionType('true_false')}
                                             className={`px-2 py-1 rounded-xl transition ${questionType === 'true_false' ? 'bg-cyan-500 text-slate-950 font-black' : 'text-slate-400'}`}
                                         >
-                                            V/F
+                                            True / False
                                         </button>
                                         <button 
                                             onClick={() => setQuestionType('written')}
                                             className={`px-2 py-1 rounded-xl transition ${questionType === 'written' ? 'bg-cyan-500 text-slate-950 font-black' : 'text-slate-400'}`}
                                         >
-                                            Desarrollo
+                                            Open Response
                                         </button>
                                     </div>
                                 </div>
@@ -274,7 +274,7 @@ export default function TeacherDashboard() {
                                 {/* TARJETA DE PREGUNTA EN VIVO 5/15 */}
                                 <div className="bg-slate-900/90 p-5 rounded-2xl border border-cyan-500/40 space-y-3 font-mono">
                                     <div className="flex items-center justify-between text-xs text-cyan-300 font-bold">
-                                        <span>PREGUNTA 5/15</span>
+                                        <span>QUESTION 5/15</span>
                                         <span className="text-[10px] bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500 text-cyan-200 uppercase">
                                             {questionType}
                                         </span>
@@ -306,14 +306,14 @@ export default function TeacherDashboard() {
                                     )}
 
                                     <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/80">
-                                        <span>Time límites: 
+                                        <span>Time limit: 
                                             <input
                                                 type="number"
                                                 value={timer}
                                                 onChange={e => setTimer(Number(e.target.value))}
                                                 className="w-14 bg-slate-950 text-cyan-300 font-mono font-bold text-center border border-slate-800 rounded mx-1.5 p-0.5"
                                             />
-                                            segundos
+                                            seconds
                                         </span>
                                     </div>
                                 </div>
@@ -323,14 +323,14 @@ export default function TeacherDashboard() {
                                     onClick={handleLaunchLiveQuestion}
                                     className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 via-sky-500 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-orbitron font-extrabold text-sm tracking-wider uppercase shadow-[0_0_25px_rgba(6,182,212,0.6)] transition-all hover:scale-[1.01]"
                                 >
-                                    LANZAR PREGUNTA A TODOS LOS ALUMNOS
+                                    LAUNCH LIVE QUESTION TO ALL STUDENTS
                                 </button>
                             </div>
 
                             {/* PANEL RESPUESTAS EN TIEMPO REAL CON GRÁFICO RECHARTS */}
                             <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
                                 <h3 className="text-base font-orbitron font-extrabold text-white tracking-wider uppercase">
-                                    RESPUESTAS EN TIEMPO REAL
+                                    REAL-TIME STUDENT RESPONSES
                                 </h3>
 
                                 <div className="h-60 w-full pt-2">
