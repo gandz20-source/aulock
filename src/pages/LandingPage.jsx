@@ -34,7 +34,6 @@ const LandingPage = () => {
         if (user) {
             navigate('/app/dashboard');
         } else {
-            // Open Contact Modal instead of login for new visitors
             setIsModalOpen(true);
         }
     };
@@ -45,9 +44,8 @@ const LandingPage = () => {
 
     const handleModalSubmit = (e) => {
         e.preventDefault();
-        // Here you would typically send the data to your backend
         console.log('Form submitted:', modalForm);
-        alert('Gracias por tu interés. Nos pondremos en contacto contigo a la brevedad para potenciar la educación en ' + (modalForm.city || 'tu ciudad') + '.');
+        alert('Thank you for your interest. Our institutional team will contact you shortly to empower education in ' + (modalForm.city || 'your school') + '.');
         setIsModalOpen(false);
         setModalForm({
             name: '',
@@ -63,11 +61,7 @@ const LandingPage = () => {
     };
 
     const handleInputChange = (e) => {
-        const { id, value } = e.target;
-        // Map id to state key (remove 'modal' prefix if present or match id)
-        const key = id.replace('modal', '').toLowerCase();
-        // Since IDs in my HTML were like modalName, modalEmail etc. I'll map them carefully or just use name attribute.
-        // Let's use name attribute in inputs for easier handling
+        const { value } = e.target;
         setModalForm(prev => ({ ...prev, [e.target.name]: value }));
     };
 
@@ -97,10 +91,10 @@ const LandingPage = () => {
                     </div>
 
                     <ul className="nav__menu" id="navMenu">
-                        <li className="nav__item"><a href="#solucion" className="nav__link">Solución</a></li>
-                        <li className="nav__item"><a href="#ciencia" className="nav__link">Ciencia</a></li>
-                        <li className="nav__item"><a href="#nosotros" className="nav__link">Nosotros</a></li>
-                        <li className="nav__item"><a href="#contacto" className="nav__link">Contacto</a></li>
+                        <li className="nav__item"><a href="#solucion" className="nav__link">Solution</a></li>
+                        <li className="nav__item"><a href="#ciencia" className="nav__link">Science</a></li>
+                        <li className="nav__item"><a href="#nosotros" className="nav__link">About Us</a></li>
+                        <li className="nav__item"><a href="#contacto" className="nav__link">Contact</a></li>
                     </ul>
 
                     <button className="nav__toggle" id="navToggle" aria-label="Toggle menu">
@@ -111,7 +105,7 @@ const LandingPage = () => {
 
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <button className="btn btn-primary" onClick={handleLogin} style={{ padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
-                            {user ? 'Ir al Dashboard' : 'Ingresar'}
+                            {user ? 'Go to Dashboard' : 'Sign In'}
                         </button>
                     </div>
                 </nav>
@@ -126,46 +120,46 @@ const LandingPage = () => {
                                 <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" strokeWidth="2"
                                     strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            <span>Tecnología NFC & Ecosistema Google Workspace</span>
+                            <span>NFC Technology & Google Workspace Ecosystem</span>
                         </div>
 
                         <h1 className="hero__title">
-                            <span className="title-line">AuLock: Transformando el</span>
-                            <span className="title-line title-gradient">Enfoque en Éxito Académico</span>
+                            <span className="title-line">AuLock: Transforming</span>
+                            <span className="title-line title-gradient">Focus into Academic Success</span>
                         </h1>
 
                         <p className="hero__description">
-                            En la era de la distracción digital, AuLock llega para equilibrar la tecnología con la disciplina. No estamos aquí para prohibir el uso de dispositivos, sino para convertirlos en herramientas de alta productividad y aprendizaje profundo.
+                            In the era of digital distraction, AuLock balances technology with discipline. We are not here to ban devices, but to turn them into tools for high productivity and deep learning.
                         </p>
 
                         <div className="hero__cta">
                             <button className="btn btn-primary" id="ctaButton" onClick={() => navigate('/login')}>
-                                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                <svg style={{ width: '20px', height: '20px', marginRight: '8px' }} viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/>
                                 </svg>
-                                <span>Conectar con Google Classroom</span>
+                                <span>Connect with Google Classroom</span>
                             </button>
                             <a href="https://youtube.com/shorts/" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
                                 <svg className="btn-icon-left" viewBox="0 0 24 24" fill="none">
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
                                     <path d="M10 8l6 4-6 4V8z" fill="currentColor" />
                                 </svg>
-                                <span>Ver Demo</span>
+                                <span>Watch Demo</span>
                             </a>
                         </div>
 
                         <div className="hero__stats">
                             <div className="stat">
                                 <div className="stat__number">95%</div>
-                                <div className="stat__label">Mejora en Concentración</div>
+                                <div className="stat__label">Improvement in Concentration</div>
                             </div>
                             <div className="stat">
                                 <div className="stat__number">Beta 🚀</div>
-                                <div className="stat__label">Etapa de Desarrollo // Buscando Primeros Usuarios</div>
+                                <div className="stat__label">Development Phase // Seeking First Adopters</div>
                             </div>
                             <div className="stat">
                                 <div className="stat__number">4.9★</div>
-                                <div className="stat__label">Valoración Promedio</div>
+                                <div className="stat__label">Average Rating</div>
                             </div>
                         </div>
                     </div>
@@ -173,7 +167,7 @@ const LandingPage = () => {
                     <div className="hero__visual">
                         <div className="visual-card">
                             <div className="card-glow"></div>
-                            <img src="/images/students-hero.jpg" alt="Estudiantes usando AuLock" className="product-image" />
+                            <img src="/images/students-hero.jpg" alt="Students using AuLock" className="product-image" />
                             <div className="floating-badge badge-1">
                                 <svg viewBox="0 0 24 24" fill="none">
                                     <path
@@ -184,7 +178,7 @@ const LandingPage = () => {
                             </div>
                             <div className="floating-badge badge-2">
                                 <div className="pulse-dot"></div>
-                                <span>En Vivo</span>
+                                <span>Live Active</span>
                             </div>
                         </div>
                     </div>
@@ -202,67 +196,80 @@ const LandingPage = () => {
                 <FounderStoryBanner />
             </div>
 
-            {/* SECTION 1: ¿POR QUÉ ELEGIR AULOCK? (CARDS SECTION) */}
+            {/* SECTION 1: WHY CHOOSE AULOCK? (CARDS SECTION) */}
             <section className="section solution" id="solucion">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">🌟 ¿Por qué elegir AuLock?</span>
-                        <h2 className="section__title">Tres Pilares que Redefinen el Aprendizaje</h2>
+                        <span className="section__tag">🌟 Why Choose AuLock?</span>
+                        <h2 className="section__title">Three Pillars Redefining Learning</h2>
                         <p className="section__description">
-                            Diseñado específicamente para instituciones educativas que buscan disciplina sin privación y automatización transparente.
+                            Specifically engineered for educational institutions seeking discipline without deprivation and transparent automation.
                         </p>
                     </div>
 
                     <div className="features-grid">
-                        {/* CARD 1: ENFOQUE GAMIFICADO */}
+                        {/* CARD 1: GAMIFIED FOCUS */}
                         <div className="feature-card">
                             <div className="feature-icon">
-                                <span className="text-2xl">🏆</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                                    <path d="M4 22h16" />
+                                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                                </svg>
                             </div>
-                            <h3 className="feature-title">Enfoque Gamificado</h3>
+                            <h3 className="feature-title">Gamified Focus</h3>
                             <p className="feature-description">
-                                Transformamos el control de asistencia y atención en un juego motivador. Los alumnos mantienen su "puntuación de enfoque" (100 PS) y ganan beneficios semanales por su constancia.
+                                We transform attendance and attention management into a motivating game. Students maintain their "Focus Score" (100 PS) and earn weekly benefits through consistency.
                             </p>
                         </div>
 
-                        {/* CARD 2: INTEGRACIÓN TOTAL GOOGLE */}
+                        {/* CARD 2: GOOGLE INTEGRATION */}
                         <div className="feature-card">
                             <div className="feature-icon">
-                                <span className="text-2xl">🌐</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <line x1="2" y1="12" x2="22" y2="12" />
+                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                                </svg>
                             </div>
-                            <h3 className="feature-title">Integración Total con Google</h3>
+                            <h3 className="feature-title">Full Google Integration</h3>
                             <p className="feature-description">
-                                AuLock vive dentro de tu ecosistema escolar. Sincronizamos tus clases de Google Classroom, tus horarios de Google Calendar y generamos reportes automáticos en PDF en Google Drive.
+                                AuLock lives inside your school ecosystem. We synchronize your Google Classroom courses, Google Calendar schedules, and generate automated PDF reports in Google Drive.
                             </p>
                         </div>
 
-                        {/* CARD 3: IA SOCRÁTICA */}
+                        {/* CARD 3: SOCRATIC AI */}
                         <div className="feature-card">
                             <div className="feature-icon">
-                                <span className="text-2xl">🤖</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                                </svg>
                             </div>
-                            <h3 className="feature-title">Inteligencia Artificial Socrática</h3>
+                            <h3 className="feature-title">Socratic Artificial Intelligence</h3>
                             <p className="feature-description">
-                                Nuestro motor de IA no da respuestas fáciles; guía al estudiante mediante el método socrático, estimulando el razonamiento profundo y el pensamiento crítico.
+                                Our AI engine does not hand out easy answers; it guides the student using the Socratic method, stimulating deep reasoning and critical thinking.
                             </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 2: MÓDULOS DESTACADOS (TEASISTO & MOTOR DE ENFOQUE ACTIVO) */}
+            {/* SECTION 2: FEATURED MODULES (TEASISTO & ACTIVE FOCUS MOTOR) */}
             <section className="section">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">🚀 Módulos Destacados</span>
-                        <h2 className="section__title">Tutoría Inteligente & Supervisión No Invasiva</h2>
+                        <span className="section__tag">🚀 Featured Modules</span>
+                        <h2 className="section__title">Intelligent Tutoring & Non-Invasive Supervision</h2>
                         <p className="section__description">
-                            Herramientas diseñadas para acompañar al estudiante y dar visibilidad pedagógica al docente en tiempo real.
+                            Tools designed to support students and grant real-time pedagogical visibility to teachers.
                         </p>
                     </div>
 
                     <div className="features-grid">
-                        {/* MÓDULO TEASISTO */}
+                        {/* MODULE TEASISTO */}
                         <div className="feature-card">
                             <div className="feature-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -273,44 +280,44 @@ const LandingPage = () => {
                                     <path d="M9 17h6" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">🤖 TeAsisto: Tu Compañero de Aprendizaje</h3>
+                            <h3 className="feature-title">🤖 TeAsisto: Your AI Learning Companion</h3>
                             <p className="feature-description">
-                                El módulo TeAsisto es nuestro tutor inteligente impulsado por IA. Funciona como un apoyo constante para el alumno durante la clase:
+                                The TeAsisto module is our AI-powered intelligent tutor. It acts as constant support for students during class:
                             </p>
                             <ul className="module-list">
-                                <li><strong>✓ Apoyo proactivo:</strong> Resuelve dudas conceptuales sin dar la respuesta final.</li>
-                                <li><strong>✓ Personalización:</strong> Se adapta al ritmo y perfil de cada estudiante.</li>
-                                <li><strong>✓ Conexión en tiempo real:</strong> El profesor monitorea interacciones para saber en qué conceptos fallan los alumnos.</li>
+                                <li><strong>✓ Proactive support:</strong> Resolves conceptual doubts without giving away final answers.</li>
+                                <li><strong>✓ Personalization:</strong> Seamlessly adapts to each student's learning pace and profile.</li>
+                                <li><strong>✓ Real-time connection:</strong> Teachers monitor interactions to identify concepts where students struggle.</li>
                             </ul>
                         </div>
 
-                        {/* MÓDULO MOTOR DE ENFOQUE ACTIVO */}
+                        {/* MODULE ACTIVE FOCUS MOTOR */}
                         <div className="feature-card">
                             <div className="feature-icon">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">🛡️ Motor de Enfoque Activo</h3>
+                            <h3 className="feature-title">🛡️ Active Focus Engine</h3>
                             <p className="feature-description">
-                                Detectamos automáticamente cambios de pantalla o distracciones mediante el <strong>Page Visibility API</strong>. Esto permite al profesor tener una visión real de quién sigue la clase sin necesidad de vigilancia invasiva.
+                                We automatically detect tab switching or distractions using the <strong>Page Visibility API</strong>. This grants teachers real visibility into class engagement without invasive surveillance.
                             </p>
                             <div className="module-highlight-badge">
-                                📈 <strong>Lógica Transparente:</strong> Inicia en 100 PS. La salida de pantalla descuenta 3 puntos y muestra un aviso en vivo; la participación correcta en preguntas del profesor recupera +2 puntos.
+                                📈 <strong>Transparent Logic:</strong> Starts at 100 PS. Leaving the active tab deducts 3 points with a live alert; answering teacher questions correctly restores +2 points.
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 3: BENEFICIOS INSTITUCIONALES */}
+            {/* SECTION 3: INSTITUTIONAL IMPACT */}
             <section className="section">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">📊 Impacto Educativo</span>
-                        <h2 className="section__title">Lo que AuLock puede hacer por tu colegio</h2>
+                        <span className="section__tag">📊 Educational Impact</span>
+                        <h2 className="section__title">What AuLock Can Do For Your School</h2>
                         <p className="section__description">
-                            Resultados tangibles para la gestión institucional, el bienestar estudiantil y la automatización docente.
+                            Tangible outcomes for institutional administration, student well-being, and teacher workflow automation.
                         </p>
                     </div>
 
@@ -322,9 +329,9 @@ const LandingPage = () => {
                                     <line x1="12" y1="2" x2="12" y2="12" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Reducir Distracciones</h3>
+                            <h3 className="feature-title">Reduce Classroom Distractions</h3>
                             <p className="feature-description">
-                                Elimina el uso inapropiado del teléfono celular en el aula virtual y presencial de forma autorregulada.
+                                Eliminates inappropriate mobile device usage in virtual and in-person classrooms through self-regulation.
                             </p>
                         </div>
 
@@ -334,9 +341,9 @@ const LandingPage = () => {
                                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Automatizar Gestión</h3>
+                            <h3 className="feature-title">Automate Administration</h3>
                             <p className="feature-description">
-                                Automatiza la toma de asistencia y la generación de reportes, ahorrando horas de trabajo administrativo al docente.
+                                Automates attendance recording and report generation, saving hours of administrative workload for educators.
                             </p>
                         </div>
 
@@ -348,9 +355,9 @@ const LandingPage = () => {
                                     <line x1="6" y1="20" x2="6" y2="14" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Métricas Reales</h3>
+                            <h3 className="feature-title">Real-Time Metrics</h3>
                             <p className="feature-description">
-                                Provee datos precisos sobre el compromiso estudiantil con tableros de control intuitivos para directivos.
+                                Provides precise data on student engagement with intuitive executive dashboards for school leaders.
                             </p>
                         </div>
 
@@ -364,23 +371,23 @@ const LandingPage = () => {
                                     <polyline points="10 9 9 9 8 9" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Evidencias en Drive</h3>
+                            <h3 className="feature-title">Drive Evidence Portfolio</h3>
                             <p className="feature-description">
-                                Genera informes automáticos en formato PDF en Google Drive para fortalecer el portafolio docente.
+                                Generates automated PDF reports directly in Google Drive to strengthen teacher evaluation portfolios.
                             </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* SECTION 4: COMPROMISO DE PRIVACIDAD & SECURITY BADGE */}
+            {/* SECTION 4: PRIVACY COMMITMENT & SECURITY BADGE */}
             <section className="section">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">🔒 Compromiso de Privacidad</span>
-                        <h2 className="section__title">Tu Data es Sagrada</h2>
+                        <span className="section__tag">🔒 Privacy Commitment</span>
+                        <h2 className="section__title">Your Data is Sacred</h2>
                         <p className="section__description">
-                            Sabemos que la información académica es sensible. En AuLock, la privacidad no es una opción; es nuestro pilar fundamental.
+                            We understand that academic data is sensitive. At AuLock, privacy is not an option; it is our fundamental pillar.
                         </p>
                     </div>
 
@@ -392,9 +399,9 @@ const LandingPage = () => {
                                     <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">1. Propiedad del Colegio</h3>
+                            <h3 className="feature-title">1. School & Student Ownership</h3>
                             <p className="feature-description">
-                                Toda la información generada (datos de alumnos, notas y métricas) es exclusiva propiedad del colegio y del estudiante.
+                                All generated data (student records, grades, focus metrics) belongs exclusively to the school and student.
                             </p>
                         </div>
 
@@ -404,9 +411,9 @@ const LandingPage = () => {
                                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">2. Cero Comercio de Datos</h3>
+                            <h3 className="feature-title">2. Zero Data Commercialization</h3>
                             <p className="feature-description">
-                                AuLock jamás vende, comparte ni comercializa información personal para fines publicitarios.
+                                AuLock never sells, shares, or monetizes personal information for advertising or third-party purposes.
                             </p>
                         </div>
 
@@ -417,9 +424,9 @@ const LandingPage = () => {
                                     <path d="M6 12h4m4 0h4" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">3. Seguridad de Grado Bancario</h3>
+                            <h3 className="feature-title">3. Bank-Grade Security</h3>
                             <p className="feature-description">
-                                Utilizamos encriptación de estándar bancario en Supabase para asegurar el acceso exclusivo de usuarios autorizados.
+                                We enforce bank-grade encryption via Supabase to guarantee that only authorized users access their data.
                             </p>
                         </div>
                     </div>
@@ -430,7 +437,7 @@ const LandingPage = () => {
                             <svg className="security-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                             </svg>
-                            <span>Datos 100% privados y protegidos por Encriptación Institucional Supabase & Google Suite Security</span>
+                            <span>100% Private Data Protected by Supabase Institutional Encryption & Google Suite Security</span>
                         </div>
                     </div>
                 </div>
@@ -440,11 +447,10 @@ const LandingPage = () => {
             <section className="section solution" id="solucion">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">Nuestra Solución</span>
-                        <h2 className="section__title">Tecnología que Potencia el Enfoque</h2>
+                        <span className="section__tag">Our Solution</span>
+                        <h2 className="section__title">Technology Empowering Focus</h2>
                         <p className="section__description">
-                            AuLock combina hardware NFC con software inteligente para crear
-                            un ecosistema completo de gestión de concentración.
+                            AuLock combines NFC hardware with intelligent software to create a complete focus management ecosystem.
                         </p>
                     </div>
 
@@ -456,10 +462,9 @@ const LandingPage = () => {
                                     <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Verificación NFC</h3>
+                            <h3 className="feature-title">NFC Verification</h3>
                             <p className="feature-description">
-                                Estuche inteligente que verifica automáticamente cuando el estudiante
-                                está en modo concentración.
+                                Smart pouch that automatically verifies when the student is in deep concentration mode.
                             </p>
                         </div>
 
@@ -470,10 +475,9 @@ const LandingPage = () => {
                                     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Bloques de Estudio</h3>
+                            <h3 className="feature-title">Study Blocks</h3>
                             <p className="feature-description">
-                                Sistema de intervalos optimizados basado en investigación científica
-                                sobre concentración.
+                                Optimized interval system based on scientific research on human concentration and attention span.
                             </p>
                         </div>
 
@@ -484,29 +488,26 @@ const LandingPage = () => {
                                     <path d="M7 16l4-4 3 3 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Analytics Avanzados</h3>
+                            <h3 className="feature-title">Advanced Analytics</h3>
                             <p className="feature-description">
-                                Dashboard completo con métricas de rendimiento, tendencias y
-                                recomendaciones personalizadas.
+                                Comprehensive dashboard with performance metrics, trends, and personalized recommendations.
                             </p>
                         </div>
 
                         <div className="feature-card">
                             <div className="feature-icon">
                                 <svg viewBox="0 0 24 24" fill="none">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor"
-                                        strokeWidth="2" />
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" />
                                     <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
-                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor"
-                                        strokeWidth="2" />
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Gestión Institucional y DAEM</h3>
+                            <h3 className="feature-title">Institutional & DAEM Management</h3>
                             <p className="feature-description">
-                                Plataforma integral para Direcciones y DAEM: obtenga datos precisos para la gestión educativa y
-                                tome decisiones basadas en evidencia.
+                                Comprehensive platform for school leadership and DAEM: obtain precise data for educational management and evidence-based decision making.
                             </p>
                         </div>
+
                         <div className="feature-card">
                             <div className="feature-icon">
                                 <svg viewBox="0 0 24 24" fill="none">
@@ -515,10 +516,9 @@ const LandingPage = () => {
                                     <path d="M12 17h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Inclusión Real (TEA/NEEP)</h3>
+                            <h3 className="feature-title">Real Inclusion (TEA/ADHD)</h3>
                             <p className="feature-description">
-                                Entorno libre de distracciones ideal para estudiantes con necesidades especiales (TEA/TDAH),
-                                facilitando la autorregulación y el foco.
+                                Distraction-free environment ideal for students with special needs (TEA/ADHD), facilitating self-regulation and focus.
                             </p>
                         </div>
                     </div>
@@ -530,11 +530,10 @@ const LandingPage = () => {
                 <div className="container">
                     <div className="science__content">
                         <div className="science__text">
-                            <span className="section__tag">Respaldado por Ciencia</span>
-                            <h2 className="section__title">Fundamentos Neurocientíficos</h2>
+                            <span className="section__tag">Backed by Science</span>
+                            <h2 className="section__title">Neuroscientific Foundations</h2>
                             <p className="science__description">
-                                AuLock está basado en décadas de investigación sobre atención,
-                                concentración y aprendizaje efectivo.
+                                AuLock is built upon decades of research into attention, concentration, and effective learning.
                             </p>
 
                             <div className="science__points">
@@ -546,9 +545,9 @@ const LandingPage = () => {
                                         </svg>
                                     </div>
                                     <div className="point-content">
-                                        <h4>Principio de la Técnica Pomodoro</h4>
-                                        <p><strong>El concepto:</strong> AuLock utiliza el bloqueo de dispositivos para estructurar el aprendizaje en intervalos, fomentando ciclos de alta concentración seguidos de descansos.</p>
-                                        <p><strong>Beneficio:</strong> Evita el agotamiento cognitivo y mejora la retención a largo plazo.</p>
+                                        <h4>Pomodoro Technique Principle</h4>
+                                        <p><strong>The Concept:</strong> AuLock structures learning into intervals using device locking, fostering deep concentration cycles followed by breaks.</p>
+                                        <p><strong>Benefit:</strong> Prevents cognitive exhaustion and enhances long-term retention.</p>
                                     </div>
                                 </div>
 
@@ -560,9 +559,9 @@ const LandingPage = () => {
                                         </svg>
                                     </div>
                                     <div className="point-content">
-                                        <h4>Psicología del "Deep Work"</h4>
-                                        <p><strong>El concepto:</strong> Al eliminar la posibilidad física de acceder a notificaciones (NFC), se suprime la "interrupción constante".</p>
-                                        <p><strong>Beneficio:</strong> Permite al cerebro alcanzar estados de flujo (flow) para resolver problemas complejos.</p>
+                                        <h4>Deep Work Psychology</h4>
+                                        <p><strong>The Concept:</strong> By physically removing access to notifications (NFC), constant interruption is suppressed.</p>
+                                        <p><strong>Benefit:</strong> Enables the brain to achieve flow states for complex problem solving.</p>
                                     </div>
                                 </div>
 
@@ -576,9 +575,9 @@ const LandingPage = () => {
                                         </svg>
                                     </div>
                                     <div className="point-content">
-                                        <h4>Aprendizaje Socrático Mediante IA</h4>
-                                        <p><strong>El concepto:</strong> La IA de AuLock actúa como un tutor que guía mediante preguntas (Método Socrático).</p>
-                                        <p><strong>Beneficio:</strong> Fuerza al estudiante a razonar, logrando un aprendizaje significativo no memorístico.</p>
+                                        <h4>AI-Driven Socratic Learning</h4>
+                                        <p><strong>The Concept:</strong> AuLock AI acts as a tutor guiding through inquiry (Socratic Method).</p>
+                                        <p><strong>Benefit:</strong> Forces students to reason, achieving meaningful, non-rote learning.</p>
                                     </div>
                                 </div>
                             </div>
@@ -586,7 +585,6 @@ const LandingPage = () => {
 
                         <div className="science__visual">
                             <div className="science-image-wrapper">
-                                {/* Data Preview Card */}
                                 <div className="data-preview-card">
                                     <div className="preview-header">
                                         <div className="preview-dot red"></div>
@@ -600,10 +598,10 @@ const LandingPage = () => {
                                             <div className="bar" style={{ height: '40%' }}></div>
                                             <div className="bar" style={{ height: '90%' }}></div>
                                         </div>
-                                        <div className="preview-label">Nivel de Concentración</div>
+                                        <div className="preview-label">Concentration Index</div>
                                     </div>
                                 </div>
-                                <img src="/images/science-lab.jpg" alt="Innovación educativa con AuLock" className="science-image" style={{ opacity: 0.5, mixBlendMode: 'overlay' }} />
+                                <img src="/images/science-lab.jpg" alt="Educational innovation with AuLock" className="science-image" style={{ opacity: 0.5, mixBlendMode: 'overlay' }} />
                             </div>
                         </div>
                     </div>
@@ -614,10 +612,10 @@ const LandingPage = () => {
             <section className="section data-intelligence" id="datos">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">Inteligencia Educativa</span>
-                        <h2 className="section__title">Datos para la Gestión Directiva</h2>
+                        <span className="section__tag">Educational Intelligence</span>
+                        <h2 className="section__title">Data for Executive Leadership</h2>
                         <p className="section__description">
-                            AuLock convierte la interacción en el aula en información accionable para la toma de decisiones estratégicas.
+                            AuLock transforms classroom interaction into actionable intelligence for strategic decision-making.
                         </p>
                     </div>
 
@@ -628,9 +626,9 @@ const LandingPage = () => {
                                     <path d="M2 12h5l3 5 4-11 5 9h5" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Monitoreo del Clima Escolar</h3>
+                            <h3 className="feature-title">School Climate Monitoring</h3>
                             <p className="feature-description">
-                                Métricas en tiempo real sobre niveles de concentración y ansiedad digital. Identifique dificultades de enfoque por jornada o nivel.
+                                Real-time metrics on concentration levels and digital anxiety. Identify focus bottlenecks by grade or shift.
                             </p>
                         </div>
 
@@ -640,9 +638,9 @@ const LandingPage = () => {
                                     <path d="M21 21v-2a4 4 0 0 0-3-3.87M15.73 6.64a4 4 0 0 0-5.46 0l-3.35 3.35a4 4 0 0 0 0 5.66L9 17.76a4 4 0 0 0 5.66 0l3.35-3.35a4 4 0 0 0 0-5.66" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Reportes Predictivos</h3>
+                            <h3 className="feature-title">Predictive Reports</h3>
                             <p className="feature-description">
-                                IA adaptativa que detecta "lagunas cognitivas" y patrones de aprendizaje antes de las evaluaciones.
+                                Adaptive AI that detects cognitive gaps and learning patterns before evaluations.
                             </p>
                         </div>
 
@@ -654,9 +652,9 @@ const LandingPage = () => {
                                     <path d="M9 21V9" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Evidencia para DAEM</h3>
+                            <h3 className="feature-title">Evidence for Educational Boards</h3>
                             <p className="feature-description">
-                                Dashboard automatizado que justifica la inversión con datos de uso, mejora en tiempos efectivos y progreso en nivelación académica.
+                                Automated dashboard justifying technology investment with usage data, effective time gains, and academic progress.
                             </p>
                         </div>
 
@@ -668,9 +666,9 @@ const LandingPage = () => {
                                     <path d="M12 17h.01" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Seguimiento Inclusión (PIE/TEA)</h3>
+                            <h3 className="feature-title">Inclusion Tracking (TEA/NEEP)</h3>
                             <p className="feature-description">
-                                Datos específicos sobre el progreso de alumnos con NEEP, facilitando informes precisos para equipos multidisciplinarios.
+                                Specific metrics on special needs student progress, facilitating precise reports for multidisciplinary teams.
                             </p>
                         </div>
                     </div>
@@ -681,10 +679,10 @@ const LandingPage = () => {
             <section className="section ecosystem" id="ecosistema">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">Ecosistema AuLock</span>
-                        <h2 className="section__title">Un Ecosistema de Acompañamiento Integral</h2>
+                        <span className="section__tag">AuLock Ecosystem</span>
+                        <h2 className="section__title">A Comprehensive Support Ecosystem</h2>
                         <p className="section__description">
-                            Transformamos la interacción educativa mediante tres pilares fundamentales que potencian el aprendizaje activo.
+                            Transforming educational interaction through three fundamental pillars that power active learning.
                         </p>
                     </div>
 
@@ -696,13 +694,13 @@ const LandingPage = () => {
                                     <path d="M5 22v-6.57a2 2 0 0 1 1.07-1.78l.83-.39a2 2 0 0 0 1.1-1.79V10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1.46a2 2 0 0 0 1.1 1.79l.83.39A2 2 0 0 1 19 15.43V22" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">IA Adaptativa y Tutores Especializados</h3>
+                            <h3 className="feature-title">Adaptive AI & Specialized Tutors</h3>
                             <p className="feature-description">
-                                Sistema de Tutores IA diseñados bajo el método socrático, no un buscador genérico.
+                                AI Tutor system designed around the Socratic method, not a generic search bar.
                             </p>
                             <ul className="ecosystem-list">
-                                <li><strong>Squads de Especialidad:</strong> Acompañamiento específico en Matemáticas, Ciencias, Lenguaje e Historia.</li>
-                                <li><strong>Nivelación Personalizada:</strong> Ajuste automático de complejidad.</li>
+                                <li><strong>Specialty Squads:</strong> Focused support in Math, Science, Language, and History.</li>
+                                <li><strong>Personalized Leveling:</strong> Automatic difficulty adjustments.</li>
                             </ul>
                         </div>
 
@@ -712,14 +710,14 @@ const LandingPage = () => {
                                     <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Metodología de Interacción Activa</h3>
+                            <h3 className="feature-title">Active Interaction Methodology</h3>
                             <p className="feature-description">
-                                Transformamos al estudiante de receptor pasivo a protagonista de su aprendizaje.
+                                Transforming students from passive consumers to active protagonists of their learning.
                             </p>
                             <ul className="ecosystem-list">
-                                <li><strong>Debate Asistido:</strong> Fomenta el pensamiento crítico.</li>
-                                <li><strong>Preguntas Guía:</strong> La IA guía al alumno a descubrir la solución.</li>
-                                <li><strong>Desafíos de Creación:</strong> Proyectos originales con IA.</li>
+                                <li><strong>Assisted Debate:</strong> Fosters critical thinking.</li>
+                                <li><strong>Guided Questions:</strong> AI guides students to discover solutions.</li>
+                                <li><strong>Creation Challenges:</strong> Original projects with AI.</li>
                             </ul>
                         </div>
 
@@ -731,13 +729,13 @@ const LandingPage = () => {
                                     <line x1="12" y1="17" x2="12" y2="21" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">El "Control de Mando" para el Docente</h3>
+                            <h3 className="feature-title">Teacher Command Center</h3>
                             <p className="feature-description">
-                                Herramientas avanzadas para la gestión pedagógica y recuperación del rol mentor.
+                                Advanced tools for pedagogical management and regaining the mentor role.
                             </p>
                             <ul className="ecosystem-list">
-                                <li><strong>Dashboard de Clima:</strong> Datos en tiempo real sobre "Deep Work".</li>
-                                <li><strong>Recuperación del Aula:</strong> Delega la nivelación para enfocarse en la mentoría.</li>
+                                <li><strong>Class Climate Dashboard:</strong> Real-time Deep Work analytics.</li>
+                                <li><strong>Classroom Recovery:</strong> Delegates leveling to focus on mentorship.</li>
                             </ul>
                         </div>
                     </div>
@@ -749,44 +747,40 @@ const LandingPage = () => {
                 <div className="container">
                     <div className="benefits-content">
                         <div className="benefits-image-wrapper">
-                            <img src="/images/teacher-student.jpg" alt="Profesores y estudiantes con AuLock"
+                            <img src="/images/teacher-student.jpg" alt="Teachers and students with AuLock"
                                 className="benefit-image" />
                         </div>
                         <div className="benefits-text">
-                            <span className="section__tag">Beneficios Comprobados</span>
-                            <h2 className="section__title">¡Usa AuLock y Gana Puntos!</h2>
+                            <span className="section__tag">Proven Benefits</span>
+                            <h2 className="section__title">Use AuLock and Earn Rewards!</h2>
                             <p className="benefits__description">
-                                Acumula horas usando AuLock en clase junto a tus compañeros.
-                                ¡El curso con más horas ganará un punto extra en la próxima evaluación!
+                                Accumulate focus hours using AuLock in class with your peers.
+                                The top course wins bonus evaluation points!
                             </p>
                             <ul className="benefits-list">
                                 <li>
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
-                                            strokeWidth="2" />
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
                                     </svg>
-                                    <span>Bloquea señal 2G-5G / Wi-Fi / Bluetooth</span>
+                                    <span>Blocks 2G-5G / Wi-Fi / Bluetooth signal</span>
                                 </li>
                                 <li>
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
-                                            strokeWidth="2" />
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
                                     </svg>
-                                    <span>Seguro y resistente para uso diario</span>
+                                    <span>Durable and secure for daily classroom use</span>
                                 </li>
                                 <li>
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
-                                            strokeWidth="2" />
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
                                     </svg>
-                                    <span>Compatible con todos los teléfonos</span>
+                                    <span>Compatible with all smartphone models</span>
                                 </li>
                                 <li>
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor"
-                                            strokeWidth="2" />
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" />
                                     </svg>
-                                    <span>Uso educativo certificado</span>
+                                    <span>Certified educational use</span>
                                 </li>
                             </ul>
                         </div>
@@ -798,39 +792,37 @@ const LandingPage = () => {
             <section className="section about-us" id="nosotros">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">Quiénes Somos</span>
-                        <h2 className="section__title">Experiencia con Propósito</h2>
+                        <span className="section__tag">About Us</span>
+                        <h2 className="section__title">Purposeful Engineering</h2>
                         <p className="section__description">
-                            Desde la alta seguridad industrial hacia la innovación educativa.
+                            From high industrial security to educational innovation.
                         </p>
                     </div>
 
                     <div className="about-grid">
                         <div className="about-history">
                             <div className="history-content">
-                                <h3>Nuestra Trayectoria</h3>
+                                <h3>Our Trajectory</h3>
                                 <p>
-                                    Nuestra trayectoria nace bajo el alero de <strong>Comercializadora Kadosh Ltda.</strong>,
-                                    donde lideramos proyectos de alta complejidad técnica, destacando la implementación de
-                                    sistemas de seguridad para la <strong>Octava Zona de Carabineros</strong>. En 2016, a la innovación en seguridad industrial con <strong>Celulosa Arauco</strong>.
+                                    Our trajectory began under <strong>Comercializadora Kadosh Ltda.</strong>, leading high-complexity technical engineering projects such as security systems for <strong>Carabineros (National Police Eighth Zone)</strong>. In 2016, we expanded to industrial safety innovation with <strong>Celulosa Arauco</strong>.
                                 </p>
                                 <p>
-                                    Como <strong>Seguridad y Tecnología Chile</strong>, hemos consolidado nuestra experiencia colaborando con <strong>Pesquera Camanchaca</strong>.
+                                    As <strong>Seguridad y Tecnología Chile</strong>, we consolidated our expertise collaborating with <strong>Pesquera Camanchaca</strong>.
                                 </p>
                                 <p>
-                                    Desde 2025, volcamos esta experiencia técnica en <strong>AuLock</strong>, evolucionando de una respuesta a la adicción móvil a un ecosistema educativo.
+                                    Since 2025, we channel this technical precision into <strong>AuLock</strong>, evolving from mobile addiction prevention to a complete educational ecosystem.
                                 </p>
                             </div>
 
                             <div className="institutional-logos">
                                 <div className="logo-item">
-                                    <div className="logo-placeholder">Logo Carabineros</div>
+                                    <div className="logo-placeholder">Carabineros Security</div>
                                 </div>
                                 <div className="logo-item">
-                                    <div className="logo-placeholder">Logo Arauco</div>
+                                    <div className="logo-placeholder">Arauco Industrial</div>
                                 </div>
                                 <div className="logo-item">
-                                    <div className="logo-placeholder">Logo Camanchaca</div>
+                                    <div className="logo-placeholder">Camanchaca Maritime</div>
                                 </div>
                             </div>
                         </div>
@@ -844,9 +836,9 @@ const LandingPage = () => {
                                         <path d="M2 12h20" />
                                     </svg>
                                 </div>
-                                <h3>Misión</h3>
+                                <h3>Mission</h3>
                                 <p>
-                                    Combatir la dependencia digital en adolescentes, transformando el aula en un espacio libre de distracciones. Elevamos el rendimiento académico y devolvemos la capacidad de enfocarse.
+                                    To combat digital dependency in adolescents, transforming classrooms into distraction-free spaces. We elevate academic performance and restore the ability to focus.
                                 </p>
                             </div>
 
@@ -857,12 +849,12 @@ const LandingPage = () => {
                                         <circle cx="12" cy="12" r="3" />
                                     </svg>
                                 </div>
-                                <h3>Visión</h3>
+                                <h3>Vision</h3>
                                 <p>
-                                    Aspiramos a transformar la educación, fomentando el pensamiento crítico y la creatividad.
+                                    We aspire to transform education, fostering critical thinking and human creativity.
                                 </p>
                                 <blockquote className="vision-highlight">
-                                    "En un mundo donde la IA asume tareas técnicas, existe una capacidad que no puede replicar: la creación humana. Nuestra visión es formar generaciones que dominen las herramientas del futuro sin ser dominadas por ellas."
+                                    "In a world where AI handles technical tasks, one capability remains irreplaceable: human creativity. Our vision is to empower generations to master the tools of the future without being mastered by them."
                                 </blockquote>
                             </div>
                         </div>
@@ -875,24 +867,22 @@ const LandingPage = () => {
                 <div className="container">
                     <div className="contact__card">
                         <div className="contact__content">
-                            <h2 className="contact__title">¿Listo para Transformar el Aprendizaje?</h2>
+                            <h2 className="contact__title">Ready to Transform Learning?</h2>
                             <p className="contact__description">
-                                Únete a miles de estudiantes y educadores que ya están mejorando
-                                su concentración con AuLock.
+                                Join thousands of students and educators who are already elevating their focus with AuLock.
                             </p>
 
                             <form className="contact__form" id="contactForm" onSubmit={(e) => { e.preventDefault(); setIsModalOpen(true); }}>
-                                {/* Simplified form that just opens modal on submit/click */}
                                 <div className="form-row">
                                     <div className="form-group">
-                                        <input type="text" placeholder="Nombre completo" readOnly />
+                                        <input type="text" placeholder="Full Name" readOnly />
                                     </div>
                                     <div className="form-group">
-                                        <input type="email" placeholder="Email" readOnly />
+                                        <input type="email" placeholder="Institutional Email" readOnly />
                                     </div>
                                 </div>
                                 <button type="button" className="btn btn-primary btn-full" onClick={() => setIsModalOpen(true)}>
-                                    <span>Solicitar Demostración</span>
+                                    <span>Request Institutional Demo</span>
                                     <svg className="btn-icon" viewBox="0 0 24 24" fill="none">
                                         <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2"
                                             strokeLinecap="round" strokeLinejoin="round" />
@@ -934,8 +924,8 @@ const LandingPage = () => {
                                     <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" />
                                 </svg>
                                 <div>
-                                    <div className="info-label">Ubicación</div>
-                                    <div className="info-value">Concepción, Chile (Cobertura Nacional)</div>
+                                    <div className="info-label">Location</div>
+                                    <div className="info-value">Concepción, Chile (Global Coverage)</div>
                                 </div>
                             </div>
 
@@ -980,37 +970,37 @@ const LandingPage = () => {
                                 </svg>
                                 <span className="logo-text">Au<span className="logo-accent">Lock</span></span>
                             </div>
-                            <p className="footer__tagline">Transformando el aprendizaje a través de la concentración verificada.</p>
+                            <p className="footer__tagline">Transforming learning through verified concentration.</p>
                         </div>
 
                         <div className="footer__links">
                             <div className="footer__column">
-                                <h4>Producto</h4>
-                                <a href="#solucion">Características</a>
-                                <a href="#ciencia">Ciencia</a>
-                                <a href="#">Precios</a>
+                                <h4>Product</h4>
+                                <a href="#solucion">Features</a>
+                                <a href="#ciencia">Science</a>
+                                <a href="#">Pricing</a>
                                 <a href="#">FAQ</a>
                             </div>
 
                             <div className="footer__column">
-                                <h4>Empresa</h4>
-                                <a href="#">Sobre Nosotros</a>
+                                <h4>Company</h4>
+                                <a href="#nosotros">About Us</a>
                                 <a href="#">Blog</a>
-                                <a href="#">Carreras</a>
-                                <a href="#contacto">Contacto</a>
+                                <a href="#">Careers</a>
+                                <a href="#contacto">Contact</a>
                             </div>
 
                             <div className="footer__column">
                                 <h4>Legal</h4>
-                                <a href="#">Privacidad</a>
-                                <a href="#">Términos</a>
+                                <a href="#">Privacy</a>
+                                <a href="#">Terms</a>
                                 <a href="#">Cookies</a>
                             </div>
                         </div>
                     </div>
 
                     <div className="footer__bottom">
-                        <p>&copy; 2024 AuLock. Todos los derechos reservados.</p>
+                        <p>&copy; 2026 AuLock. All rights reserved.</p>
                     </div>
                 </div>
             </footer>
@@ -1024,86 +1014,64 @@ const LandingPage = () => {
                         </svg>
                     </button>
                     <div className="modal-content">
-                        <h2 className="modal-title">Solicitar Información</h2>
-                        <p className="modal-subtitle">Déjanos tus datos y te contactaremos a la brevedad.</p>
+                        <h2 className="modal-title">Request Information</h2>
+                        <p className="modal-subtitle">Leave us your contact details and our team will reach out promptly.</p>
 
                         <form className="contact__form" id="modalForm" onSubmit={handleModalSubmit}>
-                            {/* 1. Identificación */}
                             <div className="form-group">
-                                <label htmlFor="modalName">Nombre Completo *</label>
-                                <input type="text" id="modalName" name="name" required placeholder="Ej: Juan Pérez" value={modalForm.name} onChange={handleInputChange} />
+                                <label htmlFor="modalName">Full Name *</label>
+                                <input type="text" id="modalName" name="name" required placeholder="e.g. Sarah Jenkins" value={modalForm.name} onChange={handleInputChange} />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label htmlFor="modalEmail">Correo Institucional *</label>
-                                    <input type="email" id="modalEmail" name="email" required placeholder="nombre@institucion.cl" value={modalForm.email} onChange={handleInputChange} />
+                                    <label htmlFor="modalEmail">Institutional Email *</label>
+                                    <input type="email" id="modalEmail" name="email" required placeholder="name@school.edu" value={modalForm.email} onChange={handleInputChange} />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="modalPhone">Teléfono de Contacto *</label>
-                                    <input type="tel" id="modalPhone" name="phone" required placeholder="+56 9 XXXXXXXX" value={modalForm.phone} onChange={handleInputChange} />
+                                    <label htmlFor="modalPhone">Contact Phone *</label>
+                                    <input type="tel" id="modalPhone" name="phone" required placeholder="+1 555 123 4567" value={modalForm.phone} onChange={handleInputChange} />
                                 </div>
                             </div>
 
-                            {/* 2. Información Geográfica */}
                             <div className="form-group">
-                                <label htmlFor="modalRegion">Región *</label>
-                                <select id="modalRegion" name="region" required value={modalForm.region} onChange={handleInputChange}>
-                                    <option value="">Seleccione una Región</option>
-                                    <option value="Arica y Parinacota">Arica y Parinacota</option>
-                                    <option value="Tarapacá">Tarapacá</option>
-                                    <option value="Antofagasta">Antofagasta</option>
-                                    <option value="Atacama">Atacama</option>
-                                    <option value="Coquimbo">Coquimbo</option>
-                                    <option value="Valparaíso">Valparaíso</option>
-                                    <option value="Metropolitana">Metropolitana</option>
-                                    <option value="O'Higgins">O'Higgins</option>
-                                    <option value="Maule">Maule</option>
-                                    <option value="Ñuble">Ñuble</option>
-                                    <option value="Biobío">Biobío</option>
-                                    <option value="Araucanía">Araucanía</option>
-                                    <option value="Los Ríos">Los Ríos</option>
-                                    <option value="Los Lagos">Los Lagos</option>
-                                    <option value="Aysén">Aysén</option>
-                                    <option value="Magallanes">Magallanes</option>
-                                </select>
+                                <label htmlFor="modalRegion">Region / State *</label>
+                                <input type="text" id="modalRegion" name="region" required placeholder="State / Province / Region" value={modalForm.region} onChange={handleInputChange} />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label htmlFor="modalCity">Ciudad *</label>
-                                    <input type="text" id="modalCity" name="city" required placeholder="Ej: Concepción" value={modalForm.city} onChange={handleInputChange} />
+                                    <label htmlFor="modalCity">City *</label>
+                                    <input type="text" id="modalCity" name="city" required placeholder="e.g. Concepción" value={modalForm.city} onChange={handleInputChange} />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="modalAddress">Dirección de la Entidad *</label>
-                                    <input type="text" id="modalAddress" name="address" required placeholder="Calle y Número" value={modalForm.address} onChange={handleInputChange} />
+                                    <label htmlFor="modalAddress">Entity Address *</label>
+                                    <input type="text" id="modalAddress" name="address" required placeholder="Street Name and Number" value={modalForm.address} onChange={handleInputChange} />
                                 </div>
                             </div>
 
-                            {/* 3. Caracterización de la Entidad */}
                             <div className="form-group">
-                                <label htmlFor="modalInstitutionType">Tipo de Institución *</label>
+                                <label htmlFor="modalInstitutionType">Institution Type *</label>
                                 <select id="modalInstitutionType" name="institutionType" required value={modalForm.institutionType} onChange={handleInputChange}>
-                                    <option value="">Seleccione Tipo</option>
-                                    <option value="Colegio Municipal / SLEP">Colegio Municipal / SLEP</option>
-                                    <option value="Colegio Particular Subvencionado">Colegio Particular Subvencionado</option>
-                                    <option value="Colegio Particular Pagado">Colegio Particular Pagado</option>
-                                    <option value="DAEM / Corporación Municipal">DAEM / Corporación Municipal</option>
-                                    <option value="Otra entidad">Otra entidad</option>
+                                    <option value="">Select Type</option>
+                                    <option value="Public School / District">Public School / District</option>
+                                    <option value="Charter / Subsidized School">Charter / Subsidized School</option>
+                                    <option value="Private K-12 Academy">Private K-12 Academy</option>
+                                    <option value="Educational Board / Ministry">Educational Board / Ministry</option>
+                                    <option value="Higher Education / University">Higher Education / University</option>
                                 </select>
                             </div>
 
-                            {/* 4. Mensaje Adicional */}
                             <div className="form-group">
-                                <label htmlFor="modalMessage">Comentarios Adicionales (Opcional)</label>
-                                <textarea id="modalMessage" name="message" rows="3" placeholder="¿Alguna duda específica?" value={modalForm.message} onChange={handleInputChange}></textarea>
+                                <label htmlFor="modalMessage">Additional Comments (Optional)</label>
+                                <textarea id="modalMessage" name="message" rows="3" placeholder="Any specific requirements or questions?" value={modalForm.message} onChange={handleInputChange}></textarea>
                             </div>
 
                             <button type="submit" className="btn btn-primary btn-full">
-                                Enviar Solicitud
+                                Submit Request
                             </button>
                             <p className="form-note">
-                                Al enviar, sus datos serán recibidos por nuestro equipo comercial.
+                                Upon submission, your request will be assigned to an institutional specialist.
                             </p>
                         </form>
                     </div>
