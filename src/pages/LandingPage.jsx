@@ -126,27 +126,24 @@ const LandingPage = () => {
                                 <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" strokeWidth="2"
                                     strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            <span>Tecnología NFC Innovadora</span>
+                            <span>Tecnología NFC & Ecosistema Google Workspace</span>
                         </div>
 
                         <h1 className="hero__title">
-                            <span className="title-line">AuLock: Redefine la</span>
-                            <span className="title-line title-gradient">Concentración.</span>
-                            <span className="title-line">Transforma el Aprendizaje.</span>
+                            <span className="title-line">AuLock: Transformando el</span>
+                            <span className="title-line title-gradient">Enfoque en Éxito Académico</span>
                         </h1>
 
                         <p className="hero__description">
-                            La única plataforma que utiliza tecnología NFC para verificar la concentración,
-                            optimizando el rendimiento académico mediante bloques de estudio enfocados.
+                            En la era de la distracción digital, AuLock llega para equilibrar la tecnología con la disciplina. No estamos aquí para prohibir el uso de dispositivos, sino para convertirlos en herramientas de alta productividad y aprendizaje profundo.
                         </p>
 
                         <div className="hero__cta">
-                            <button className="btn btn-primary" id="ctaButton" onClick={() => setIsModalOpen(true)}>
-                                <span>Solicitar más información</span>
-                                <svg className="btn-icon" viewBox="0 0 24 24" fill="none">
-                                    <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" strokeWidth="2"
-                                        strokeLinecap="round" strokeLinejoin="round" />
+                            <button className="btn btn-primary" id="ctaButton" onClick={() => navigate('/login')}>
+                                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/>
                                 </svg>
+                                <span>Conectar con Google Classroom</span>
                             </button>
                             <a href="https://youtube.com/shorts/" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
                                 <svg className="btn-icon-left" viewBox="0 0 24 24" fill="none">
@@ -205,15 +202,171 @@ const LandingPage = () => {
                 <FounderStoryBanner />
             </div>
 
-            {/* Product Showcase Section */}
-            <section className="section product-showcase">
+            {/* SECTION 1: ¿POR QUÉ ELEGIR AULOCK? (CARDS SECTION) */}
+            <section className="section solution" id="solucion">
                 <div className="container">
-                    <div className="showcase-grid">
-                        <div className="showcase-item">
-                            <img src="/images/product-specs.jpg" alt="Especificaciones AuLock" className="showcase-image" />
+                    <div className="section__header">
+                        <span className="section__tag">🌟 ¿Por qué elegir AuLock?</span>
+                        <h2 className="section__title">Tres Pilares que Redefinen el Aprendizaje</h2>
+                        <p className="section__description">
+                            Diseñado específicamente para instituciones educativas que buscan disciplina sin privación y automatización transparente.
+                        </p>
+                    </div>
+
+                    <div className="features-grid">
+                        {/* CARD 1: ENFOQUE GAMIFICADO */}
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <span className="text-2xl">🏆</span>
+                            </div>
+                            <h3 className="feature-title">Enfoque Gamificado</h3>
+                            <p className="feature-description">
+                                Transformamos el control de asistencia y atención en un juego motivador. Los alumnos mantienen su "puntuación de enfoque" (100 PS) y ganan beneficios semanales por su constancia.
+                            </p>
                         </div>
-                        <div className="showcase-item">
-                            <img src="/images/study-table.jpg" alt="Estudiantes concentrados con AuLock" className="showcase-image" />
+
+                        {/* CARD 2: INTEGRACIÓN TOTAL GOOGLE */}
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <span className="text-2xl">🌐</span>
+                            </div>
+                            <h3 className="feature-title">Integración Total con Google</h3>
+                            <p className="feature-description">
+                                AuLock vive dentro de tu ecosistema escolar. Sincronizamos tus clases de Google Classroom, tus horarios de Google Calendar y generamos reportes automáticos en PDF en Google Drive.
+                            </p>
+                        </div>
+
+                        {/* CARD 3: IA SOCRÁTICA */}
+                        <div className="feature-card">
+                            <div className="feature-icon">
+                                <span className="text-2xl">🤖</span>
+                            </div>
+                            <h3 className="feature-title">Inteligencia Artificial Socrática</h3>
+                            <p className="feature-description">
+                                Nuestro motor de IA no da respuestas fáciles; guía al estudiante mediante el método socrático, estimulando el razonamiento profundo y el pensamiento crítico.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECTION 2: MÓDULOS DESTACADOS (TEASISTO & MOTOR DE ENFOQUE ACTIVO) */}
+            <section className="section data-intelligence bg-slate-900/60 border-y border-slate-800">
+                <div className="container space-y-12">
+                    <div className="section__header">
+                        <span className="section__tag">🚀 Módulos Destacados</span>
+                        <h2 className="section__title">Tutoría Inteligente & Supervisión No Invasiva</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* MÓDULO TEASISTO */}
+                        <div className="bg-slate-950 p-8 rounded-3xl border border-cyan-500/30 space-y-4 shadow-xl">
+                            <div className="flex items-center space-x-3">
+                                <span className="text-3xl">🤖</span>
+                                <h3 className="text-xl font-bold font-orbitron text-white">TeAsisto: Tu Compañero de Aprendizaje</h3>
+                            </div>
+                            <p className="text-sm text-slate-300 leading-relaxed">
+                                El módulo TeAsisto es nuestro tutor inteligente impulsado por IA. Funciona como un apoyo constante para el alumno durante la clase:
+                            </p>
+                            <ul className="space-y-2 text-xs text-slate-300 font-mono">
+                                <li className="flex items-start space-x-2">
+                                    <span className="text-cyan-400 font-bold">✓</span>
+                                    <span><strong>Apoyo proactivo:</strong> Resuelve dudas conceptuales sin dar la respuesta final.</span>
+                                </li>
+                                <li className="flex items-start space-x-2">
+                                    <span className="text-cyan-400 font-bold">✓</span>
+                                    <span><strong>Personalización:</strong> Se adapta al ritmo y perfil de cada estudiante.</span>
+                                </li>
+                                <li className="flex items-start space-x-2">
+                                    <span className="text-cyan-400 font-bold">✓</span>
+                                    <span><strong>Conexión en tiempo real:</strong> El profesor monitorea interacciones para saber en qué conceptos están fallando los alumnos.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* MÓDULO MOTOR DE ENFOQUE ACTIVO */}
+                        <div className="bg-slate-950 p-8 rounded-3xl border border-emerald-500/30 space-y-4 shadow-xl">
+                            <div className="flex items-center space-x-3">
+                                <span className="text-3xl">🛡️</span>
+                                <h3 className="text-xl font-bold font-orbitron text-white">Motor de Enfoque Activo</h3>
+                            </div>
+                            <p className="text-sm text-slate-300 leading-relaxed">
+                                Detectamos automáticamente cambios de pantalla o distracciones mediante el <strong>Page Visibility API</strong>. Esto permite al profesor tener una visión real de quién está siguiendo la clase y quién necesita apoyo, fomentando una cultura de responsabilidad digital sin necesidad de vigilancia invasiva.
+                            </p>
+                            <div className="p-4 bg-emerald-950/60 border border-emerald-800 rounded-2xl text-xs text-emerald-200 font-mono">
+                                📈 <strong>Lógica Transparente:</strong> Inicia en 100 PS. La salida de pantalla descuenta 3 puntos y muestra un aviso en vivo; la participación correcta en preguntas del profesor recupera +2 puntos.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECTION 3: BENEFICIOS INSTITucionales */}
+            <section className="section bg-slate-950">
+                <div className="container space-y-8">
+                    <div className="section__header">
+                        <span className="section__tag">📊 Impacto Educativo</span>
+                        <h2 className="section__title">Lo que AuLock puede hacer por tu colegio</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
+                            <span className="text-2xl block">📵</span>
+                            <h4 className="font-bold text-white text-sm">Reducir Distracciones</h4>
+                            <p className="text-xs text-slate-400">Elimina el uso inapropiado del teléfono en el aula virtual y presencial.</p>
+                        </div>
+                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
+                            <span className="text-2xl block">⚡</span>
+                            <h4 className="font-bold text-white text-sm">Automatizar Gestión</h4>
+                            <p className="text-xs text-slate-400">Automatiza toma de asistencia y reportes ahorrando horas de trabajo docente.</p>
+                        </div>
+                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
+                            <span className="text-2xl block">📈</span>
+                            <h4 className="font-bold text-white text-sm">Métricas Reales</h4>
+                            <p className="text-xs text-slate-400">Provee datos precisos sobre el compromiso estudiantil con tableros intuitivos.</p>
+                        </div>
+                        <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-2">
+                            <span className="text-2xl block">📁</span>
+                            <h4 className="font-bold text-white text-sm">Evidencias en Drive</h4>
+                            <p className="text-xs text-slate-400">Genera informes PDF automáticos en Google Drive para el portafolio docente.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SECTION 4: COMPROMISO DE PRIVACIDAD & SECURITY BADGE */}
+            <section className="section bg-slate-900/80 border-t border-slate-800 py-12">
+                <div className="container max-w-4xl mx-auto space-y-6 text-center">
+                    <span className="text-xs font-bold text-emerald-400 bg-emerald-950 border border-emerald-800 px-3 py-1 rounded-full uppercase tracking-wider">
+                        🔒 COMPROMISO DE PRIVACIDAD
+                    </span>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-white font-orbitron">
+                        Tu Data es Sagrada
+                    </h2>
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                        Sabemos que la información académica es sensible. En AuLock, la privacidad no es una opción, es nuestro pilar fundamental:
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left text-xs font-mono pt-4">
+                        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                            <strong className="text-emerald-400 block text-sm">1. Propiedad del Colegio</strong>
+                            <p className="text-slate-400">Toda la información generada (datos de alumnos, notas, métricas) es exclusiva del colegio y del estudiante.</p>
+                        </div>
+                        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                            <strong className="text-emerald-400 block text-sm">2. Cero Comercio de Datos</strong>
+                            <p className="text-slate-400">AuLock jamás vende, comparte ni comercializa información personal con fines publicitarios.</p>
+                        </div>
+                        <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                            <strong className="text-emerald-400 block text-sm">3. Seguridad de Grado Bancario</strong>
+                            <p className="text-slate-400">Utilizamos encriptación de estándar bancario en Supabase para proteger todos tus datos.</p>
+                        </div>
+                    </div>
+
+                    {/* SECURITY BADGE AT BOTTOM */}
+                    <div className="pt-6">
+                        <div className="inline-flex items-center space-x-3 bg-emerald-950/90 border-2 border-emerald-500/80 px-6 py-3 rounded-2xl shadow-[0_0_25px_rgba(52,211,153,0.4)] text-xs md:text-sm font-bold text-emerald-300 font-mono">
+                            <span className="text-lg">🛡️</span>
+                            <span>Datos 100% privados y protegidos por Encriptación Institucional Supabase & Google Suite Security</span>
                         </div>
                     </div>
                 </div>
