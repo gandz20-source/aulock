@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 
 export default function AiTutorInteractiveWhiteboard() {
   const [selectedTutor, setSelectedTutor] = useState({
-    name: 'Tecnología Ada',
-    role: 'Naturaleza de la Ciencia (STEM)',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
-    welcome: '¡Hola! ¿Qué concepto científico o matemático exploramos hoy en la pizarra?'
+    name: 'Tutor Tecnología & Código',
+    role: 'Ciencia de Datos & Computación (STEM)',
+    avatar: '💻',
+    welcome: '¡Hola! ¿Qué concepto científico, informático o matemático exploramos hoy en la pizarra?'
   });
 
   const [activePersona, setActivePersona] = useState('Videojuegos');
@@ -25,10 +25,10 @@ export default function AiTutorInteractiveWhiteboard() {
   ]);
 
   const tutorsList = [
-    { name: 'Tecnología Ada', role: 'STEM', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150', welcome: '¡Hola! Pregúntame tus dudas de ciencia o código.' },
-    { name: 'Profesor Átomo', role: 'Física y Química', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', welcome: 'Resolvamos ecuaciones y fórmulas químicas en la pizarra.' },
-    { name: 'Dra. Flora', role: 'Ciencias de la Vida', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', welcome: 'Analicemos procesos biológicos paso a paso.' },
-    { name: 'GeoMente', role: 'Tierra y Universo', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', welcome: 'Calculemos distancias cósmicas y vectores.' },
+    { name: 'Tutor Tecnología & Código', role: 'STEM', avatar: '💻', welcome: '¡Hola! Pregúntame tus dudas de ciencia, algoritmia o código.' },
+    { name: 'Tutor Física & Química', role: 'Física y Química', avatar: '⚙️', welcome: 'Resolvamos ecuaciones y fórmulas químicas en la pizarra.' },
+    { name: 'Tutor Biología & Ciencias', role: 'Ciencias de la Vida', avatar: '🧬', welcome: 'Analicemos procesos biológicos y ecológicos paso a paso.' },
+    { name: 'Tutor Geografía & Astrofísica', role: 'Tierra y Universo', avatar: '🌍', welcome: 'Calculemos distancias cósmicas, geografía y vectores.' },
   ];
 
   const personas = ['Fútbol', 'Videojuegos', 'Música y Trap', 'Cocina', 'Anime', 'Fórmula 1'];

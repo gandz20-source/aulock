@@ -48,7 +48,7 @@ const SUBJECT_PERFORMANCE = [
         grade: '6.85', 
         level: 'Sobresaliente', 
         isStrong: true,
-        feedback: '🎉 ¡Excelente trabajo! Mantienes una gran fluidez verbal e interpretación de textos. Continúa practicando conversación técnica con Ada.'
+        feedback: '🎉 ¡Excelente trabajo! Mantienes una gran fluidez verbal e interpretación de textos. Continúa practicando conversación técnica con tu Tutor de Lenguaje e Inglés.'
     },
     { 
         subject: 'Historia & Formación Ciudadana', 
@@ -62,7 +62,7 @@ const SUBJECT_PERFORMANCE = [
         grade: '4.38', 
         level: 'Área de Mejora', 
         isWeak: true,
-        feedback: '💪 ¡No te desanimes! Un tropiezo en Biología Orgánica (4.38) no define tu potencial. Es solo una oportunidad para aprender algo nuevo. Tu tutora Dra. Curie y tu compañero Mateo Rojas están listos para apoyarte paso a paso.'
+        feedback: '💪 ¡No te desanimes! Un tropiezo en Biología Orgánica (4.38) no define tu potencial. Es solo una oportunidad para aprender algo nuevo. Tu Tutor de Ciencias y tu compañero Mateo Rojas están listos para apoyarte paso a paso.'
     }
 ];
 

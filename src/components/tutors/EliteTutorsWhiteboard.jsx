@@ -14,10 +14,10 @@ REGLAS ESTRICTAS DE RESPUESTA:
 
 export default function EliteTutorsWhiteboard() {
   const specialists = [
-    { name: 'Dra. Elena Valdés', subject: 'Matemáticas & Cálculo', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', bio: 'Especialista en álgebra, geometría y resolución analítica de problemas.' },
-    { name: 'Prof. Carlos Rivas', subject: 'Física y Mecánica', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', bio: 'Dinámica, vectores, cinemática y leyes de Newton.' },
-    { name: 'Dra. Sofía Benítez', subject: 'Química & Estructura', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', bio: 'Estequiometría, enlaces químicos y reacciones complejas.' },
-    { name: 'Prof. Matías Soto', subject: 'Lógica & Programación', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', bio: 'Algoritmos, estructuras de datos y pensamiento computacional.' },
+    { name: 'Tutor Matemática', subject: 'Matemáticas & Cálculo', avatar: '📐', bio: 'Especialista en álgebra, geometría, cálculo y resolución analítica de problemas.' },
+    { name: 'Tutor Física', subject: 'Física & Mecánica', avatar: '⚙️', bio: 'Especialista en dinámica, vectores, cinemática, energía y física aplicada.' },
+    { name: 'Tutor Química', subject: 'Química & Estructura Molecular', avatar: '⚗️', bio: 'Especialista en estequiometría, enlaces químicos, soluciones y reacciones.' },
+    { name: 'Tutor Lógica & Programación', subject: 'Lógica & Computación', avatar: '💻', bio: 'Especialista en algoritmos, estructuras de datos y pensamiento computacional.' },
   ];
 
   const [selectedSpecialist, setSelectedSpecialist] = useState(specialists[0]);

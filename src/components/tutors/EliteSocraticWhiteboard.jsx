@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 
 export default function EliteSocraticWhiteboardFixed() {
   const specialists = [
-    { name: 'Prof. Carlos Rivas', subject: 'Física y Mecánica', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', bio: 'Especialista en dinámica, cinemática y leyes de Newton.' },
-    { name: 'Dra. Elena Valdés', subject: 'Matemáticas & Cálculo', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', bio: 'Álgebra y Cálculo Superior.' },
-    { name: 'Dra. Sofía Benítez', subject: 'Química & Estructura', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', bio: 'Estequiometría y Reacciones.' },
-    { name: 'Prof. Matías Soto', subject: 'Lógica & Programación', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', bio: 'Algoritmos y Estructuras.' },
+    { name: 'Tutor Física', subject: 'Física y Mecánica', avatar: '⚙️', bio: 'Especialista en dinámica, cinemática y leyes de Newton.' },
+    { name: 'Tutor Matemática', subject: 'Matemáticas & Cálculo', avatar: '📐', bio: 'Álgebra, Geometría y Cálculo Superior.' },
+    { name: 'Tutor Química', subject: 'Química & Estructura', avatar: '⚗️', bio: 'Estequiometría, Soluciones y Reacciones.' },
+    { name: 'Tutor Lógica & Programación', subject: 'Lógica & Computación', avatar: '💻', bio: 'Algoritmos, Estructuras y Pensamiento Lógico.' },
   ];
 
   const [selectedSpecialist, setSelectedSpecialist] = useState(specialists[0]);
