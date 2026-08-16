@@ -7,7 +7,6 @@ import { AULOCK_TUTORS, MINEDUC_OA_CATALOG } from '../data/AuLockTutorsData';
 import { MINEDUC_CONVIVENCIA_RESOURCES, WEEKLY_CLASSROOM_AGREEMENTS } from '../data/AuLockMineducConvivenciaDataset';
 import { useFocusMode } from '../context/FocusModeProvider';
 import { SchoolCoexistenceCapsule } from '../components/SchoolCoexistenceCapsule';
-import FounderStoryBanner from '../components/FounderStoryBanner';
 import AfterIALoreCard from '../components/AfterIALoreCard';
 import AfterIAWorld from '../components/afteria/AfterIAWorld';
 import AfterIAPortal from '../components/afteria/AfterIAPortal';
@@ -534,9 +533,6 @@ const StudentWorkspace = () => {
                 {/* ==================== PÁGINA 1: MI PERFIL & BIENVENIDA (ESTILO EXACTO REFERENCIA) ==================== */}
                 {activeTab === 'profile' && (
                     <div className="space-y-8 animate-in fade-in duration-300">
-                        {/* BANNER HISTORIA DEL FUNDADOR & PARTICIPACIÓN EN XPRIZE */}
-                        <FounderStoryBanner />
-                        
                         {/* LAYOUT 3 COLUMNAS: SEAMOS COMUNIDAD | MARCO CIBERNÉTICO CENTRAL | ANALÍTICA ACADÉMICA */}
                         <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto,1fr] gap-6 items-center">
                             
