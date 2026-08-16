@@ -25,10 +25,30 @@ export default function AiTutorInteractiveWhiteboard() {
   ]);
 
   const tutorsList = [
-    { name: 'Tutor Tecnología & Código', role: 'STEM', avatar: '💻', welcome: '¡Hola! Pregúntame tus dudas de ciencia, algoritmia o código.' },
-    { name: 'Tutor Física & Química', role: 'Física y Química', avatar: '⚙️', welcome: 'Resolvamos ecuaciones y fórmulas químicas en la pizarra.' },
-    { name: 'Tutor Biología & Ciencias', role: 'Ciencias de la Vida', avatar: '🧬', welcome: 'Analicemos procesos biológicos y ecológicos paso a paso.' },
-    { name: 'Tutor Geografía & Astrofísica', role: 'Tierra y Universo', avatar: '🌍', welcome: 'Calculemos distancias cósmicas, geografía y vectores.' },
+    { 
+      name: 'Tutor Tecnología & Código', 
+      role: 'STEM & Computación', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%2306B6D4' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23164E63' stroke='%2322D3EE' stroke-width='2'/><text x='60' y='48' font-family='monospace, sans-serif' font-weight='bold' font-size='24' fill='%2322D3EE' text-anchor='middle'>%3C/%3E</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='18' fill='%23A5F3FC' text-anchor='middle'>1 0 1 0 1</text></svg>", 
+      welcome: '¡Hola! Pregúntame tus dudas de ciencia, algoritmia o código.' 
+    },
+    { 
+      name: 'Tutor Física & Química', 
+      role: 'Física y Química', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%2310B981' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23064E3B' stroke='%2334D399' stroke-width='2'/><text x='60' y='48' font-family='sans-serif' font-weight='bold' font-size='18' fill='%2334D399' text-anchor='middle'>H%E2%82%82O %E2%80%A2 CO%E2%82%82</text><text x='60' y='78' font-family='sans-serif' font-weight='900' font-size='22' fill='%23A7F3D0' text-anchor='middle'>%E2%9A%97%EF%B8%8F NaCl</text></svg>", 
+      welcome: 'Resolvamos ecuaciones y fórmulas químicas en la pizarra.' 
+    },
+    { 
+      name: 'Tutor Biología & Ciencias', 
+      role: 'Ciencias de la Vida', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%23059669' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23065F46' stroke='%236EE7B7' stroke-width='2'/><text x='60' y='48' font-family='sans-serif' font-weight='bold' font-size='20' fill='%236EE7B7' text-anchor='middle'>%F0%9F%A8%AC DNA</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='18' fill='%23FCD34D' text-anchor='middle'>A-T G-C</text></svg>", 
+      welcome: 'Analicemos procesos biológicos y ecológicos paso a paso.' 
+    },
+    { 
+      name: 'Tutor Matemática & Cálculo', 
+      role: 'Números & Cálculo', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%233B82F6' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%231E293B' stroke='%2360A5FA' stroke-width='2'/><text x='60' y='48' font-family='monospace, sans-serif' font-weight='bold' font-size='20' fill='%2360A5FA' text-anchor='middle'>%E2%88%91 %E2%88%9A%CF%80</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='24' fill='%23F59E0B' text-anchor='middle'>1 2 3</text></svg>", 
+      welcome: 'Calculemos fórmulas, números, ecuaciones y vectores.' 
+    },
   ];
 
   const personas = ['Fútbol', 'Videojuegos', 'Música y Trap', 'Cocina', 'Anime', 'Fórmula 1'];

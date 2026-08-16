@@ -3,13 +3,21 @@
  * Official MINEDUC Chile Curriculum (1° - 6° Básico) AI Tutors & OA Catalogue Dataset
  */
 
+export const TUTOR_SUBJECT_AVATARS = {
+    tech: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%2306B6D4' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23164E63' stroke='%2322D3EE' stroke-width='2'/><text x='60' y='48' font-family='monospace, sans-serif' font-weight='bold' font-size='24' fill='%2322D3EE' text-anchor='middle'>%3C/%3E</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='18' fill='%23A5F3FC' text-anchor='middle'>1 0 1 0 1</text></svg>",
+    chemistry: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%2310B981' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23064E3B' stroke='%2334D399' stroke-width='2'/><text x='60' y='48' font-family='sans-serif' font-weight='bold' font-size='18' fill='%2334D399' text-anchor='middle'>H%E2%82%82O %E2%80%A2 CO%E2%82%82</text><text x='60' y='78' font-family='sans-serif' font-weight='900' font-size='22' fill='%23A7F3D0' text-anchor='middle'>%E2%9A%97%EF%B8%8F NaCl</text></svg>",
+    biology: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%23059669' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23065F46' stroke='%236EE7B7' stroke-width='2'/><text x='60' y='48' font-family='sans-serif' font-weight='bold' font-size='20' fill='%236EE7B7' text-anchor='middle'>%F0%9F%A9%AC DNA</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='18' fill='%23FCD34D' text-anchor='middle'>A-T G-C</text></svg>",
+    earth: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%2338BDF8' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23075985' stroke='%237DD3FC' stroke-width='2'/><text x='60' y='48' font-family='sans-serif' font-weight='bold' font-size='22' fill='%237DD3FC' text-anchor='middle'>%F0%9F%8D%8D %F0%9F%8C%8D</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='16' fill='%23BAE6FD' text-anchor='middle'>TIERRA %E2%80%A2 N2</text></svg>",
+    steam: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%23A855F7' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23581C87' stroke='%23C084FC' stroke-width='2'/><text x='60' y='48' font-family='sans-serif' font-weight='bold' font-size='22' fill='%23C084FC' text-anchor='middle'>%F0%9F%8C%A8%EF%B8%8F STEAM</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='16' fill='%23F472B6' text-anchor='middle'>ART %E2%80%A2 CODE</text></svg>"
+};
+
 export const AULOCK_TUTORS = [
     {
         id: "ada_tech",
         name: "Tutor Habilidades Científicas (STEM)",
         specialty: "Habilidades Científicas (STEM)",
         eje_mineduc: "Naturaleza de la Ciencia",
-        avatar_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80",
+        avatar_url: TUTOR_SUBJECT_AVATARS.tech,
         color_accent: "blue",
         bg: "bg-blue-50",
         border: "border-blue-200",
@@ -23,7 +31,7 @@ export const AULOCK_TUTORS = [
         name: "Tutor Ciencias Físicas & Químicas",
         specialty: "Ciencias Físicas y Químicas",
         eje_mineduc: "Ciencias Físicas y Químicas",
-        avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80",
+        avatar_url: TUTOR_SUBJECT_AVATARS.chemistry,
         color_accent: "indigo",
         bg: "bg-indigo-50",
         border: "border-indigo-200",
@@ -37,7 +45,7 @@ export const AULOCK_TUTORS = [
         name: "Tutor Ciencias de la Vida & Biología",
         specialty: "Ciencias de la Vida",
         eje_mineduc: "Ciencias de la Vida",
-        avatar_url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80",
+        avatar_url: TUTOR_SUBJECT_AVATARS.biology,
         color_accent: "emerald",
         bg: "bg-emerald-50",
         border: "border-emerald-200",
@@ -51,7 +59,7 @@ export const AULOCK_TUTORS = [
         name: "Tutor Ciencias de la Tierra & Astronomía",
         specialty: "Tierra y Universo",
         eje_mineduc: "Ciencias de la Tierra y el Universo",
-        avatar_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80",
+        avatar_url: TUTOR_SUBJECT_AVATARS.earth,
         color_accent: "sky",
         bg: "bg-sky-50",
         border: "border-sky-200",
@@ -65,7 +73,7 @@ export const AULOCK_TUTORS = [
         name: "Tutor Integración & Artes (STEAM)",
         specialty: "Integración STEAM",
         eje_mineduc: "Artes & Creatividad Transversal",
-        avatar_url: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&auto=format&fit=crop&q=80",
+        avatar_url: TUTOR_SUBJECT_AVATARS.steam,
         color_accent: "purple",
         bg: "bg-purple-50",
         border: "border-purple-200",

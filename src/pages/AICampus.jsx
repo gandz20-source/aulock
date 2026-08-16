@@ -30,17 +30,25 @@ const AICampus = () => {
                             onClick={() => navigate(`/ai-chat/${key}`)}
                             className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md hover:border-blue-300 transition-all duration-300 text-left group"
                         >
-                            <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                                {assistant.avatar}
-                            </div>
+                            {assistant.avatar && assistant.avatar.startsWith('data:') ? (
+                                <img 
+                                    src={assistant.avatar} 
+                                    alt={assistant.name} 
+                                    className="w-14 h-14 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300 shadow-md border border-slate-200" 
+                                />
+                            ) : (
+                                <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    {assistant.avatar || assistant.icon || '📐'}
+                                </div>
+                            )}
                             <h3 className="text-xl font-bold text-slate-800 mb-1">{assistant.name}</h3>
                             <p className="text-sm text-blue-600 font-medium mb-2">{assistant.role}</p>
                             <p className="text-sm text-slate-500 line-clamp-2">
-                                {key === 'newton' && 'Ayuda con matemáticas y física.'}
-                                {key === 'curie' && 'Ciencia explicada fácil.'}
-                                {key === 'shakespeare' && 'Practice your English.'}
-                                {key === 'teapoyo' && 'Apoyo claro y estructurado.'}
-                                {key === 'guardian' && 'Consejería y apoyo emocional.'}
+                                {key === 'newton' && 'Resuelve ecuaciones, números, cálculo y física.'}
+                                {key === 'curie' && 'Explicación de química, moléculas y reacciones.'}
+                                {key === 'shakespeare' && 'Práctica de lenguaje, literatura e inglés.'}
+                                {key === 'teapoyo' && 'Apoyo directo, literal y estructurado.'}
+                                {key === 'guardian' && 'Orientación académica y bienestar escolar.'}
                             </p>
                         </button>
                     ))}

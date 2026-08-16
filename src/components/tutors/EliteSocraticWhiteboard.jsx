@@ -2,10 +2,30 @@ import React, { useState } from 'react';
 
 export default function EliteSocraticWhiteboardFixed() {
   const specialists = [
-    { name: 'Tutor Física', subject: 'Física y Mecánica', avatar: '⚙️', bio: 'Especialista en dinámica, cinemática y leyes de Newton.' },
-    { name: 'Tutor Matemática', subject: 'Matemáticas & Cálculo', avatar: '📐', bio: 'Álgebra, Geometría y Cálculo Superior.' },
-    { name: 'Tutor Química', subject: 'Química & Estructura', avatar: '⚗️', bio: 'Estequiometría, Soluciones y Reacciones.' },
-    { name: 'Tutor Lógica & Programación', subject: 'Lógica & Computación', avatar: '💻', bio: 'Algoritmos, Estructuras y Pensamiento Lógico.' },
+    { 
+      name: 'Tutor Física', 
+      subject: 'Física y Mecánica', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%238B5CF6' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23312E81' stroke='%23A78BFA' stroke-width='2'/><text x='60' y='48' font-family='monospace, sans-serif' font-weight='bold' font-size='18' fill='%23C4B5FD' text-anchor='middle'>E = mc%C2%B2</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='22' fill='%23F472B6' text-anchor='middle'>%E2%9A%9B%EF%B8%8F F=ma</text></svg>", 
+      bio: 'Especialista en dinámica, cinemática y leyes de Newton.' 
+    },
+    { 
+      name: 'Tutor Matemática', 
+      subject: 'Matemáticas & Cálculo', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%233B82F6' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%231E293B' stroke='%2360A5FA' stroke-width='2'/><text x='60' y='48' font-family='monospace, sans-serif' font-weight='bold' font-size='20' fill='%2360A5FA' text-anchor='middle'>%E2%88%91 %E2%88%9A%CF%80</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='24' fill='%23F59E0B' text-anchor='middle'>1 2 3</text></svg>", 
+      bio: 'Álgebra, Números, Geometría y Cálculo Superior.' 
+    },
+    { 
+      name: 'Tutor Química', 
+      subject: 'Química & Estructura', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%2310B981' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23064E3B' stroke='%2334D399' stroke-width='2'/><text x='60' y='48' font-family='sans-serif' font-weight='bold' font-size='18' fill='%2334D399' text-anchor='middle'>H%E2%82%82O %E2%80%A2 CO%E2%82%82</text><text x='60' y='78' font-family='sans-serif' font-weight='900' font-size='22' fill='%23A7F3D0' text-anchor='middle'>%E2%9A%97%EF%B8%8F NaCl</text></svg>", 
+      bio: 'Estequiometría, Soluciones y Reacciones Químicas.' 
+    },
+    { 
+      name: 'Tutor Lógica & Programación', 
+      subject: 'Lógica & Computación', 
+      avatar: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' rx='28' fill='%230F172A'/><rect x='4' y='4' width='112' height='112' rx='24' fill='none' stroke='%2306B6D4' stroke-width='3' opacity='0.6'/><circle cx='60' cy='60' r='46' fill='%23164E63' stroke='%2322D3EE' stroke-width='2'/><text x='60' y='48' font-family='monospace, sans-serif' font-weight='bold' font-size='24' fill='%2322D3EE' text-anchor='middle'>%3C/%3E</text><text x='60' y='78' font-family='monospace, sans-serif' font-weight='900' font-size='18' fill='%23A5F3FC' text-anchor='middle'>1 0 1 0 1</text></svg>", 
+      bio: 'Algoritmos, Estructuras de Datos y Pensamiento Lógico.' 
+    },
   ];
 
   const [selectedSpecialist, setSelectedSpecialist] = useState(specialists[0]);
