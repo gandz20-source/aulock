@@ -6,39 +6,39 @@ import {
 } from 'lucide-react';
 
 const DEFAULT_COURSE_ROSTER = [
-    { id: 'st-1', name: 'Juan Carlos Pérez', course: '4° Medio A', strengths: ['Matemáticas (7.0)', 'Idiomas (6.8)'], weaknesses: ['Biología Orgánica (4.3)'], role: 'Líder Lógico' },
-    { id: 'st-2', name: 'Mateo Rojas', course: '4° Medio A', strengths: ['Biología & Ciencias (6.8)'], weaknesses: ['Matemáticas Avanzadas (4.5)'], role: 'Tutor de Ciencias' },
-    { id: 'st-3', name: 'Sofía Martínez', course: '4° Medio A', strengths: ['Historia & Formación Ciudadana (6.9)'], weaknesses: ['Física Aplicada (4.8)'], role: 'Mentora de Humanidades' },
-    { id: 'st-4', name: 'Camila Silva', course: '4° Medio A', strengths: ['Lenguaje & Argumentación (6.9)'], weaknesses: ['Química (4.6)'], role: 'Líder Debate' },
-    { id: 'st-5', name: 'Lucas Fernández', course: '4° Medio A', strengths: ['Artes & Creatividad (6.9)'], weaknesses: ['Cálculo (4.4)'], role: 'Diseño' },
-    { id: 'st-6', name: 'Valentina Soto', course: '4° Medio A', strengths: ['Física & Química (6.7)'], weaknesses: ['Historia (4.5)'], role: 'Científica' },
-    { id: 'st-7', name: 'Diego Morales', course: '4° Medio A', strengths: ['Programación & Lógica (6.8)'], weaknesses: ['Lenguaje (4.6)'], role: 'Desarrollador' },
-    { id: 'st-8', name: 'Constanza Silva', course: '4° Medio A', strengths: ['Inglés Técnico (7.0)'], weaknesses: ['Álgebra (4.2)'], role: 'Lingüista' }
+    { id: 'st-1', name: 'Juan Carlos Pérez', course: 'Senior High A', strengths: ['Mathematics (7.0)', 'Languages (6.8)'], weaknesses: ['Organic Biology (4.3)'], role: 'Logic Lead' },
+    { id: 'st-2', name: 'Mateo Rojas', course: 'Senior High A', strengths: ['Biology & Sciences (6.8)'], weaknesses: ['Advanced Math (4.5)'], role: 'Science Tutor' },
+    { id: 'st-3', name: 'Sofía Martínez', course: 'Senior High A', strengths: ['History & Civics (6.9)'], weaknesses: ['Applied Physics (4.8)'], role: 'Humanities Mentor' },
+    { id: 'st-4', name: 'Camila Silva', course: 'Senior High A', strengths: ['Language & Debate (6.9)'], weaknesses: ['Chemistry (4.6)'], role: 'Debate Captain' },
+    { id: 'st-5', name: 'Lucas Fernández', course: 'Senior High A', strengths: ['Arts & Design (6.9)'], weaknesses: ['Calculus (4.4)'], role: 'Creative Design' },
+    { id: 'st-6', name: 'Valentina Soto', course: 'Senior High A', strengths: ['Physics & Chemistry (6.7)'], weaknesses: ['History (4.5)'], role: 'Science Researcher' },
+    { id: 'st-7', name: 'Diego Morales', course: 'Senior High A', strengths: ['Coding & Logic (6.8)'], weaknesses: ['Language (4.6)'], role: 'Software Dev' },
+    { id: 'st-8', name: 'Constanza Silva', course: 'Senior High A', strengths: ['Technical English (7.0)'], weaknesses: ['Algebra (4.2)'], role: 'Linguistics' }
 ];
 
 const DEFAULT_SQUADS = [
     {
         id: 'sq-1',
-        name: 'Squad Alfa STEM',
-        course: '4° Medio A',
-        specialty: 'Ciencias & Tecnología',
+        name: 'Squad Alpha STEM',
+        course: 'Senior High A',
+        specialty: 'Science & Technology',
         members: [
-            { id: 'st-1', name: 'Juan Carlos Pérez', role: 'Líder Lógico' },
-            { id: 'st-2', name: 'Mateo Rojas', role: 'Tutor de Ciencias' },
-            { id: 'st-3', name: 'Sofía Martínez', role: 'Mentora de Humanidades' }
+            { id: 'st-1', name: 'Juan Carlos Pérez', role: 'Logic Lead' },
+            { id: 'st-2', name: 'Mateo Rojas', role: 'Science Tutor' },
+            { id: 'st-3', name: 'Sofía Martínez', role: 'Humanities Mentor' }
         ],
         synergies: [
-            { student1: 'Juan Carlos Pérez', student2: 'Mateo Rojas', reason: 'Tutoría Cruzada: Juan Carlos apoya en Matemáticas y Mateo en Biología.' }
+            { student1: 'Juan Carlos Pérez', student2: 'Mateo Rojas', reason: 'Cross-Mentoring: Juan Carlos leads Math and Mateo leads Biology.' }
         ]
     },
     {
         id: 'sq-2',
-        name: 'Squad Beta Humanidades',
-        course: '4° Medio A',
-        specialty: 'Debate & Literatura',
+        name: 'Squad Beta Humanities',
+        course: 'Senior High A',
+        specialty: 'Debate & Literature',
         members: [
-            { id: 'st-4', name: 'Camila Silva', role: 'Líder Debate' },
-            { id: 'st-5', name: 'Lucas Fernández', role: 'Diseño' }
+            { id: 'st-4', name: 'Camila Silva', role: 'Debate Captain' },
+            { id: 'st-5', name: 'Lucas Fernández', role: 'Creative Design' }
         ],
         synergies: []
     }
@@ -52,8 +52,8 @@ export default function TeacherSquadManager() {
 
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newSquadName, setNewSquadName] = useState('');
-    const [newSquadCourse, setNewSquadCourse] = useState('4° Medio A');
-    const [newSquadSpecialty, setNewSquadSpecialty] = useState('STEM & PAES');
+    const [newSquadCourse, setNewSquadCourse] = useState('Senior High A');
+    const [newSquadSpecialty, setNewSquadSpecialty] = useState('STEM & AP Math');
 
     const [selectedStudentForSquad, setSelectedStudentForSquad] = useState({});
     const [customStudentName, setCustomStudentName] = useState({});
@@ -67,7 +67,7 @@ export default function TeacherSquadManager() {
     // Create New Squad
     const handleCreateSquad = (e) => {
         e.preventDefault();
-        if (!newSquadName.trim()) return alert("Por favor ingresa un nombre para el Squad.");
+        if (!newSquadName.trim()) return alert("Please enter a name for the Squad.");
 
         const newSq = {
             id: 'sq-' + Date.now(),
@@ -85,7 +85,7 @@ export default function TeacherSquadManager() {
 
     // Delete Squad
     const handleDeleteSquad = (squadId, squadName) => {
-        if (window.confirm(`¿Estás seguro de disolver el "${squadName}"?`)) {
+        if (window.confirm(`Are you sure you want to disband "${squadName}"?`)) {
             const updated = squads.filter(sq => sq.id !== squadId);
             saveSquads(updated);
         }
@@ -94,7 +94,7 @@ export default function TeacherSquadManager() {
     // Add Roster Student to Squad
     const handleAddRosterStudent = (squadId) => {
         const studentId = selectedStudentForSquad[squadId];
-        if (!studentId) return alert("Selecciona un alumno de la lista.");
+        if (!studentId) return alert("Select a student from the list.");
 
         const student = DEFAULT_COURSE_ROSTER.find(s => s.id === studentId);
         if (!student) return;
@@ -102,12 +102,12 @@ export default function TeacherSquadManager() {
         const updated = squads.map(sq => {
             if (sq.id === squadId) {
                 if (sq.members.some(m => m.id === student.id || m.name === student.name)) {
-                    alert(`${student.name} ya pertenece a este Squad.`);
+                    alert(`${student.name} is already a member of this Squad.`);
                     return sq;
                 }
                 return {
                     ...sq,
-                    members: [...sq.members, { id: student.id, name: student.name, role: student.role || 'Integrante' }]
+                    members: [...sq.members, { id: student.id, name: student.name, role: student.role || 'Member' }]
                 };
             }
             return sq;
@@ -120,17 +120,17 @@ export default function TeacherSquadManager() {
     // Add Custom Student Name to Squad
     const handleAddCustomStudent = (squadId) => {
         const name = customStudentName[squadId]?.trim();
-        if (!name) return alert("Escribe el nombre del alumno.");
+        if (!name) return alert("Type the student's name.");
 
         const updated = squads.map(sq => {
             if (sq.id === squadId) {
                 if (sq.members.some(m => m.name.toLowerCase() === name.toLowerCase())) {
-                    alert(`${name} ya pertenece a este Squad.`);
+                    alert(`${name} is already in this Squad.`);
                     return sq;
                 }
                 return {
                     ...sq,
-                    members: [...sq.members, { id: 'custom-' + Date.now(), name: name, role: 'Estudiante' }]
+                    members: [...sq.members, { id: 'custom-' + Date.now(), name: name, role: 'Student' }]
                 };
             }
             return sq;
@@ -158,7 +158,7 @@ export default function TeacherSquadManager() {
     const handleGenerateSynergy = (squadId) => {
         const squad = squads.find(sq => sq.id === squadId);
         if (!squad || squad.members.length < 2) {
-            return alert("Se necesitan al menos 2 estudiantes en el Squad para generar sinergia de pares.");
+            return alert("At least 2 students are required in the Squad to generate peer tutoring synergies.");
         }
 
         const m1 = squad.members[0].name;
@@ -167,7 +167,7 @@ export default function TeacherSquadManager() {
         const newSynergy = {
             student1: m1,
             student2: m2,
-            reason: `Vínculo de Mentoría: ${m1} lidera la resolución lógica y ${m2} complementa en desarrollo.`
+            reason: `Peer Mentoring Link: ${m1} leads logical resolution and ${m2} complements in project execution.`
         };
 
         const updated = squads.map(sq => {
@@ -191,10 +191,10 @@ export default function TeacherSquadManager() {
                     </div>
                     <div>
                         <h2 className="text-xl md:text-2xl font-orbitron font-black text-white tracking-wider">
-                            GESTIÓN & CONFORMACIÓN DE SQUADS DE AULA
+                            CLASSROOM SQUAD FORMATION & MANAGEMENT
                         </h2>
                         <p className="text-xs text-indigo-300">
-                            Organiza, agrega, remueve estudiantes y gestiona equipos de trabajo colaborativo.
+                            Organize, add, remove students and manage collaborative learning squads.
                         </p>
                     </div>
                 </div>
@@ -204,7 +204,7 @@ export default function TeacherSquadManager() {
                     className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.5)] transition flex items-center space-x-2 cursor-pointer"
                 >
                     <Plus className="w-4 h-4" />
-                    <span>+ Crear Nuevo Squad</span>
+                    <span>+ Create New Squad</span>
                 </button>
             </div>
 
@@ -228,24 +228,24 @@ export default function TeacherSquadManager() {
                             
                             <button
                                 onClick={() => handleDeleteSquad(sq.id, sq.name)}
-                                className="p-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl transition text-xs flex items-center space-x-1"
-                                title="Disolver Squad"
+                                className="p-2 bg-rose-950/60 hover:bg-rose-900 border border-rose-800 text-rose-300 rounded-xl transition text-xs flex items-center space-x-1 cursor-pointer"
+                                title="Disband Squad"
                             >
                                 <Trash2 className="w-4 h-4" />
-                                <span className="hidden sm:inline">Disolver</span>
+                                <span className="hidden sm:inline">Disband</span>
                             </button>
                         </div>
 
                         {/* Member List */}
                         <div className="space-y-2">
                             <div className="flex items-center justify-between text-xs text-slate-400 font-bold">
-                                <span>INTEGRANTES ({sq.members.length}):</span>
-                                <span className="text-indigo-400 text-[11px]">Colaboración Activa</span>
+                                <span>MEMBERS ({sq.members.length}):</span>
+                                <span className="text-indigo-400 text-[11px]">Active Collaboration</span>
                             </div>
 
                             {sq.members.length === 0 ? (
                                 <p className="text-xs text-slate-500 italic py-2 text-center bg-slate-950/50 rounded-xl border border-dashed border-slate-800">
-                                    Este Squad no tiene alumnos asignados. Agrega integrantes abajo.
+                                    This Squad has no students assigned yet. Add members below.
                                 </p>
                             ) : (
                                 <div className="space-y-1.5">
@@ -258,14 +258,14 @@ export default function TeacherSquadManager() {
                                                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
                                                 <span className="font-bold text-white">{member.name}</span>
                                                 <span className="text-[10px] text-slate-400 bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800">
-                                                    {member.role || 'Estudiante'}
+                                                    {member.role || 'Student'}
                                                 </span>
                                             </div>
 
                                             <button
                                                 onClick={() => handleRemoveStudent(sq.id, member.id, member.name)}
-                                                className="p-1 bg-slate-900 hover:bg-rose-950 border border-slate-700 hover:border-rose-700 text-slate-400 hover:text-rose-300 rounded-lg transition"
-                                                title={`Quitar a ${member.name}`}
+                                                className="p-1 bg-slate-900 hover:bg-rose-950 border border-slate-700 hover:border-rose-700 text-slate-400 hover:text-rose-300 rounded-lg transition cursor-pointer"
+                                                title={`Remove ${member.name}`}
                                             >
                                                 <UserMinus className="w-3.5 h-3.5" />
                                             </button>
@@ -278,7 +278,7 @@ export default function TeacherSquadManager() {
                         {/* Add Member Controls */}
                         <div className="pt-2 border-t border-slate-800/80 space-y-2">
                             <span className="text-[11px] text-indigo-300 font-bold uppercase block">
-                                + AGREGAR ALUMNO A ESTE SQUAD:
+                                + ADD STUDENT TO THIS SQUAD:
                             </span>
 
                             {/* Option A: Select from Course Roster */}
@@ -288,7 +288,7 @@ export default function TeacherSquadManager() {
                                     onChange={(e) => setSelectedStudentForSquad({ ...selectedStudentForSquad, [sq.id]: e.target.value })}
                                     className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-indigo-400 font-mono"
                                 >
-                                    <option value="">-- Seleccionar de Nómina del Curso --</option>
+                                    <option value="">-- Select from Class Roster --</option>
                                     {DEFAULT_COURSE_ROSTER.map((st) => (
                                         <option key={st.id} value={st.id}>
                                             {st.name} ({st.role})
@@ -298,10 +298,10 @@ export default function TeacherSquadManager() {
 
                                 <button
                                     onClick={() => handleAddRosterStudent(sq.id)}
-                                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center space-x-1"
+                                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl transition flex items-center space-x-1 cursor-pointer"
                                 >
                                     <UserPlus className="w-3.5 h-3.5" />
-                                    <span>Agregar</span>
+                                    <span>Add Student</span>
                                 </button>
                             </div>
 
@@ -309,16 +309,16 @@ export default function TeacherSquadManager() {
                             <div className="flex items-center gap-2">
                                 <input
                                     type="text"
-                                    placeholder="O escribe nombre de otro estudiante..."
+                                    placeholder="Or type custom student name..."
                                     value={customStudentName[sq.id] || ''}
                                     onChange={(e) => setCustomStudentName({ ...customStudentName, [sq.id]: e.target.value })}
                                     className="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-slate-200 outline-none focus:border-indigo-400 font-mono"
                                 />
                                 <button
                                     onClick={() => handleAddCustomStudent(sq.id)}
-                                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/40 font-bold text-xs rounded-xl transition"
+                                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-indigo-500/40 font-bold text-xs rounded-xl transition cursor-pointer"
                                 >
-                                    + Añadir
+                                    + Add Custom
                                 </button>
                             </div>
                         </div>
@@ -327,7 +327,7 @@ export default function TeacherSquadManager() {
                         {sq.synergies && sq.synergies.length > 0 && (
                             <div className="pt-2 border-t border-slate-800 space-y-1.5">
                                 <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">
-                                    🤝 SINERGIAS & MENTORÍA DE PARES VINCULADAS:
+                                    🤝 LINKED PEER TUTORING & SYNERGIES:
                                 </span>
                                 {sq.synergies.map((syn, idx) => (
                                     <div key={idx} className="p-2.5 bg-emerald-950/40 border border-emerald-800/60 rounded-xl text-[11px] text-emerald-200 leading-relaxed">
@@ -341,10 +341,10 @@ export default function TeacherSquadManager() {
                         <div className="pt-2 flex justify-end">
                             <button
                                 onClick={() => handleGenerateSynergy(sq.id)}
-                                className="px-3 py-1.5 bg-slate-950 border border-emerald-500/50 hover:bg-emerald-950 text-emerald-300 text-[11px] font-bold rounded-xl transition flex items-center space-x-1"
+                                className="px-3 py-1.5 bg-slate-950 border border-emerald-500/50 hover:bg-emerald-950 text-emerald-300 text-[11px] font-bold rounded-xl transition flex items-center space-x-1 cursor-pointer"
                             >
                                 <HeartHandshake className="w-3.5 h-3.5 text-emerald-400" />
-                                <span>⚡ Vincular Sinergia de Pares</span>
+                                <span>⚡ Link Peer Synergy</span>
                             </button>
                         </div>
                     </div>
@@ -357,7 +357,7 @@ export default function TeacherSquadManager() {
                     <div className="bg-slate-900 border-2 border-indigo-500 p-6 md:p-8 rounded-3xl max-w-md w-full space-y-5 shadow-2xl">
                         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                             <h3 className="text-lg font-orbitron font-extrabold text-white">
-                                CREAR NUEVO SQUAD DE AULA
+                                CREATE NEW CLASSROOM SQUAD
                             </h3>
                             <button
                                 onClick={() => setIsCreateModalOpen(false)}
@@ -369,11 +369,11 @@ export default function TeacherSquadManager() {
 
                         <form onSubmit={handleCreateSquad} className="space-y-4 text-xs font-mono">
                             <div className="space-y-1">
-                                <label className="text-slate-300 font-bold">Nombre del Squad *</label>
+                                <label className="text-slate-300 font-bold">Squad Name *</label>
                                 <input
                                     type="text"
                                     required
-                                    placeholder="Ej: Squad Gamma PAES / Squad Delta Lógica"
+                                    placeholder="e.g. Squad Gamma AP Math / Squad Delta Physics"
                                     value={newSquadName}
                                     onChange={(e) => setNewSquadName(e.target.value)}
                                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-indigo-400"
@@ -381,24 +381,24 @@ export default function TeacherSquadManager() {
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-slate-300 font-bold">Curso Asignado *</label>
+                                <label className="text-slate-300 font-bold">Assigned Class / Grade *</label>
                                 <select
                                     value={newSquadCourse}
                                     onChange={(e) => setNewSquadCourse(e.target.value)}
                                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-indigo-400"
                                 >
-                                    <option value="4° Medio A">4° Medio A</option>
-                                    <option value="3° Medio B">3° Medio B</option>
-                                    <option value="2° Medio C">2° Medio C</option>
-                                    <option value="1° Medio A">1° Medio A</option>
+                                    <option value="Senior High A">Senior High A</option>
+                                    <option value="Senior High B">Senior High B</option>
+                                    <option value="Junior High A">Junior High A</option>
+                                    <option value="Junior High B">Junior High B</option>
                                 </select>
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-slate-300 font-bold">Especialidad u Objetivo</label>
+                                <label className="text-slate-300 font-bold">Specialty or Objective</label>
                                 <input
                                     type="text"
-                                    placeholder="Ej: STEM, Debate, PAES, Inclusión"
+                                    placeholder="e.g. STEM, Debate, AP Prep, Inclusion"
                                     value={newSquadSpecialty}
                                     onChange={(e) => setNewSquadSpecialty(e.target.value)}
                                     className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white outline-none focus:border-indigo-400"
@@ -409,15 +409,15 @@ export default function TeacherSquadManager() {
                                 <button
                                     type="button"
                                     onClick={() => setIsCreateModalOpen(false)}
-                                    className="px-4 py-2.5 bg-slate-950 text-slate-300 border border-slate-800 rounded-xl font-bold hover:bg-slate-800"
+                                    className="px-4 py-2.5 bg-slate-950 text-slate-300 border border-slate-800 rounded-xl font-bold hover:bg-slate-800 cursor-pointer"
                                 >
-                                    Cancelar
+                                    Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black uppercase tracking-wider shadow"
+                                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black uppercase tracking-wider shadow cursor-pointer"
                                 >
-                                    Guardar Squad
+                                    Save Squad
                                 </button>
                             </div>
                         </form>

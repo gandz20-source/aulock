@@ -50,7 +50,7 @@ const DebugBanner = () => {
                         }`}
                     >
                         <GraduationCap className="w-5 h-5 text-cyan-300" />
-                        <span>🎓 PANEL ALUMNO</span>
+                        <span>🎓 STUDENT PANEL</span>
                     </button>
 
                     {/* 2. TEACHER PANEL */}
@@ -63,12 +63,12 @@ const DebugBanner = () => {
                         }`}
                     >
                         <Users className="w-5 h-5 text-emerald-300" />
-                        <span>👨‍🏫 PANEL PROFESOR</span>
+                        <span>👨‍🏫 TEACHER PANEL</span>
                     </button>
 
                     {/* 3. SCHOOL ADMIN PANEL */}
                     <button
-                        onClick={() => handleSwitchRole('colegio', '/school-admin', 'Dirección San Agustín')}
+                        onClick={() => handleSwitchRole('colegio', '/school-admin', 'San Agustín High School Leadership')}
                         className={`px-4 py-2.5 rounded-2xl font-orbitron font-black text-xs md:text-sm tracking-wider uppercase transition-all duration-300 flex items-center space-x-2 shadow-lg cursor-pointer ${
                             currentRole === 'colegio' || location.pathname === '/school-admin' || location.pathname === '/school-dashboard'
                                 ? 'bg-gradient-to-r from-sky-600 to-blue-500 text-white border-2 border-sky-300 shadow-[0_0_25px_rgba(56,189,248,0.8)] scale-105 z-10'
@@ -76,7 +76,7 @@ const DebugBanner = () => {
                         }`}
                     >
                         <School className="w-5 h-5 text-sky-300" />
-                        <span>🏫 PANEL COLEGIO</span>
+                        <span>🏫 SCHOOL PANEL</span>
                     </button>
 
                     {/* 4. CORE INTELLIGENCE */}

@@ -537,55 +537,56 @@ const StudentWorkspace = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto,1fr] gap-6 items-center">
                             
                             {/* COLUMNA IZQUIERDA: TARJETA SEAMOS COMUNIDAD MINEDUC */}
+                            {/* LEFT COLUMN: WE ARE COMMUNITY CARD */}
                             <div className="col-span-1">
-                                <DataCard title="Seamos Comunidad" colorBorder="cyan" icon="🌱">
+                                <DataCard title="We Are Community" colorBorder="cyan" icon="🌱">
                                     <p className="text-xs md:text-sm text-cyan-200 leading-relaxed italic">
-                                        "{bannerContent?.cuerpo_mensaje || '¿Cómo demuestras empatía hoy con un compañero que estaba solo? Te invitamos a: Invita a alguien nuevo a tu grupo en el recreo.'}"
+                                        "{bannerContent?.cuerpo_mensaje || 'How do you show empathy today with a classmate who was alone? We invite you to: Invite someone new to join your group during recess.'}"
                                     </p>
                                     <button
                                         onClick={() => setShowDeepReflection(!showDeepReflection)}
-                                        className="mt-4 text-xs text-cyan-300 hover:text-white underline underline-offset-4 decoration-dotted font-mono flex items-center gap-1.5"
+                                        className="mt-4 text-xs text-cyan-300 hover:text-white underline underline-offset-4 decoration-dotted font-mono flex items-center gap-1.5 cursor-pointer"
                                     >
-                                        {showDeepReflection ? 'Ocultar cápsula' : '✨ Ver cápsula de reflexión del día ▼'}
+                                        {showDeepReflection ? 'Hide reflection capsule' : '✨ View daily reflection capsule ▼'}
                                     </button>
                                     {showDeepReflection && (
                                         <div className="mt-3 p-4 bg-slate-900/90 rounded-2xl border border-cyan-500/40 text-xs text-cyan-100 font-sans shadow-inner">
-                                            <p className="font-bold text-cyan-300 uppercase mb-1">Reflexión Ciudadana:</p>
-                                            <p>{bannerContent?.reflexion_profunda || "El diálogo cotidiano y el buen trato entre compañeros construyen comunidades escolares resilientes e inclusivas."}</p>
+                                            <p className="font-bold text-cyan-300 uppercase mb-1">Civic Reflection:</p>
+                                            <p>{bannerContent?.reflexion_profunda || "Daily dialogue and respectful interaction among peers build resilient and inclusive school communities."}</p>
                                         </div>
                                     )}
                                 </DataCard>
                             </div>
 
-                            {/* COLUMNA CENTRAL: MARCO PORTRAIT CIBERNÉTICO CON TRAZOS PCB DE CONEXIÓN */}
+                            {/* CENTER COLUMN: CYBERPUNK PORTRAIT FRAME WITH PCB LINES */}
                             <div className="col-span-1 flex flex-col items-center">
                                 <ProfileFrame
                                     imgSrc="/images/latino_student_portrait.jpg"
                                     name={profile?.full_name || 'Juan Carlos Pérez'}
-                                    carrera="4° medio // COLEGIO SAN AGUSTÍN, STEM Specializ / ALFA STEM"
+                                    carrera="SENIOR HIGH // SAN AGUSTÍN HIGH SCHOOL, STEM SPECIALIZATION / ALFA STEM"
                                     badges={[
-                                        { text: '★ 7.0 Lógica', color: 'purple' },
-                                        { text: '🌟 Equipo de tutores Alfa', color: 'yellow' },
-                                        { text: '🛡️ Formación Ciudadana', color: 'blue' }
+                                        { text: '★ 7.0 Logic & STEM', color: 'purple' },
+                                        { text: '🌟 Alfa Peer Tutor Squad', color: 'yellow' },
+                                        { text: '🛡️ Civic Education', color: 'blue' }
                                     ]}
                                 />
                             </div>
 
-                            {/* COLUMNA DERECHA: ANALÍTICA ACADÉMICA Y PROGRESO SOCRÁTICO */}
+                            {/* RIGHT COLUMN: ACADEMIC ANALYTICS & SOCRATIC PROGRESS */}
                             <div className="col-span-1">
-                                <DataCard title="Analítica Académica" colorBorder="emerald" icon="📊">
+                                <DataCard title="Academic Analytics" colorBorder="emerald" icon="📊">
                                     <div className="space-y-3 font-mono text-xs">
                                         <div className="flex justify-between items-center bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-                                            <span className="text-slate-300">Promedio General:</span>
+                                            <span className="text-slate-300">GPA / Overall Average:</span>
                                             <strong className="text-amber-300 text-xl font-orbitron">6.14</strong>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-                                            <span className="text-slate-300">Asistencia NFC:</span>
-                                            <strong className="text-emerald-400 text-xs font-orbitron">100% REGISTRADA</strong>
+                                            <span className="text-slate-300">NFC Attendance:</span>
+                                            <strong className="text-emerald-400 text-xs font-orbitron">100% RECORDED</strong>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-                                            <span className="text-slate-300">Misiones Socráticas:</span>
-                                            <strong className="text-cyan-300 text-xs font-orbitron">5/5 COMPLETADAS</strong>
+                                            <span className="text-slate-300">Socratic Missions:</span>
+                                            <strong className="text-cyan-300 text-xs font-orbitron">5/5 COMPLETED</strong>
                                         </div>
                                     </div>
                                 </DataCard>
@@ -593,31 +594,31 @@ const StudentWorkspace = () => {
 
                         </div>
 
-                        {/* BARRA INFERIOR DE BOTONES DE ACCIÓN ANGULADOS */}
+                        {/* BOTTOM ANGLED ACTION BUTTON BAR */}
                         <div className="flex flex-wrap items-center justify-center gap-4 pt-6 border-t border-cyan-900/50">
                             <ActionButton
                                 icon="❓"
-                                text="¿Cómo te sientes hoy?"
+                                text="How do you feel today?"
                                 color="yellow"
                                 onClick={() => setShowEmojiCheckin(true)}
                             />
                             <ActionButton
                                 icon="🔒"
-                                text="Denuncia Segura"
+                                text="Safe & Secure Report"
                                 color="green"
                                 onClick={() => setShowReportModal(true)}
                             />
                             <ActionButton
                                 icon="⚙️"
-                                text="Evaluar Clase"
+                                text="Evaluate Class"
                                 color="purple"
                                 onClick={() => setShowTeacherRatingModal(true)}
                             />
                             <ActionButton
                                 icon="🆘"
-                                text="Botón de Ayuda"
+                                text="SOS Help Button"
                                 color="red"
-                                onClick={() => alert("🆘 Solicitud de Ayuda pedagógica enviada al equipo escolar.")}
+                                onClick={() => alert("🆘 Pedagogical help request sent to school staff.")}
                             />
                         </div>
 

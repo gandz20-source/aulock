@@ -8,29 +8,29 @@ import {
 } from 'lucide-react';
 
 const FEATURED_COURSES = [
-    { name: '3° Medio A', status: 'Sobresaliente', trait: 'Alto Compromiso Vocacional & Tutoría entre Pares', progress: 92, medal: '🥇' },
-    { name: '1° Medio A', status: 'Óptimo', trait: 'Clima de Convivencia Ejemplar & Creatividad', progress: 85, medal: '🥈' },
-    { name: '4° Medio A', status: 'Monitoreo PAES', trait: 'Rendimiento Lógico Alto con Ansiedad Situacional', progress: 88, medal: '🥉' }
+    { name: 'Junior High A', status: 'Outstanding', trait: 'High Vocational Engagement & Peer Tutoring', progress: 92, medal: '🥇' },
+    { name: 'Freshman High A', status: 'Optimal', trait: 'Exemplary Climate & Creativity', progress: 85, medal: '🥈' },
+    { name: 'Senior High A', status: 'AP & SAT Monitoring', trait: 'High Logical Performance with Situational Anxiety', progress: 88, medal: '🥉' }
 ];
 
 const FEATURED_STUDENTS = [
-    { name: 'Juan Carlos Pérez (4° Medio A)', trait: 'Percentil 98 en Lógica & Tutor de Pares', nem: 'NEM 6.34', progress: 95 },
-    { name: 'Sofía Martínez (4° Medio A)', trait: 'Arena de Debate Campeona & Rigor Evidencia', nem: 'NEM 6.52', progress: 92 },
-    { name: 'Mateo Rojas (4° Medio A)', trait: 'Líder de Laboratorio STEM & Biología', nem: 'NEM 6.10', progress: 88 }
+    { name: 'Juan Carlos Pérez (Senior High A)', trait: '98th Percentile in Logic & Peer Tutor', nem: 'GPA 3.9', progress: 95 },
+    { name: 'Sofía Martínez (Senior High A)', trait: 'Debate Champion & Evidentiary Rigor', nem: 'GPA 4.0', progress: 92 },
+    { name: 'Mateo Rojas (Senior High A)', trait: 'STEM Lab Leader & Biology', nem: 'GPA 3.8', progress: 88 }
 ];
 
 const INITIAL_BEHAVIOR_ALERTS = [
-    { id: 'alt-1', studentName: 'Lucas Fernández (4° Medio A)', type: 'Alerta Preventiva', category: 'Medición Repetida', urgency: 'Medios', urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950', date: '4 de agosto de 2026', status: 'Pendiente de Orientación', statusColor: 'text-cyan-300' },
-    { id: 'alt-2', studentName: 'Camila Silva (4° Medio A)', type: 'Alerta Preventiva', category: 'Ciberacoso / Redes', urgency: 'Medios', urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950', date: '3 de agosto de 2026', status: 'En Investigación Directivo', statusColor: 'text-emerald-400' },
-    { id: 'alt-3', studentName: 'Camila Silva (4° Medio A)', type: 'Denuncia Confidencial', category: 'Ciberacoso / Redes', urgency: 'Alta', urgencyColor: 'text-rose-400 border-rose-500/40 bg-rose-950', date: '3 de agosto de 2026', status: 'En Investigación Directivo', statusColor: 'text-rose-400' }
+    { id: 'alt-1', studentName: 'Lucas Fernández (Senior High A)', type: 'Preventive Alert', category: 'Repeated Measurement', urgency: 'Medium', urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950', date: 'August 4, 2026', status: 'Pending Guidance', statusColor: 'text-cyan-300' },
+    { id: 'alt-2', studentName: 'Camila Silva (Senior High A)', type: 'Preventive Alert', category: 'Cyberbullying / Social Media', urgency: 'Medium', urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950', date: 'August 3, 2026', status: 'Under Admin Investigation', statusColor: 'text-emerald-400' },
+    { id: 'alt-3', studentName: 'Camila Silva (Senior High A)', type: 'Confidential Report', category: 'Cyberbullying / Social Media', urgency: 'High', urgencyColor: 'text-rose-400 border-rose-500/40 bg-rose-950', date: 'August 3, 2026', status: 'Under Admin Investigation', statusColor: 'text-rose-400' }
 ];
 
 const ALL_STUDENTS_LIST = [
-    'Juan Carlos Pérez (4° Medio A)',
-    'Sofía Martínez (4° Medio A)',
-    'Mateo Rojas (4° Medio A)',
-    'Lucas Fernández (4° Medio A)',
-    'Camila Silva (4° Medio A)'
+    'Juan Carlos Pérez (Senior High A)',
+    'Sofía Martínez (Senior High A)',
+    'Mateo Rojas (Senior High A)',
+    'Lucas Fernández (Senior High A)',
+    'Camila Silva (Senior High A)'
 ];
 
 export default function AuLockCoreIntelligence() {
@@ -39,90 +39,90 @@ export default function AuLockCoreIntelligence() {
 
     // Alert Sender Form State
     const [selectedAlertStudent, setSelectedAlertStudent] = useState(ALL_STUDENTS_LIST[3]);
-    const [alertCategory, setAlertCategory] = useState('Citación por Orientación de Comportamiento');
+    const [alertCategory, setAlertCategory] = useState('Behavioral Guidance Citation');
     const [alertMessage, setAlertMessage] = useState('');
     const [alertsList, setAlertsList] = useState(INITIAL_BEHAVIOR_ALERTS);
     const [isDeploying, setIsDeploying] = useState(false);
 
     const handleExecuteDeployment = (e) => {
         e.preventDefault();
-        if (!alertMessage.trim()) return alert("Por favor escribe el mensaje u orientación institucional.");
+        if (!alertMessage.trim()) return alert("Please write the official message or guidance.");
 
         setIsDeploying(true);
         setTimeout(() => {
             const newAlert = {
                 id: 'alt-' + Date.now(),
                 studentName: selectedAlertStudent,
-                type: 'Alerta Preventiva',
+                type: 'Preventive Alert',
                 category: alertCategory,
-                urgency: 'Medios',
+                urgency: 'Medium',
                 urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950',
-                date: 'Hoy',
-                status: 'Pendiente de Orientación',
+                date: 'Today',
+                status: 'Pending Guidance',
                 statusColor: 'text-cyan-300'
             };
 
             setAlertsList(prev => [newAlert, ...prev]);
             setIsDeploying(false);
             setAlertMessage('');
-            alert(`🚀 ¡Despliegue ejecutado! Alerta preventive notificada a ${selectedAlertStudent}.`);
+            alert(`🚀 Deployment executed! Preventive alert notified to ${selectedAlertStudent}.`);
         }, 800);
     };
 
     const handleExportTraceableReport = () => {
-        const reportContent = `REPORTE DE BIENESTAR E INTELIGENCIA INSTITUCIONAL - AULOCK CORE 360°
-Fecha: ${new Date().toLocaleString()}
-Código Trazable Auditoría: AULOCK-CORE-TRACE-${Date.now()}
+        const reportContent = `INSTITUTIONAL WELLNESS & INTELLIGENCE REPORT - AULOCK CORE 360°
+Date: ${new Date().toLocaleString()}
+Traceable Audit Code: AULOCK-CORE-TRACE-${Date.now()}
 ======================================================
-Estrés Institucional Promedio: 16% (Nivel Óptimo)
-Alertas Preventivas Activas: ${alertsList.length}
+Average Institutional Stress: 16% (Optimal Level)
+Active Preventive Alerts: ${alertsList.length}
 
-CURSOS DESTACADOS:
-1. 3° Medio A (Sobresaliente)
-2. 1° Medio A (Óptimo)
-3. 4° Medio A (Monitoreo PAES)
+FEATURED CLASSES:
+1. Junior High A (Outstanding)
+2. Freshman High A (Optimal)
+3. Senior High A (AP & SAT Monitoring)
 `;
 
         const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Informe_Trazable_AuLock_Core_${Date.now()}.txt`;
+        link.download = `AuLock_Core_Traceable_Report_${Date.now()}.txt`;
         link.click();
     };
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-100 font-mono p-3 md:p-6 pb-28 select-none selection:bg-cyan-900">
             
-            {/* 🔴 LÍNEA DE ENCABEZADO SUPERIOR RBAC (Exacto a la referencia) */}
+            {/* RBAC HEADER LINE */}
             <header className="max-w-7xl mx-auto bg-slate-950/95 border-2 border-cyan-500/40 p-4 rounded-3xl shadow-2xl backdrop-blur-xl mb-6 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-3 text-xs border-b border-cyan-900/60 pb-3">
                     <div className="flex items-center space-x-2 text-cyan-300 font-mono">
-                        <strong className="text-white">Arquitectura móvil AuLock RBAC</strong>
+                        <strong className="text-white">AuLock Mobile RBAC Architecture</strong>
                         <span>|</span>
-                        <span>Usuario: <strong className="text-cyan-200">Dirección San Agustín</strong></span>
+                        <span>User: <strong className="text-cyan-200">San Agustín High School Leadership</strong></span>
                         <span>|</span>
-                        <span>Rol Activo: <strong className="text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-700">[ ALUMNO / NÚCLEO 360° ]</strong></span>
+                        <span>Active Role: <strong className="text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-700">[ STUDENT / 360° CORE ]</strong></span>
                     </div>
 
-                    {/* CONMUTADOR DE PERFIL */}
+                    {/* PROFILE SWITCHER */}
                     <div className="flex items-center space-x-2 text-[11px] font-bold">
-                        <span className="text-slate-400">CONMUTADOR DE PERFIL:</span>
-                        <button onClick={() => navigate('/student-dashboard')} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400">
-                            🎓 Rol Alumno
+                        <span className="text-slate-400">PROFILE SWITCHER:</span>
+                        <button onClick={() => navigate('/student-dashboard')} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 cursor-pointer">
+                            🎓 Student Role
                         </button>
-                        <button onClick={() => navigate('/teacher-dashboard')} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400">
-                            👨‍🏫 Rol Profesor
+                        <button onClick={() => navigate('/teacher-dashboard')} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 cursor-pointer">
+                            👨‍🏫 Teacher Role
                         </button>
-                        <button onClick={() => navigate('/school-dashboard')} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400">
-                            🏫 Rol Colegio 360°
+                        <button onClick={() => navigate('/school-dashboard')} className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 cursor-pointer">
+                            🏫 School 360° Role
                         </button>
                         <button className="px-2.5 py-1 rounded-xl bg-cyan-950 border border-cyan-400 text-cyan-300 font-bold shadow-[0_0_10px_rgba(6,182,212,0.5)]">
-                            🌀 Núcleo 360°
+                            🌀 360° Core
                         </button>
                     </div>
                 </div>
 
-                {/* TÍTULO Y BADGES */}
+                {/* TITLE & BADGES */}
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center space-x-3">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 via-sky-500 to-blue-600 flex items-center justify-center text-slate-950 font-black text-xl shadow-[0_0_20px_rgba(6,182,212,0.6)]">
@@ -130,52 +130,51 @@ CURSOS DESTACADOS:
                         </div>
                         <div>
                             <h1 className="text-xl md:text-2xl font-orbitron font-extrabold text-white tracking-wider">
-                                AuLock Core - Centro de Bienestar Institucional
+                                AuLock Core - Institutional Wellness & Intelligence Center
                             </h1>
                             <p className="text-xs text-slate-400">
-                                Consolidado de Salud Emocional, Alertas de Comportamiento, Cursos Destacados y Atención de Notificaciones Preventivas.
+                                Consolidated Emotional Health, Behavior Alerts, Featured Classes, and Preventive Intervention Management.
                             </p>
                         </div>
                     </div>
 
                     <div className="flex items-center space-x-3">
                         <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-3 py-1.5 rounded-full border border-emerald-600">
-                            Información Trazable 100% Auditada
+                            100% Audited Traceable Intelligence
                         </span>
                         <button
                             onClick={handleExportTraceableReport}
-                            className="px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.5)] transition flex items-center space-x-2"
+                            className="px-4 py-2 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.5)] transition flex items-center space-x-2 cursor-pointer"
                         >
                             <span>🟢</span>
-                            <span>Exportar Informe Trazable</span>
+                            <span>Export Audit Report</span>
                         </button>
                     </div>
                 </div>
             </header>
 
-            {/* 🔴 SECCIÓN 1: MEDICIONES EN TIEMPO REAL (3 TOMAS DIARIAS) + GAUGE ESTRÉS PROMEDIO (Exacto a la imagen) */}
+            {/* MAIN CONTENT */}
             <main className="max-w-7xl mx-auto space-y-6">
                 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                    {/* IZQUIERDA (8 COLS): 3 TOMAS DIARIAS DE ESTRÉS */}
+                    {/* LEFT (8 COLS): 3 DAILY STRESS CHECK-INS */}
                     <div className="lg:col-span-8 bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
                         <div className="space-y-1 border-b border-cyan-900/60 pb-3">
                             <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase font-bold block">
-                                MEDICIONES EN TIEMPO REAL <span className="text-slate-400">(3 TOMAS DIARIAS)</span>
+                                REAL-TIME MEASUREMENTS <span className="text-slate-400">(3 DAILY CHECK-INS)</span>
                             </span>
                         </div>
 
-                        {/* 3 TARJETAS DIARIAS */}
+                        {/* 3 DAILY CARDS */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             
-                            {/* TOMA 1: 08:30 hrs */}
+                            {/* CHECK-IN 1: 08:30 AM */}
                             <div className="bg-slate-900/90 p-4 rounded-2xl border border-cyan-500/40 space-y-2">
-                                <span className="text-xs font-bold text-slate-300 block">08:30 hrs (Inicio)</span>
-                                <h3 className="text-2xl font-orbitron font-black text-cyan-300">12 % Estrés</h3>
-                                <span className="text-[10px] text-slate-400 block">Tranquilo / Llegada</span>
+                                <span className="text-xs font-bold text-slate-300 block">08:30 AM (Arrival / Morning)</span>
+                                <h3 className="text-2xl font-orbitron font-black text-cyan-300">12 % Stress</h3>
+                                <span className="text-[10px] text-slate-400 block">Calm / Morning Entry</span>
                                 
-                                {/* Arc SVG & ECG Waveform */}
                                 <div className="pt-2 flex items-center justify-between">
                                     <div className="w-12 h-6 bg-cyan-950 border border-cyan-400 rounded-t-full p-1 flex items-end justify-center">
                                         <div className="w-1.5 h-1.5 bg-cyan-300 rounded-full" />
@@ -186,13 +185,12 @@ CURSOS DESTACADOS:
                                 </div>
                             </div>
 
-                            {/* TOMA 2: 11:45 hrs */}
+                            {/* CHECK-IN 2: 11:45 AM */}
                             <div className="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/40 space-y-2">
-                                <span className="text-xs font-bold text-slate-300 block">11:45 hrs (Recreo Central)</span>
-                                <h3 className="text-2xl font-orbitron font-black text-amber-300">22 % Estrés</h3>
-                                <span className="text-[10px] text-slate-400 block">Concentrado / Evaluaciones</span>
+                                <span className="text-xs font-bold text-slate-300 block">11:45 AM (Midday Break)</span>
+                                <h3 className="text-2xl font-orbitron font-black text-amber-300">22 % Stress</h3>
+                                <span className="text-[10px] text-slate-400 block">Focused / Midday Assessments</span>
                                 
-                                {/* Arc SVG & ECG Waveform */}
                                 <div className="pt-2 flex items-center justify-between">
                                     <div className="w-12 h-6 bg-amber-950 border border-amber-400 rounded-t-full p-1 flex items-end justify-center">
                                         <div className="w-1.5 h-1.5 bg-amber-300 rounded-full" />
@@ -203,13 +201,12 @@ CURSOS DESTACADOS:
                                 </div>
                             </div>
 
-                            {/* TOMA 3: 15:30 hrs */}
+                            {/* CHECK-IN 3: 03:15 PM */}
                             <div className="bg-slate-900/90 p-4 rounded-2xl border border-emerald-500/40 space-y-2">
-                                <span className="text-xs font-bold text-slate-300 block">15:30 h (Cierre)</span>
-                                <h3 className="text-2xl font-orbitron font-black text-emerald-400">14 % Estrés</h3>
-                                <span className="text-[10px] text-slate-400 block">Relajado / Salida</span>
+                                <span className="text-xs font-bold text-slate-300 block">03:15 PM (Dismissal)</span>
+                                <h3 className="text-2xl font-orbitron font-black text-emerald-400">14 % Stress</h3>
+                                <span className="text-[10px] text-slate-400 block">Relaxed / End of Day</span>
                                 
-                                {/* Arc SVG & ECG Waveform */}
                                 <div className="pt-2 flex items-center justify-between">
                                     <div className="w-12 h-6 bg-emerald-950 border border-emerald-400 rounded-t-full p-1 flex items-end justify-center">
                                         <div className="w-1.5 h-1.5 bg-emerald-300 rounded-full" />
@@ -223,10 +220,9 @@ CURSOS DESTACADOS:
                         </div>
                     </div>
 
-                    {/* DERECHA (4 COLS): PANEL MEDIDOR GAUGE DE ESTRÉS PROMEDIO (Exacto a la imagen) */}
+                    {/* RIGHT (4 COLS): AVERAGE STRESS GAUGE */}
                     <div className="lg:col-span-4 bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] flex flex-col justify-between items-center text-center relative overflow-hidden">
                         
-                        {/* PCB Circuit Trace Background Lines */}
                         <div className="absolute inset-0 opacity-10 pointer-events-none">
                             <svg className="w-full h-full stroke-cyan-400 stroke-1 fill-none">
                                 <path d="M 0 50 H 100 V 200 H 300" />
@@ -235,10 +231,9 @@ CURSOS DESTACADOS:
                         </div>
 
                         <span className="text-xs font-orbitron font-extrabold text-slate-300 uppercase tracking-widest">
-                            NIVEL DE ESTRÉS PROMEDIO
+                            AVERAGE STRESS LEVEL
                         </span>
 
-                        {/* GIANT GLOWING ARC NEEDLE GAUGE 16% */}
                         <div className="relative w-48 h-32 flex items-end justify-center my-4">
                             <div className="w-48 h-24 border-[12px] border-cyan-950 border-t-emerald-400 border-r-cyan-400 border-l-emerald-500 rounded-t-full flex items-end justify-center shadow-[0_0_30px_rgba(52,211,153,0.4)]">
                                 <span className="text-3xl font-orbitron font-black text-white mb-2">16%</span>
@@ -246,20 +241,20 @@ CURSOS DESTACADOS:
                         </div>
 
                         <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-3 py-1 rounded-full border border-emerald-700">
-                            ✓ Estado General: Óptimo & Controlado
+                            ✓ Overall Status: Optimal & Controlled
                         </span>
                     </div>
 
                 </div>
 
-                {/* 🔴 SECCIÓN 2: CURSOS Y ALUMNOS DESTACADOS (2 TARJETAS SIDE-BY-SIDE) */}
+                {/* FEATURED CLASSES & MENTORS */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
-                    {/* TARJETA IZQUIERDA: CURSOS DESTACADOS */}
+                    {/* LEFT: FEATURED CLASSES */}
                     <div className="lg:col-span-6 bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 className="text-sm font-orbitron font-extrabold text-white uppercase tracking-wider flex items-center space-x-2">
                             <span>🏆</span>
-                            <span>Cursos Destacados en Bienestar y Rendimiento</span>
+                            <span>Featured Classes in Wellness & Performance</span>
                         </h3>
 
                         <div className="space-y-3">
@@ -278,11 +273,11 @@ CURSOS DESTACADOS:
                         </div>
                     </div>
 
-                    {/* TARJETA DERECHA: ALUMNOS DESTACADOS & MENTORES */}
+                    {/* RIGHT: FEATURED STUDENTS & MENTORS */}
                     <div className="lg:col-span-6 bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-xl space-y-4">
                         <h3 className="text-sm font-orbitron font-extrabold text-white uppercase tracking-wider flex items-center space-x-2">
                             <span>👥</span>
-                            <span>Alumnos Destacados & Mentores de Pares</span>
+                            <span>Featured Students & Peer Mentors</span>
                         </h3>
 
                         <div className="space-y-3">
@@ -303,14 +298,14 @@ CURSOS DESTACADOS:
 
                 </div>
 
-                {/* 🔴 SECCIÓN 3: COMUNICACIÓN INSTITUCIONAL DIRECTA (Exacto a la imagen) */}
+                {/* DIRECT INSTITUTIONAL DISPATCH */}
                 <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
                     <div className="space-y-1 border-b border-cyan-900/60 pb-3">
                         <span className="text-[10px] text-rose-400 uppercase font-bold tracking-widest block">
-                            COMUNICACIÓN INSTITUCIONAL DIRECTA
+                            DIRECT INSTITUTIONAL COMMUNICATION
                         </span>
                         <h2 className="text-lg md:text-xl font-orbitron font-extrabold text-white">
-                            Emisor de Alertas Preventivas y Citaciones al Alumno
+                            Preventive Alert & Student Citation Dispatcher
                         </h2>
                     </div>
 
@@ -318,7 +313,7 @@ CURSOS DESTACADOS:
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">
-                                    SELECCIONAR ALUMNO DESTINATARIO 👤
+                                    SELECT TARGET STUDENT 👤
                                 </label>
                                 <select
                                     value={selectedAlertStudent}
@@ -333,55 +328,55 @@ CURSOS DESTACADOS:
 
                             <div>
                                 <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">
-                                    CATEGORÍA DEL AVISO ∨
+                                    NOTICE CATEGORY ∨
                                 </label>
                                 <select
                                     value={alertCategory}
                                     onChange={e => setAlertCategory(e.target.value)}
                                     className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-cyan-200 font-mono outline-none focus:border-cyan-400"
                                 >
-                                    <option value="Citación por Orientación de Comportamiento">Citación por Orientación de Comportamiento</option>
-                                    <option value="Alerta de Asistencia & Puntualidad">Alerta de Asistencia & Puntualidad</option>
-                                    <option value="Notificación de Convivencia Escolar">Notificación de Convivencia Escolar</option>
-                                    <option value="Reconocimiento por Desempeño Destacado">Reconocimiento por Desempeño Destacado</option>
+                                    <option value="Behavioral Guidance Citation">Behavioral Guidance Citation</option>
+                                    <option value="Attendance & Punctuality Alert">Attendance & Punctuality Alert</option>
+                                    <option value="School Coexistence Notification">School Coexistence Notification</option>
+                                    <option value="Outstanding Performance Recognition">Outstanding Performance Recognition</option>
                                 </select>
                             </div>
                         </div>
 
                         <div>
                             <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">
-                                MENSAJE U ORIENTACIÓN INSTITUCIONAL
+                                OFFICIAL MESSAGE OR GUIDANCE
                             </label>
                             <textarea
                                 value={alertMessage}
                                 onChange={e => setAlertMessage(e.target.value)}
-                                placeholder="Escribe el cuerpo completo del aviso institucional para ser notificado en la pantalla del estudiante..."
+                                placeholder="Type full body of institutional notice to be dispatched directly to the student dashboard screen..."
                                 className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 text-xs text-slate-100 outline-none focus:border-cyan-400 min-h-[90px] resize-none font-mono"
                             />
                         </div>
 
-                        {/* BOTÓN NEÓN GRANDE EJECUTAR DESPLIEGUE */}
+                        {/* BIG NEON DISPATCH BUTTON */}
                         <div className="flex justify-end pt-2">
                             <button
                                 type="submit"
                                 disabled={isDeploying}
-                                className="px-8 py-4 rounded-2xl border-2 border-cyan-400 bg-slate-900 text-cyan-300 font-orbitron font-extrabold text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:bg-cyan-950 transition-all flex items-center space-x-2"
+                                className="px-8 py-4 rounded-2xl border-2 border-cyan-400 bg-slate-900 text-cyan-300 font-orbitron font-extrabold text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:bg-cyan-950 transition-all flex items-center space-x-2 cursor-pointer"
                             >
                                 <span>🚀</span>
-                                <span>{isDeploying ? 'EJECUTANDO...' : 'EJECUTAR DESPLIEGUE'}</span>
+                                <span>{isDeploying ? 'EXECUTING...' : 'DISPATCH ALERT'}</span>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                {/* 🔴 SECCIÓN 4: REGISTRO TRAZABLE DE DENUNCIAS Y ALERTAS (Exacto a la imagen) */}
+                {/* TRACEABLE AUDIT TABLE */}
                 <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
                     <div className="flex justify-between items-center border-b border-cyan-900/60 pb-3">
                         <h2 className="text-lg font-orbitron font-extrabold text-white tracking-wider">
-                            Registro Trazable de Denuncias y Alertas de Comportamiento
+                            Traceable Behavioral Reports & Alerts Log
                         </h2>
                         <span className="text-xs text-cyan-400 font-mono">
-                            Total: {alertsList.length} Registros
+                            Total: {alertsList.length} Records
                         </span>
                     </div>
 
@@ -389,12 +384,12 @@ CURSOS DESTACADOS:
                         <table className="w-full text-left text-xs font-mono">
                             <thead className="bg-slate-900/90 text-slate-400 font-extrabold uppercase border-b border-cyan-900/60">
                                 <tr>
-                                    <th className="p-3">ALUMNO / CURSO</th>
-                                    <th className="p-3">TIPO REGISTRO</th>
-                                    <th className="p-3">CATEGORÍA</th>
+                                    <th className="p-3">STUDENT / CLASS</th>
+                                    <th className="p-3">RECORD TYPE</th>
+                                    <th className="p-3">CATEGORY</th>
                                     <th className="p-3">URGENCY</th>
-                                    <th className="p-3">FECHA</th>
-                                    <th className="p-3">ESTADO</th>
+                                    <th className="p-3">DATE</th>
+                                    <th className="p-3">STATUS</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800">

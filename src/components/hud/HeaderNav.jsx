@@ -88,38 +88,38 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
           </span>
         </div>
 
-        {/* Links a Roles */}
+        {/* Role Links */}
         <div className="flex flex-wrap items-center gap-2 text-[9.5px] font-bold">
           <button 
             onClick={() => navigate('/student-dashboard')}
-            className="px-2 py-0.5 rounded bg-cyan-950/90 border border-cyan-400 text-cyan-300 hover:bg-cyan-900 transition flex items-center gap-1"
+            className="px-2 py-0.5 rounded bg-cyan-950/90 border border-cyan-400 text-cyan-300 hover:bg-cyan-900 transition flex items-center gap-1 cursor-pointer"
           >
             🎓 Student Role ✓
           </button>
           <button 
             onClick={() => navigate('/teacher-dashboard')}
-            className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1"
+            className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 cursor-pointer"
           >
-            👨‍🏫 Rol Profesor
+            👨‍🏫 Teacher Role
           </button>
           <button 
             onClick={() => navigate('/teacher-dashboard')}
-            className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1"
+            className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 cursor-pointer"
           >
-            🧠 Rol Profesor (Sec. AI)
+            🧠 Teacher Role (AI Sec.)
           </button>
           <button 
             onClick={() => navigate('/school-dashboard')}
-            className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1"
+            className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 cursor-pointer"
           >
-            🏫 Rol Colegio 360°
+            🏫 School 360° Role
           </button>
         </div>
       </div>
 
-      {/* 🔴 MICRO-CÓDIGO DE SISTEMA */}
+      {/* SYSTEM MICRO-CODE */}
       <div className="text-[10px] text-cyan-500 font-mono tracking-widest uppercase flex items-center justify-between px-1">
-        <span>HUD.SYS // 7 MÓDULOS DE APRENDIZAJE SOCRÁTICO</span>
+        <span>HUD.SYS // 7 SOCRATIC LEARNING MODULES</span>
         <span className="hidden sm:inline text-slate-500">• • • MATRIX HUD v2.5</span>
       </div>
 
