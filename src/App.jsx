@@ -46,9 +46,9 @@ function App() {
               {/* --- Direct Access Routes --- */}
               <Route path="/academic-passport" element={<AcademicPassport />} />
               <Route path="/core-intelligence" element={<AuLockCoreIntelligence />} />
-              <Route path="/school-dashboard" element={<Colegio360MasterDashboard />} />
-              <Route path="/school-admin" element={<SchoolAdminDashboard />} />
-              <Route path="/colegio-360-master" element={<Colegio360MasterDashboard />} />
+              <Route path="/school-dashboard" element={<AuLockCoreIntelligence />} />
+              <Route path="/school-admin" element={<AuLockCoreIntelligence />} />
+              <Route path="/colegio-360-master" element={<AuLockCoreIntelligence />} />
               <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
               <Route path="/student-dashboard" element={<StudentWorkspace />} />
               <Route path="/after-ia" element={<AfterIAPortal />} />
@@ -60,7 +60,7 @@ function App() {
                 <Route index element={<LayoutSwitcher />} />
                 <Route path="tutor" element={<AICampus />} />
                 <Route path="pre-u" element={<StudentWorkspace />} />
-                <Route path="school" element={<Colegio360MasterDashboard />} />
+                <Route path="school" element={<AuLockCoreIntelligence />} />
                 <Route path="student-dashboard" element={<StudentWorkspace />} />
                 <Route path="ai-campus" element={<AICampus />} />
                 <Route path="ai-chat/:assistantId" element={<ChatInterface />} />
@@ -70,7 +70,7 @@ function App() {
                 <Route path="teacher-dashboard" element={<TeacherDashboard />} />
                 <Route path="academic-passport" element={<AcademicPassport />} />
                 <Route path="core-intelligence" element={<AuLockCoreIntelligence />} />
-                <Route path="school-dashboard" element={<Colegio360MasterDashboard />} />
+                <Route path="school-dashboard" element={<AuLockCoreIntelligence />} />
                 <Route path="subject/:id" element={<SubjectDetail />} />
                 <Route path="debate" element={<DebateArena />} />
                 <Route path="live-class" element={<LiveClass />} />

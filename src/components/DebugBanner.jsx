@@ -68,7 +68,7 @@ const DebugBanner = () => {
 
                     {/* 3. SCHOOL ADMIN PANEL */}
                     <button
-                        onClick={() => handleSwitchRole('colegio', '/school-admin', 'San Agustín High School Leadership')}
+                        onClick={() => handleSwitchRole('colegio', '/school-dashboard', 'San Agustín High School Leadership')}
                         className={`px-4 py-2.5 rounded-2xl font-orbitron font-black text-xs md:text-sm tracking-wider uppercase transition-all duration-300 flex items-center space-x-2 shadow-lg cursor-pointer ${
                             currentRole === 'colegio' || location.pathname === '/school-admin' || location.pathname === '/school-dashboard'
                                 ? 'bg-gradient-to-r from-sky-600 to-blue-500 text-white border-2 border-sky-300 shadow-[0_0_25px_rgba(56,189,248,0.8)] scale-105 z-10'
