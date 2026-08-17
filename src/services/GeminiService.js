@@ -912,3 +912,72 @@ function getFallbackTutorQueryResponse(specialist, query, mode) {
     };
 }
 
+/**
+ * Generate TEAsisto Emotional & Calming Conversational AI Support Response
+ */
+export async function generateTEAsistoSupportResponse({ userMessage, history = [], activePet = null }) {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+    const petPersona = activePet ? `Acompañante actual: ${activePet.name} (${activePet.type}). Incluye una breve nota de ánimo de ${activePet.name} con un emoji.` : '';
+
+    const prompt = `
+Eres TEAsisto, un asistente de apoyo emocional pedagógico, empático, calmado y libre de juicios para estudiantes de educación secundaria en la plataforma AuLock.
+Tu objetivo es escuchar al estudiante con profunda calidez, validar sus emociones (ansiedad, cansancio, dudas, alegría, estrés escolar o social), y responder de manera conversacional, cercana y reconfortante.
+${petPersona}
+
+Mensaje del estudiante: "${userMessage}"
+
+Reglas de respuesta:
+1. Responde de forma completamente conversacional y fluida. NUNCA uses respuestas estáticas ni repetitivas.
+2. Muestra empatía genuina y valida lo que siente el alumno sin juzgar.
+3. Si el alumno menciona estrés, exámenes o agobio, ofrece un consejo suave y una invitación breve a pausar o respirar.
+4. Mantén la respuesta entre 2 y 4 oraciones cálidas y reconfortantes.
+`;
+
+    if (!apiKey || apiKey === 'DEMO_KEY') {
+        return getFallbackTEAsistoResponse(userMessage, activePet);
+    }
+
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        if (!response.ok) throw new Error('Gemini API Error');
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return text.trim();
+        return getFallbackTEAsistoResponse(userMessage, activePet);
+    } catch (err) {
+        console.warn("Using fallback TEAsisto response due to API connection:", err);
+        return getFallbackTEAsistoResponse(userMessage, activePet);
+    }
+}
+
+function getFallbackTEAsistoResponse(userMessage, activePet) {
+    const textLower = userMessage.toLowerCase();
+    const petNote = activePet ? `\n\n${activePet.emoji || '🐾'} ${activePet.name}: "${activePet.advice}"` : '';
+
+    if (textLower.includes('hola') || textLower.includes('hello') || textLower.includes('hi')) {
+        return `¡Hola! Me alegra mucho saludarte. Recuerda que este es tu espacio seguro, sin presiones ni juzgamientos. ¿Cómo te has sentido durante la jornada de hoy?${petNote}`;
+    }
+    if (textLower.includes('como estas') || textLower.includes('how are you')) {
+        return `Estoy aquí contigo, listo para escucharte y acompañarte a tu propio ritmo. Cuéntame, ¿qué tal ha estado tu día o qué tienes en mente en este momento?${petNote}`;
+    }
+    if (textLower.includes('estres') || textLower.includes('ansiedad') || textLower.includes('agobiad') || textLower.includes('mal') || textLower.includes('sad') || textLower.includes('tired') || textLower.includes('cansad')) {
+        return `Comprendo totalmente esa sensación de agobio, y es 100% válido sentirse así. No tienes que demostrarle nada a nadie en este momento. Tómate una pausa suave, haz una inhalación profunda y recuerda que ir paso a paso es una gran victoria.${petNote}`;
+    }
+    if (textLower.includes('gracias') || textLower.includes('thank')) {
+        return `¡De nada! Siempre es un gusto estar aquí para ti. Recuerda que eres capaz de superar cualquier reto y que tus mascotas y tu equipo están contigo.${petNote}`;
+    }
+    if (textLower.includes('prueba') || textLower.includes('examen') || textLower.includes('paes') || textLower.includes('nota') || textLower.includes('tarea')) {
+        return `Las evaluaciones pueden sentirse intimidantes, pero tu valor no se define por un solo número. Has estado trabajando duro; confía en tu proceso y regálate 5 minutos de descanso para despejar tu mente.${petNote}`;
+    }
+
+    return `Te escucho con mucha atención. Todo lo que sientes es importante y válido. Tómate tu tiempo para expresar lo que necesitas; estoy aquí para acompañarte sin ninguna prisa.${petNote}`;
+}
+

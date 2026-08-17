@@ -737,6 +737,11 @@ const StudentWorkspace = () => {
                             />
                         </div>
 
+                        {/* EMBEDDED TEASISTO EMOTIONAL SUPPORT & CALMING MODULE ON HOME DASHBOARD */}
+                        <div className="pt-6 border-t border-cyan-900/50">
+                            <TEAsisto />
+                        </div>
+
                     </div>
                 )}
 
