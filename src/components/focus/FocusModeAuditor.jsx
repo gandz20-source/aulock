@@ -20,6 +20,27 @@ export default function FocusModeAuditor({ showExplanations = true }) {
     }
   }, [isPhoneInCase]);
 
+  // Real-time synchronization listener for Teacher Forced Focus Signal
+  useEffect(() => {
+    const checkForceFocus = () => {
+      const forced = localStorage.getItem('aulock_force_focus_mode') === 'true';
+      if (forced) {
+        setIsFocused(true);
+        setActivationSource('TEACHER_FORCED');
+      } else if (localStorage.getItem('aulock_force_focus_mode') === 'false') {
+        setIsFocused(false);
+      }
+    };
+
+    checkForceFocus();
+    window.addEventListener('storage', checkForceFocus);
+    window.addEventListener('aulock_focus_event', checkForceFocus);
+    return () => {
+      window.removeEventListener('storage', checkForceFocus);
+      window.removeEventListener('aulock_focus_event', checkForceFocus);
+    };
+  }, []);
+
   useEffect(() => {
     let timer = null;
 

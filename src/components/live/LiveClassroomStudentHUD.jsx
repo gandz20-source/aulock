@@ -28,29 +28,42 @@ export default function LiveClassroomStudentHUD() {
     };
   });
 
-  // Listen for real-time question broadcasts from Teacher Dashboard
+  // Listen for real-time question broadcasts from Teacher Dashboard (storage & custom event)
   useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem('aulock_active_question');
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          setActiveQuestion({
-            question: parsed.question || parsed.text || '¿Cuál es el resultado de resolver la ecuación de segundo grado $x^2 - 5x + 6 = 0$?',
-            options: parsed.options || ['A) x = 2 y x = 3', 'B) x = -2 y x = -3', 'C) x = 1 y x = 6', 'D) x = 0 y x = 5'],
-            timeLimit: parsed.timeLimit || parsed.timer_seconds || 45
-          });
-          setTimeLeft(parsed.timeLimit || parsed.timer_seconds || 45);
-          setSelectedOption(null);
-          setHasSubmitted(false);
-        } catch (e) {
-          console.error(e);
+    const handleStorageChange = (e) => {
+      let savedData = null;
+
+      if (e && e.detail && e.detail.data) {
+        savedData = e.detail.data;
+      } else {
+        const saved = localStorage.getItem('aulock_active_question');
+        if (saved) {
+          try {
+            savedData = JSON.parse(saved);
+          } catch (err) {
+            console.error(err);
+          }
         }
+      }
+
+      if (savedData) {
+        setActiveQuestion({
+          question: savedData.question || savedData.text || 'What is the correct syntax for declaring a variable in Ryo-Script?',
+          options: savedData.options && savedData.options.length > 0 ? savedData.options : ['A) let x = 10', 'B) var x = 10', 'C) const x: 10', 'D) define x = 10'],
+          timeLimit: savedData.timeLimit || savedData.timer_seconds || 45
+        });
+        setTimeLeft(savedData.timeLimit || savedData.timer_seconds || 45);
+        setSelectedOption(null);
+        setHasSubmitted(false);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('aulock_question_event', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('aulock_question_event', handleStorageChange);
+    };
   }, []);
 
   // Countdown timer simulation for active live question

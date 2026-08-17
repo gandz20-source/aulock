@@ -139,21 +139,49 @@ export default function TeacherDashboard() {
         return saved ? JSON.parse(saved) : INITIAL_SHARED_FILES;
     });
 
-    // Live Question Launcher
-    const [questionType, setQuestionType] = useState('multiple_choice');
-    const [questionText, setQuestionText] = useState('¿Cuál es la sintaxis correcta para definir una variable en Ryo-Script?');
+    // Session Configuration State
+    const [activeMode, setActiveMode] = useState('Projector / Desktop');
+    const [groupSize, setGroupSize] = useState('3 Groups of 4 Students');
+
+    // Forced Focus Mode State & Synchronized Handler
+    const [isForceFocusActive, setIsForceFocusActive] = useState(() => {
+        return localStorage.getItem('aulock_force_focus_mode') === 'true';
+    });
+
+    const handleToggleForceFocusMode = () => {
+        const nextState = !isForceFocusActive;
+        setIsForceFocusActive(nextState);
+        localStorage.setItem('aulock_force_focus_mode', nextState ? 'true' : 'false');
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('aulock_focus_event', { detail: { active: nextState } }));
+        if (nextState) {
+            alert("🚀 Classwide Focus Mode FORCED! All 26 student mobile devices are now locked in Focus Mode.");
+        } else {
+            alert("⛔ Classwide Focus Mode RELEASED. Mobile devices returned to normal mode.");
+        }
+    };
+
+    // Live Question Launcher & Synchronized Event Broadcast
+    const [questionType, setQuestionType] = useState('alternatives');
+    const [questionText, setQuestionText] = useState('What is the correct syntax for declaring a variable in Ryo-Script?');
     const [timer, setTimer] = useState(45);
-    const [options, setOptions] = useState(['var x = 10', 'let x = 10', 'const x: 10']);
+    const [options, setOptions] = useState(['let x = 10', 'var x = 10', 'const x: 10', 'define x = 10']);
     const [correctAnswer, setCorrectAnswer] = useState('let x = 10');
 
     const handleLaunchLiveQuestion = () => {
+        if (!questionText.trim()) return alert("Please enter a question prompt first.");
+
+        const validOptions = (questionType === 'multiple_choice' || questionType === 'alternatives') 
+            ? options.filter(o => o.trim()) 
+            : (questionType === 'true_false' ? ['True', 'False'] : []);
+
         const payload = {
             type: "NEW_QUESTION",
             data: {
-                question: questionText || "¿Cuál es la sintaxis correcta para definir una variable en Ryo-Script?",
-                options: questionType === 'multiple_choice' || questionType === 'alternatives' ? options : [],
+                question: questionText.trim(),
+                options: validOptions,
                 type: questionType,
-                timeLimit: timer,
+                timeLimit: Number(timer) || 45,
                 correct_answer: correctAnswer
             }
         };
@@ -164,14 +192,15 @@ export default function TeacherDashboard() {
             question_type: questionType,
             options: payload.data.options,
             correct_answer: correctAnswer,
-            timer_seconds: timer,
+            timer_seconds: Number(timer) || 45,
             launched_at: new Date().toISOString()
         };
 
         localStorage.setItem('aulock_active_question_event', JSON.stringify(payload));
         localStorage.setItem('aulock_active_question', JSON.stringify(legacyQuestion));
         window.dispatchEvent(new Event('storage'));
-        alert(`🚀 Pregunta de Ryo-Script (Tiempo límite: ${timer}s) enviada en vivo a la pantalla de todos los alumnos.`);
+        window.dispatchEvent(new CustomEvent('aulock_question_event', { detail: payload }));
+        alert(`🚀 Live Question Broadcasted to Class! Time Limit: ${timer}s. Student HUD updated instantly.`);
     };
 
     // MINEDUC Activities State
@@ -230,105 +259,141 @@ export default function TeacherDashboard() {
             {/* 🔴 CONTENIDO PRINCIPAL SEGÚN PESTAÑA HUD SELECCIONADA */}
             <main className="max-w-7xl mx-auto space-y-8">
                 
-                {/* ==================== PESTAÑA 1: 1. AULA EN VIVO (DISEÑO EXACTO REFERENCIA) ==================== */}
+                {/* ==================== TAB 1: 1. LIVE CLASSROOM ==================== */}
                 {activeTab === 'live' && (
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-300">
 
-                        {/* COLUMNA IZQUIERDA (7/12) - ACTIVIDAD EN VIVO & GRÁFICOS */}
+                        {/* LEFT COLUMN (7/12) - LIVE QUESTION CREATOR & REAL-TIME RESPONSES */}
                         <div className="lg:col-span-7 space-y-6">
 
-                            {/* PANEL ACTIVIDAD ACTUAL */}
-                            <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
-                                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-cyan-900/60 pb-3">
+                            {/* CURRENT LIVE QUESTION CREATOR & BROADCASTER */}
+                            <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 md:p-7 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.35)] space-y-5">
+                                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-cyan-900/60 pb-4">
                                     <div>
-                                        <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase block">
-                                            CURRENT ACTIVITY:
+                                        <span className="text-xs text-cyan-400 font-mono tracking-widest uppercase font-bold block mb-1">
+                                            CURRENT CLASS ACTIVITY:
                                         </span>
                                         <h2 className="text-xl md:text-2xl font-orbitron font-extrabold text-white tracking-wide">
-                                            Dynamic Live Classroom with Multiple Response Types
+                                            Dynamic Live Question Broadcaster
                                         </h2>
                                     </div>
 
-                                    {/* Selector de Tipo de Respuesta */}
-                                    <div className="flex flex-wrap bg-slate-900 p-1.5 rounded-2xl border border-cyan-500/40 text-[10px] font-bold gap-1">
+                                    {/* Question Response Type Selector */}
+                                    <div className="flex flex-wrap bg-slate-900 p-1.5 rounded-2xl border border-cyan-500/40 text-xs font-bold gap-1">
                                         <button 
                                             onClick={() => setQuestionType('alternatives')}
-                                            className={`px-2 py-1 rounded-xl transition ${questionType === 'alternatives' ? 'bg-cyan-500 text-slate-950 font-black' : 'text-slate-400'}`}
+                                            className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${questionType === 'alternatives' ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(6,182,212,0.8)]' : 'text-slate-400 hover:text-white'}`}
                                         >
                                             Multiple Choice
                                         </button>
                                         <button 
                                             onClick={() => setQuestionType('true_false')}
-                                            className={`px-2 py-1 rounded-xl transition ${questionType === 'true_false' ? 'bg-cyan-500 text-slate-950 font-black' : 'text-slate-400'}`}
+                                            className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${questionType === 'true_false' ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(6,182,212,0.8)]' : 'text-slate-400 hover:text-white'}`}
                                         >
                                             True / False
                                         </button>
                                         <button 
                                             onClick={() => setQuestionType('written')}
-                                            className={`px-2 py-1 rounded-xl transition ${questionType === 'written' ? 'bg-cyan-500 text-slate-950 font-black' : 'text-slate-400'}`}
+                                            className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${questionType === 'written' ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(6,182,212,0.8)]' : 'text-slate-400 hover:text-white'}`}
                                         >
                                             Open Response
                                         </button>
                                     </div>
                                 </div>
 
-                                {/* TARJETA DE PREGUNTA EN VIVO 5/15 */}
-                                <div className="bg-slate-900/90 p-5 rounded-2xl border border-cyan-500/40 space-y-3 font-mono">
-                                    <div className="flex items-center justify-between text-xs text-cyan-300 font-bold">
-                                        <span>QUESTION 5/15</span>
-                                        <span className="text-[10px] bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500 text-cyan-200 uppercase">
-                                            {questionType}
+                                {/* LIVE QUESTION PROMPT CARD */}
+                                <div className="bg-slate-900/90 p-5 md:p-6 rounded-2xl border-2 border-cyan-500/50 space-y-4 font-mono">
+                                    <div className="flex items-center justify-between text-sm text-cyan-300 font-bold">
+                                        <span className="font-orbitron font-extrabold text-white">LIVE QUESTION BROADCAST PROMPT</span>
+                                        <span className="text-xs bg-cyan-950 px-3 py-1 rounded-lg border border-cyan-500 text-cyan-300 font-black uppercase tracking-wider">
+                                            {questionType === 'alternatives' ? 'MULTIPLE CHOICE' : questionType === 'true_false' ? 'TRUE / FALSE' : 'OPEN RESPONSE'}
                                         </span>
                                     </div>
 
-                                    <textarea
-                                        value={questionText}
-                                        onChange={e => setQuestionText(e.target.value)}
-                                        placeholder="Observar y describir el comportamiento humano de forma segura..."
-                                        className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 outline-none focus:border-cyan-400 min-h-[90px] resize-none"
-                                    />
+                                    {/* Question Text Input */}
+                                    <div className="space-y-1">
+                                        <label className="text-xs text-slate-400 font-bold uppercase block">Question Prompt Text *</label>
+                                        <textarea
+                                            value={questionText}
+                                            onChange={e => setQuestionText(e.target.value)}
+                                            placeholder="Type your question prompt for the class (e.g. What is the correct syntax for declaring a variable in Ryo-Script?)..."
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 outline-none focus:border-cyan-400 min-h-[90px] resize-none font-mono"
+                                        />
+                                    </div>
 
+                                    {/* Multiple Choice Options Input */}
                                     {questionType === 'alternatives' && (
-                                        <div className="grid grid-cols-2 gap-2 text-xs font-mono text-cyan-200 pt-1">
-                                            {options.map((opt, idx) => (
-                                                <input
-                                                    key={idx}
-                                                    type="text"
-                                                    value={opt}
-                                                    onChange={e => {
-                                                        const updated = [...options];
-                                                        updated[idx] = e.target.value;
-                                                        setOptions(updated);
-                                                    }}
-                                                    className="p-2 bg-slate-950 rounded-xl border border-slate-800 outline-none focus:border-cyan-400"
-                                                />
-                                            ))}
+                                        <div className="space-y-2 pt-1">
+                                            <label className="text-xs text-cyan-300 font-bold uppercase block">Multiple Choice Options (A, B, C, D):</label>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-mono text-cyan-200">
+                                                {options.map((opt, idx) => (
+                                                    <div key={idx} className="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                                                        <span className="font-bold text-cyan-400 w-5">{String.fromCharCode(65 + idx)})</span>
+                                                        <input
+                                                            type="text"
+                                                            value={opt}
+                                                            onChange={e => {
+                                                                const updated = [...options];
+                                                                updated[idx] = e.target.value;
+                                                                setOptions(updated);
+                                                            }}
+                                                            className="flex-1 bg-transparent text-xs text-white outline-none font-mono"
+                                                            placeholder={`Option ${String.fromCharCode(65 + idx)}`}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
 
-                                    <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/80">
-                                        <span>Time limit: 
-                                            <input
-                                                type="number"
+                                    {/* Time Limit & Timer Control */}
+                                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm text-slate-300 pt-3 border-t border-slate-800 font-mono">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-white">⏱️ Question Timer Limit:</span>
+                                            <select
                                                 value={timer}
                                                 onChange={e => setTimer(Number(e.target.value))}
-                                                className="w-14 bg-slate-950 text-cyan-300 font-mono font-bold text-center border border-slate-800 rounded mx-1.5 p-0.5"
-                                            />
-                                            seconds
-                                        </span>
+                                                className="bg-slate-950 border border-cyan-500/60 rounded-xl px-3 py-1.5 text-cyan-300 font-bold font-orbitron outline-none cursor-pointer"
+                                            >
+                                                <option value={15}>15 Seconds</option>
+                                                <option value={30}>30 Seconds</option>
+                                                <option value={45}>45 Seconds</option>
+                                                <option value={60}>60 Seconds</option>
+                                                <option value={90}>90 Seconds</option>
+                                                <option value={120}>120 Seconds (2 min)</option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex items-center gap-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => setTimer(prev => Math.max(15, prev - 15))}
+                                                className="px-2.5 py-1 bg-slate-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 font-bold rounded-lg cursor-pointer"
+                                            >
+                                                -15s
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setTimer(prev => prev + 15)}
+                                                className="px-2.5 py-1 bg-slate-950 border border-slate-700 hover:border-cyan-400 text-cyan-300 font-bold rounded-lg cursor-pointer"
+                                            >
+                                                +15s
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* BOTÓN NEÓN LANZAR PREGUNTA */}
+                                {/* GLOWING NEON BROADCAST BUTTON */}
                                 <button
                                     onClick={handleLaunchLiveQuestion}
-                                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 via-sky-500 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-orbitron font-extrabold text-sm tracking-wider uppercase shadow-[0_0_25px_rgba(6,182,212,0.6)] transition-all hover:scale-[1.01]"
+                                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 via-sky-500 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-orbitron font-extrabold text-sm md:text-base tracking-wider uppercase shadow-[0_0_25px_rgba(6,182,212,0.7)] transition-all hover:scale-[1.01] cursor-pointer flex items-center justify-center gap-2"
                                 >
-                                    LAUNCH LIVE QUESTION TO ALL STUDENTS
+                                    <span>🚀</span>
+                                    <span>LAUNCH LIVE QUESTION TO ALL STUDENTS</span>
                                 </button>
                             </div>
 
-                            {/* PANEL RESPUESTAS EN TIEMPO REAL CON GRÁFICO RECHARTS */}
+                            {/* REAL-TIME RESPONSES CHART */}
                             <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
                                 <h3 className="text-base font-orbitron font-extrabold text-white tracking-wider uppercase">
                                     REAL-TIME STUDENT RESPONSES
@@ -337,10 +402,10 @@ export default function TeacherDashboard() {
                                 <div className="h-60 w-full pt-2">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={LIVE_RESPONSE_DATA}>
-                                            <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} />
-                                            <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} />
+                                            <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                                            <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                                             <Tooltip 
-                                                contentStyle={{ backgroundColor: '#020617', borderColor: '#06b6d4', borderRadius: '12px', color: '#cffaff', fontSize: '11px' }}
+                                                contentStyle={{ backgroundColor: '#020617', borderColor: '#06b6d4', borderRadius: '12px', color: '#cffaff', fontSize: '12px' }}
                                             />
                                             <Bar dataKey="val" radius={[8, 8, 0, 0]}>
                                                 {LIVE_RESPONSE_DATA.map((entry, index) => (
@@ -354,195 +419,219 @@ export default function TeacherDashboard() {
 
                         </div>
 
-                        {/* COLUMNA DERECHA (5/12) - CONFIGURACIÓN, ESTADO Y NEXO */}
+                        {/* RIGHT COLUMN (5/12) - ENLARGED, HIGH-CONTRAST SESSION CONFIGURATION & FOCUS CONTROL */}
                         <div className="lg:col-span-5 space-y-6">
 
-                            {/* SECCIÓN 1: CONFIGURACIÓN DE SESIÓN */}
-                            <div className="bg-slate-950/90 border-2 border-cyan-500/60 p-5 rounded-3xl shadow-xl space-y-3 font-mono">
-                                <h3 className="text-xs font-orbitron font-extrabold text-cyan-300 tracking-wider uppercase border-b border-cyan-900/60 pb-2">
-                                    SECCIÓN 1: CONFIGURACIÓN DE SESIÓN
+                            {/* SECTION 1: SESSION CONFIGURATION */}
+                            <div className="bg-slate-950/95 border-2 border-cyan-400 p-6 rounded-3xl shadow-2xl space-y-4 font-mono">
+                                <h3 className="text-sm font-orbitron font-extrabold text-cyan-300 tracking-wider uppercase border-b border-cyan-900/60 pb-3 flex items-center justify-between">
+                                    <span>SECTION 1: SESSION CONFIGURATION</span>
+                                    <span className="text-xs text-cyan-400 bg-cyan-950 px-2.5 py-0.5 rounded border border-cyan-700">ACTIVE</span>
                                 </h3>
 
-                                <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
-                                    <div className="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800">
-                                        <span className="text-slate-400 block mb-0.5">MODO ACTIVO</span>
-                                        <strong className="text-cyan-300 font-mono text-xs">(Proyector/Escritorio)</strong>
+                                <div className="grid grid-cols-1 gap-3 text-xs md:text-sm">
+                                    {/* 1. ACTIVE DISPLAY MODE */}
+                                    <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+                                        <span className="text-slate-400 font-bold block uppercase text-[11px]">ACTIVE DISPLAY MODE:</span>
+                                        <select
+                                            value={activeMode}
+                                            onChange={e => setActiveMode(e.target.value)}
+                                            className="w-full bg-slate-950 border border-cyan-500/50 rounded-xl p-2.5 text-cyan-300 font-bold text-xs md:text-sm outline-none cursor-pointer"
+                                        >
+                                            <option value="Projector / Desktop">🖥️ Projector / Desktop Arena</option>
+                                            <option value="Smart TV Arena">📺 Smart TV Classroom Arena</option>
+                                            <option value="Mobile Peer Groups">📱 Mobile Peer Groups</option>
+                                        </select>
                                     </div>
-                                    <div className="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800">
-                                        <span className="text-slate-400 block mb-0.5">TAMAÑO DE GRUPO</span>
-                                        <strong className="text-cyan-300 font-mono text-xs">(3 grupos de 4 alumnos)</strong>
+
+                                    {/* 2. GROUP SIZE */}
+                                    <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+                                        <span className="text-slate-400 font-bold block uppercase text-[11px]">GROUP FORMATION SIZE:</span>
+                                        <select
+                                            value={groupSize}
+                                            onChange={e => setGroupSize(e.target.value)}
+                                            className="w-full bg-slate-950 border border-cyan-500/50 rounded-xl p-2.5 text-cyan-300 font-bold text-xs md:text-sm outline-none cursor-pointer"
+                                        >
+                                            <option value="3 Groups of 4 Students">👥 3 Groups of 4 Students (Squad Alfa)</option>
+                                            <option value="4 Groups of 6 Students">👥 4 Groups of 6 Students (Extended)</option>
+                                            <option value="Individual PAES / SAT Mode">👤 Individual PAES / SAT Mode</option>
+                                        </select>
                                     </div>
-                                    <div className="bg-slate-900/90 p-2.5 rounded-2xl border border-slate-800">
-                                        <span className="text-slate-400 block mb-0.5">TEMPORIZADOR</span>
-                                        <strong className="text-cyan-300 font-mono text-xs">(45 Segundos)</strong>
+
+                                    {/* 3. SESSION TIMER */}
+                                    <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
+                                        <span className="text-slate-400 font-bold block uppercase text-[11px]">GLOBAL SESSION TIMER:</span>
+                                        <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-cyan-500/50">
+                                            <span className="text-cyan-300 font-bold font-orbitron text-sm">{timer} Seconds</span>
+                                            <div className="flex items-center gap-1.5">
+                                                <button
+                                                    onClick={() => setTimer(prev => Math.max(15, prev - 15))}
+                                                    className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 font-bold rounded-lg text-xs cursor-pointer"
+                                                >
+                                                    -15s
+                                                </button>
+                                                <button
+                                                    onClick={() => setTimer(prev => prev + 15)}
+                                                    className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 font-bold rounded-lg text-xs cursor-pointer"
+                                                >
+                                                    +15s
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* GOOGLE WORKSPACE API INTEGRATION (CLASSROOM, DRIVE & CALENDAR) */}
-                            <div className="bg-slate-950/90 border-2 border-emerald-500/60 p-5 rounded-3xl shadow-xl space-y-4 font-mono">
-                                <div className="flex items-center justify-between border-b border-emerald-900/60 pb-2">
-                                    <h3 className="text-xs font-orbitron font-extrabold text-emerald-300 tracking-wider uppercase flex items-center gap-2">
+                            {/* GOOGLE WORKSPACE API INTEGRATION */}
+                            <div className="bg-slate-950/95 border-2 border-emerald-500/80 p-6 rounded-3xl shadow-xl space-y-4 font-mono">
+                                <div className="flex items-center justify-between border-b border-emerald-900/60 pb-3">
+                                    <h3 className="text-sm font-orbitron font-extrabold text-emerald-300 tracking-wider uppercase flex items-center gap-2">
                                         <span>🌐 Google Workspace Integrations</span>
                                     </h3>
-                                    <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                                    <span className="text-xs bg-emerald-950 text-emerald-400 border border-emerald-700 px-3 py-1 rounded-full font-bold">
                                         {googleConnected ? '● CONNECTED' : '○ DISCONNECTED'}
                                     </span>
                                 </div>
 
                                 {googleStatusMsg && (
-                                    <div className="p-2.5 bg-emerald-950/80 border border-emerald-500/40 rounded-xl text-[11px] text-emerald-200 font-bold">
+                                    <div className="p-3 bg-emerald-950/90 border border-emerald-500/40 rounded-xl text-xs text-emerald-200 font-bold leading-relaxed">
                                         {googleStatusMsg}
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
                                     {/* 1. Google Classroom Connect */}
                                     <button
                                         onClick={handleGoogleClassroomConnect}
-                                        className="p-3 bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 rounded-2xl text-left transition space-y-1 cursor-pointer"
+                                        className="p-3.5 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 rounded-2xl text-left transition space-y-1 cursor-pointer"
                                     >
-                                        <span className="block text-[10px] font-bold text-emerald-400 uppercase font-orbitron">1. CLASSROOM API</span>
-                                        <strong className="block text-xs text-white">Conectar con Classroom</strong>
-                                        <span className="block text-[9.5px] text-slate-400">Import Roster to Supabase</span>
+                                        <span className="block text-[11px] font-bold text-emerald-400 uppercase font-orbitron">1. CLASSROOM API</span>
+                                        <strong className="block text-xs text-white">Connect Classroom</strong>
+                                        <span className="block text-[10px] text-slate-400">Import Roster to Supabase</span>
                                     </button>
 
                                     {/* 2. Google Drive PDF Export */}
                                     <button
                                         onClick={handleExportPDFToGoogleDrive}
-                                        className="p-3 bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/40 rounded-2xl text-left transition space-y-1 cursor-pointer"
+                                        className="p-3.5 bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 rounded-2xl text-left transition space-y-1 cursor-pointer"
                                     >
-                                        <span className="block text-[10px] font-bold text-cyan-400 uppercase font-orbitron">2. DRIVE PDF EXPORT</span>
-                                        <strong className="block text-xs text-white">Exportar Evidencias PDF</strong>
-                                        <span className="block text-[9.5px] text-slate-400">Upload to Shared Drive</span>
+                                        <span className="block text-[11px] font-bold text-cyan-400 uppercase font-orbitron">2. DRIVE EXPORT</span>
+                                        <strong className="block text-xs text-white">Export PDF Reports</strong>
+                                        <span className="block text-[10px] text-slate-400">Upload to Shared Drive</span>
                                     </button>
 
                                     {/* 3. Google Calendar Sync */}
                                     <button
                                         onClick={handleSyncGoogleCalendar}
-                                        className="p-3 bg-fuchsia-950/60 hover:bg-fuchsia-900/80 border border-fuchsia-500/40 rounded-2xl text-left transition space-y-1 cursor-pointer"
+                                        className="p-3.5 bg-fuchsia-950/80 hover:bg-fuchsia-900 border border-fuchsia-500/50 rounded-2xl text-left transition space-y-1 cursor-pointer"
                                     >
-                                        <span className="block text-[10px] font-bold text-fuchsia-400 uppercase font-orbitron">3. CALENDAR TIMER</span>
-                                        <strong className="block text-xs text-white">Sincronizar Horarios</strong>
-                                        <span className="block text-[9.5px] text-slate-400">Prep Focus Session</span>
+                                        <span className="block text-[11px] font-bold text-fuchsia-400 uppercase font-orbitron">3. CALENDAR TIMER</span>
+                                        <strong className="block text-xs text-white">Sync Class Schedule</strong>
+                                        <span className="block text-[10px] text-slate-400">Prep Focus Session</span>
                                     </button>
                                 </div>
                             </div>
 
-                            {/* SECCIÓN 2: ESTADO DEL AULA, GRUPOS & SEMÁFORO MODO ENFOQUE */}
-                            <div className="bg-slate-950/90 border-2 border-cyan-500/60 p-5 rounded-3xl shadow-xl space-y-4 font-mono">
-                                <div className="flex justify-between items-center border-b border-cyan-900/60 pb-2">
-                                    <h3 className="text-xs font-orbitron font-extrabold text-cyan-300 tracking-wider uppercase">
-                                        SECCIÓN 2: ESTADO DEL AULA & MODO ENFOQUE
+                            {/* SECTION 2: CLASSROOM STATUS & FORCE FOCUS MODE */}
+                            <div className="bg-slate-950/95 border-2 border-cyan-400 p-6 rounded-3xl shadow-xl space-y-4 font-mono">
+                                <div className="flex justify-between items-center border-b border-cyan-900/60 pb-3">
+                                    <h3 className="text-sm font-orbitron font-extrabold text-cyan-300 tracking-wider uppercase">
+                                        SECTION 2: CLASSROOM STATUS & FOCUS MODE
                                     </h3>
-                                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 animate-pulse">
-                                        ● AUDITORÍA DE PANTALLA EN VIVO
+                                    <span className="text-xs font-bold text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-800 animate-pulse">
+                                        ● LIVE AUDIT
                                     </span>
                                 </div>
 
-                                {/* CONTROL MAESTRO DE MODO ENFOQUE DEL PROFESOR */}
-                                <div className="p-3.5 bg-cyan-950/40 border border-cyan-500/50 rounded-2xl space-y-2">
+                                {/* SYNCHRONIZED FOCUS MODE MASTER TOGGLE */}
+                                <div className="p-4 bg-cyan-950/50 border-2 border-cyan-500/60 rounded-2xl space-y-3">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[11px] font-bold text-cyan-300 font-orbitron uppercase">📱 MODO ENFOQUE MÓVIL (AULOCK FOCUS)</span>
-                                        <span className="text-[10px] text-emerald-400 font-bold">24/26 ALUMNOS ENFOCADOS</span>
+                                        <span className="text-xs font-extrabold text-cyan-300 font-orbitron uppercase">📱 MOBILE FOCUS MODE (AULOCK NFC CASE)</span>
+                                        <span className="text-xs text-emerald-400 font-bold bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-700">
+                                            24/26 FOCUSED
+                                        </span>
                                     </div>
+
                                     <button
-                                        onClick={() => alert("🚀 Señal enviada a los 26 celulares del curso: ¡Modo Enfoque Forzado Activado!")}
-                                        className="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-emerald-500 text-slate-950 font-orbitron font-black text-xs rounded-xl shadow-[0_0_15px_rgba(56,235,203,0.4)] hover:opacity-90 transition cursor-pointer flex items-center justify-center gap-1.5 uppercase"
+                                        onClick={handleToggleForceFocusMode}
+                                        className={`w-full py-3.5 rounded-xl font-orbitron font-black text-xs md:text-sm transition-all cursor-pointer flex items-center justify-center gap-2 uppercase tracking-wider ${
+                                            isForceFocusActive
+                                                ? 'bg-gradient-to-r from-rose-600 to-red-500 text-white border-2 border-rose-300 shadow-[0_0_25px_rgba(244,63,94,0.8)]'
+                                                : 'bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 text-slate-950 border-2 border-emerald-300 shadow-[0_0_25px_rgba(56,235,203,0.8)] hover:scale-[1.01]'
+                                        }`}
                                     >
-                                        <span>🚀 FORZAR MODO ENFOQUE EN TODO EL CURSO</span>
+                                        <span>{isForceFocusActive ? '⛔ RELEASE CLASSWIDE FOCUS MODE' : '🚀 FORCE CLASSWIDE FOCUS MODE'}</span>
                                     </button>
                                 </div>
 
-                                {/* SEMÁFORO DE ATENCIÓN Y SALIDAS DETECTADAS (VISIBILITY API) */}
-                                <div className="space-y-2 text-xs">
-                                    <div className="flex items-center justify-between bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-                                        <span className="text-slate-300">Conexión Celulares:</span>
+                                {/* ATTENTION METRICS & VISIBILITY DISTRACTIONS */}
+                                <div className="space-y-2.5 text-xs md:text-sm">
+                                    <div className="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-800">
+                                        <span className="text-slate-300 font-bold">Mobile Device Connection:</span>
                                         <div className="flex items-center space-x-2">
-                                            <div className="w-20 bg-slate-950 h-2.5 rounded-full overflow-hidden border border-emerald-500/40">
+                                            <div className="w-24 bg-slate-950 h-3 rounded-full overflow-hidden border border-emerald-500/40">
                                                 <div className="bg-emerald-400 h-full w-[100%]" />
                                             </div>
-                                            <strong className="text-emerald-400 font-mono">100%</strong>
+                                            <strong className="text-emerald-400 font-mono font-black">100%</strong>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between bg-slate-900/80 p-2.5 rounded-xl border border-slate-800">
-                                        <span className="text-slate-300">Índice de Atención en Clase:</span>
+                                    <div className="flex items-center justify-between bg-slate-900 p-3 rounded-xl border border-slate-800">
+                                        <span className="text-slate-300 font-bold">Class Attention Index:</span>
                                         <div className="flex items-center space-x-2">
-                                            <div className="w-20 bg-slate-950 h-2.5 rounded-full overflow-hidden border border-cyan-500/40">
+                                            <div className="w-24 bg-slate-950 h-3 rounded-full overflow-hidden border border-cyan-500/40">
                                                 <div className="bg-cyan-400 h-full w-[92%]" />
                                             </div>
-                                            <strong className="text-cyan-300 font-mono">92%</strong>
+                                            <strong className="text-cyan-300 font-mono font-black">92%</strong>
                                         </div>
                                     </div>
 
-                                    {/* ALUMNOS DISTRAÍDOS / SALIDAS REGISTRADAS */}
-                                    <div className="bg-rose-950/30 border border-rose-900/70 p-3 rounded-xl space-y-1">
-                                        <p className="text-[10px] text-rose-400 font-orbitron font-bold uppercase">🚨 ALERTAS DE DISTRACCIÓN DETECTADAS (VISIBILITY API):</p>
-                                        <div className="flex justify-between items-center text-[11px]">
+                                    {/* DISTRACTION ALERTS (VISIBILITY API) */}
+                                    <div className="bg-rose-950/40 border border-rose-900/80 p-3.5 rounded-xl space-y-2">
+                                        <p className="text-xs text-rose-400 font-orbitron font-extrabold uppercase">🚨 DISTRACTION ALERTS DETECTED (VISIBILITY API):</p>
+                                        <div className="flex justify-between items-center text-xs">
                                             <span className="text-white font-bold">• Juan Carlos Pérez</span>
-                                            <span className="text-rose-400 font-mono font-bold">2 salidas (-30 PS)</span>
+                                            <span className="text-rose-400 font-mono font-bold">2 tab exits (-30 PS)</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-[11px]">
+                                        <div className="flex justify-between items-center text-xs">
                                             <span className="text-white font-bold">• Mateo Rojas</span>
-                                            <span className="text-rose-400 font-mono font-bold">1 salida (-15 PS)</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-slate-900/90 rounded-2xl border border-slate-800 overflow-hidden text-xs">
-                                    <div className="grid grid-cols-2 bg-slate-950 p-2.5 font-bold text-slate-400 border-b border-slate-800">
-                                        <span>Grupo STEM</span>
-                                        <span className="text-right">Distracciones</span>
-                                    </div>
-                                    <div className="divide-y divide-slate-800/60">
-                                        <div className="grid grid-cols-2 p-2.5 text-slate-300">
-                                            <span>Grupo 1 (Alfa)</span>
-                                            <span className="text-right text-emerald-400 font-mono font-bold">0 Salidas</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 p-2.5 text-slate-300">
-                                            <span>Grupo 2 (Beta)</span>
-                                            <span className="text-right text-rose-400 font-mono font-bold">2 Salidas</span>
-                                        </div>
-                                        <div className="grid grid-cols-2 p-2.5 text-slate-300">
-                                            <span>Grupo 3 (Gamma)</span>
-                                            <span className="text-right text-emerald-400 font-mono font-bold">0 Salidas</span>
+                                            <span className="text-rose-400 font-mono font-bold">1 tab exit (-15 PS)</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* SECCIÓN 3: NEXO: ÁGORA DE CONVIVENCIA ESCOLAR */}
-                            <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-5 rounded-3xl shadow-[0_0_25px_rgba(6,182,212,0.3)] space-y-4 font-mono">
-                                <h3 className="text-xs font-orbitron font-extrabold text-white tracking-wider uppercase border-b border-cyan-900/60 pb-2">
-                                    SECCIÓN 3: NEXO: ÁGORA DE CONVIVENCIA ESCOLAR
+                            {/* SECTION 3: COEXISTENCE NEXUS & TEACHER CONTROL PANEL */}
+                            <div className="bg-slate-950/95 border-2 border-cyan-400 p-6 rounded-3xl shadow-xl space-y-4 font-mono">
+                                <h3 className="text-sm font-orbitron font-extrabold text-white tracking-wider uppercase border-b border-cyan-900/60 pb-3">
+                                    SECTION 3: COEXISTENCE NEXUS & AGORA
                                 </h3>
 
-                                <div className="bg-slate-900/90 p-4 rounded-2xl border border-cyan-500/40 space-y-3 text-center">
-                                    <h4 className="text-xs font-orbitron font-bold text-cyan-300 uppercase">
-                                        Panel de Control (GM Docente)
+                                <div className="bg-slate-900 p-4 rounded-2xl border border-cyan-500/40 space-y-3 text-center">
+                                    <h4 className="text-xs font-orbitron font-extrabold text-cyan-300 uppercase tracking-wider">
+                                        TEACHER CONTROL PANEL (GM ROLE)
                                     </h4>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
                                         <button 
-                                            onClick={() => alert("🛡️ Código Resistencia activado para el grupo.")}
-                                            className="py-2.5 px-3 rounded-2xl border-2 border-cyan-400 text-cyan-300 font-mono font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-950 transition"
+                                            onClick={() => alert("🛡️ Resistance Protocol Code activated for peer group.")}
+                                            className="py-3 px-3 rounded-2xl border-2 border-cyan-400 text-cyan-300 font-mono font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-950 transition cursor-pointer"
                                         >
-                                            CÓDIGO RESISTENCIA
+                                            RESISTANCE PROTOCOL CODE
                                         </button>
                                         <button 
-                                            onClick={() => alert("⚠️ Incidente de convivencia reportado a Dirección.")}
-                                            className="py-2.5 px-3 rounded-2xl border-2 border-cyan-400 text-cyan-300 font-mono font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-950 transition"
+                                            onClick={() => alert("⚠️ Coexistence incident reported to School Leadership.")}
+                                            className="py-3 px-3 rounded-2xl border-2 border-cyan-400 text-cyan-300 font-mono font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-950 transition cursor-pointer"
                                         >
-                                            REPORTAR INCIDENTE
+                                            REPORT INCIDENT
                                         </button>
                                     </div>
 
                                     <button 
-                                        onClick={() => alert("🧠 Consultando Maestro Asociados MINEDUC...")}
-                                        className="w-full py-2.5 px-3 rounded-2xl border-2 border-cyan-400 text-cyan-300 font-mono font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-950 transition mt-2"
+                                        onClick={() => alert("🧠 Consulting MINEDUC Associated Master Teacher AI System...")}
+                                        className="w-full py-3 px-3 rounded-2xl border-2 border-cyan-400 text-cyan-300 font-mono font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-950 transition mt-2 cursor-pointer"
                                     >
-                                        CONSULTAR MAESTRO ASOCIADOS
+                                        CONSULT ASSOCIATED TEACHER
                                     </button>
                                 </div>
                             </div>
