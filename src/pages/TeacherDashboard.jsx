@@ -301,11 +301,72 @@ export default function TeacherDashboard() {
             launched_at: new Date().toISOString()
         };
 
-        localStorage.setItem('aulock_active_question_event', JSON.stringify(payload));
-        localStorage.setItem('aulock_active_question', JSON.stringify(legacyQuestion));
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('aulock_question_event', { detail: payload }));
         alert(`🚀 Live Question Broadcasted to Class! Time Limit: ${timer}s. Student HUD updated instantly.`);
+    };
+
+    // Synchronized Class Timer Launcher & Controls
+    const [classTimerInitial, setClassTimerInitial] = useState(600); // Default 10 min (600s)
+    const [classTimerRemaining, setClassTimerRemaining] = useState(600);
+    const [isClassTimerRunning, setIsClassTimerRunning] = useState(false);
+
+    useEffect(() => {
+        let interval = null;
+        if (isClassTimerRunning && classTimerRemaining > 0) {
+            interval = setInterval(() => {
+                setClassTimerRemaining(prev => Math.max(0, prev - 1));
+            }, 1000);
+        } else if (classTimerRemaining === 0 && isClassTimerRunning) {
+            setIsClassTimerRunning(false);
+        }
+        return () => clearInterval(interval);
+    }, [isClassTimerRunning, classTimerRemaining]);
+
+    const handleStartClassTimer = (secondsToSet) => {
+        const targetSeconds = secondsToSet !== undefined ? secondsToSet : (classTimerRemaining > 0 ? classTimerRemaining : classTimerInitial);
+        setClassTimerRemaining(targetSeconds);
+        setIsClassTimerRunning(true);
+
+        const payload = {
+            initialSeconds: classTimerInitial,
+            remainingSeconds: targetSeconds,
+            startedAt: Date.now(),
+            isRunning: true,
+            label: 'Live Class Session Timer'
+        };
+
+        localStorage.setItem('aulock_class_timer', JSON.stringify(payload));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('aulock_timer_event', { detail: payload }));
+        alert(`⏱️ Class Timer Started (${Math.floor(targetSeconds / 60)}m ${targetSeconds % 60}s)! Broadcasted live to all student devices.`);
+    };
+
+    const handlePauseClassTimer = () => {
+        setIsClassTimerRunning(false);
+        const payload = {
+            initialSeconds: classTimerInitial,
+            remainingSeconds: classTimerRemaining,
+            startedAt: Date.now(),
+            isRunning: false,
+            label: 'Live Class Session Timer'
+        };
+        localStorage.setItem('aulock_class_timer', JSON.stringify(payload));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('aulock_timer_event', { detail: payload }));
+    };
+
+    const handleResetClassTimer = () => {
+        setIsClassTimerRunning(false);
+        setClassTimerRemaining(classTimerInitial);
+        const payload = {
+            initialSeconds: classTimerInitial,
+            remainingSeconds: classTimerInitial,
+            startedAt: Date.now(),
+            isRunning: false,
+            label: 'Live Class Session Timer'
+        };
+        localStorage.setItem('aulock_class_timer', JSON.stringify(payload));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('aulock_timer_event', { detail: payload }));
     };
 
     // MINEDUC Activities State
@@ -582,25 +643,67 @@ export default function TeacherDashboard() {
                                         </select>
                                     </div>
 
-                                    {/* 3. SESSION TIMER */}
-                                    <div className="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-1">
-                                        <span className="text-slate-400 font-bold block uppercase text-[11px]">GLOBAL SESSION TIMER:</span>
-                                        <div className="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-cyan-500/50">
-                                            <span className="text-cyan-300 font-bold font-orbitron text-sm">{timer} Seconds</span>
-                                            <div className="flex items-center gap-1.5">
+                                    {/* 3. SYNCHRONIZED CLASSROOM TIMER CONTROLLER */}
+                                    <div className="bg-slate-900 p-4 rounded-2xl border-2 border-cyan-500/60 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-cyan-300 font-bold block uppercase text-xs font-orbitron">⏱️ CLASSROOM TIMER CONTROLLER:</span>
+                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isClassTimerRunning ? 'bg-emerald-950 text-emerald-300 border border-emerald-500 animate-pulse' : 'bg-slate-950 text-slate-400 border border-slate-700'}`}>
+                                                {isClassTimerRunning ? '● LIVE SYNCED' : '○ PAUSED'}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-cyan-400">
+                                            <span className="text-slate-400 text-xs font-bold uppercase">Time Remaining:</span>
+                                            <span className="text-2xl font-black font-orbitron text-amber-300">
+                                                {String(Math.floor(classTimerRemaining / 60)).padStart(2, '0')}:{String(classTimerRemaining % 60).padStart(2, '0')}
+                                            </span>
+                                        </div>
+
+                                        {/* PRESET DURATION BUTTONS */}
+                                        <div className="flex flex-wrap gap-1.5 justify-between">
+                                            {[300, 600, 900, 1800, 2700].map((sec) => (
                                                 <button
-                                                    onClick={() => setTimer(prev => Math.max(15, prev - 15))}
-                                                    className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 font-bold rounded-lg text-xs cursor-pointer"
+                                                    key={sec}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setClassTimerInitial(sec);
+                                                        handleStartClassTimer(sec);
+                                                    }}
+                                                    className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono cursor-pointer transition ${classTimerInitial === sec ? 'bg-cyan-500 text-slate-950 font-black' : 'bg-slate-950 hover:bg-slate-800 text-cyan-300 border border-slate-700'}`}
                                                 >
-                                                    -15s
+                                                    {sec / 60}m
                                                 </button>
-                                                <button
-                                                    onClick={() => setTimer(prev => prev + 15)}
-                                                    className="px-3 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-cyan-300 font-bold rounded-lg text-xs cursor-pointer"
-                                                >
-                                                    +15s
-                                                </button>
-                                            </div>
+                                            ))}
+                                        </div>
+
+                                        {/* ACTION BUTTONS: LAUNCH, PAUSE, RESET */}
+                                        <div className="grid grid-cols-3 gap-2 pt-1">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleStartClassTimer()}
+                                                className="py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 text-slate-950 font-orbitron font-extrabold text-[11px] uppercase tracking-wider rounded-xl shadow-md transition cursor-pointer flex items-center justify-center gap-1"
+                                            >
+                                                <span>▶️</span>
+                                                <span>{isClassTimerRunning ? 'Resume' : 'Start'}</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={handlePauseClassTimer}
+                                                className="py-2.5 bg-amber-950 hover:bg-amber-900 border border-amber-500/60 text-amber-300 font-orbitron font-bold text-[11px] uppercase rounded-xl transition cursor-pointer flex items-center justify-center gap-1"
+                                            >
+                                                <span>⏸️</span>
+                                                <span>Pause</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={handleResetClassTimer}
+                                                className="py-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-300 font-orbitron font-bold text-[11px] uppercase rounded-xl transition cursor-pointer flex items-center justify-center gap-1"
+                                            >
+                                                <span>🔄</span>
+                                                <span>Reset</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

@@ -164,6 +164,50 @@ const StudentWorkspace = () => {
         };
     }, []);
 
+    // Synchronized Class Timer State in Student Workspace
+    const [classTimer, setClassTimer] = useState(() => {
+        const saved = localStorage.getItem('aulock_class_timer');
+        if (saved) {
+            try { return JSON.parse(saved); } catch (e) { console.error(e); }
+        }
+        return { remainingSeconds: 600, initialSeconds: 600, isRunning: false };
+    });
+
+    useEffect(() => {
+        const handleTimerSync = (e) => {
+            let data = null;
+            if (e && e.detail) {
+                data = e.detail;
+            } else {
+                const saved = localStorage.getItem('aulock_class_timer');
+                if (saved) {
+                    try { data = JSON.parse(saved); } catch (err) {}
+                }
+            }
+            if (data) setClassTimer(data);
+        };
+
+        window.addEventListener('storage', handleTimerSync);
+        window.addEventListener('aulock_timer_event', handleTimerSync);
+        return () => {
+            window.removeEventListener('storage', handleTimerSync);
+            window.removeEventListener('aulock_timer_event', handleTimerSync);
+        };
+    }, []);
+
+    useEffect(() => {
+        let interval = null;
+        if (classTimer.isRunning && classTimer.remainingSeconds > 0) {
+            interval = setInterval(() => {
+                setClassTimer(prev => ({
+                    ...prev,
+                    remainingSeconds: Math.max(0, prev.remainingSeconds - 1)
+                }));
+            }, 1000);
+        }
+        return () => clearInterval(interval);
+    }, [classTimer.isRunning, classTimer.remainingSeconds]);
+
     // Time-based Motivational Banner
     const [timeGreeting, setTimeGreeting] = useState({ period: 'morning', text: '', icon: Sunrise });
     const [civicIndex, setCivicIndex] = useState(0);
@@ -552,6 +596,25 @@ const StudentWorkspace = () => {
             )}
 
             <div className="max-w-7xl mx-auto space-y-8">
+
+                {/* --- SYNCHRONIZED CLASSROOM TIMER BANNER FOR STUDENTS --- */}
+                {classTimer && classTimer.isRunning && (
+                    <div className="p-5 bg-slate-950/95 border-2 border-cyan-400 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.4)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 font-mono animate-fade-in">
+                        <div className="flex items-center gap-3">
+                            <span className="text-2xl animate-bounce">⏱️</span>
+                            <div>
+                                <span className="text-[10px] text-cyan-300 font-bold font-orbitron uppercase block">LIVE TEACHER CLASSROOM TIMER IN PROGRESS</span>
+                                <h3 className="text-sm font-bold text-white font-sans">Prof. María González launched live class session countdown</h3>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 bg-slate-900 px-5 py-2.5 rounded-2xl border border-cyan-500 shrink-0">
+                            <span className="text-2xl font-black font-orbitron text-amber-300">
+                                {String(Math.floor(classTimer.remainingSeconds / 60)).padStart(2, '0')}:{String(classTimer.remainingSeconds % 60).padStart(2, '0')}
+                            </span>
+                            <span className="px-2.5 py-1 bg-emerald-950 text-emerald-300 text-[10px] font-bold rounded-lg border border-emerald-600 animate-pulse">● LIVE SYNCED</span>
+                        </div>
+                    </div>
+                )}
 
                 {/* --- OFFICIAL DISPATCHED INSTITUTIONAL NOTICE BANNER --- */}
                 {dispatchedAlert && (

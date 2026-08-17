@@ -53,6 +53,12 @@ export const FocusModeProvider = ({ children }) => {
         }
 
         const handleVisibilityChange = () => {
+            const currentPath = (window.location.pathname || '').toLowerCase();
+            // NEVER trigger out-of-focus warning on teacher or school admin routes
+            if (currentPath.includes('teacher') || currentPath.includes('school') || currentPath.includes('core-intelligence') || currentPath.includes('admin')) {
+                return;
+            }
+
             if (document.visibilityState === 'hidden' || document.hidden) {
                 // 1. Pause student focus timer
                 setIsTabFocused(false);

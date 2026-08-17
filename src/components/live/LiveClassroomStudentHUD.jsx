@@ -66,6 +66,55 @@ export default function LiveClassroomStudentHUD() {
     };
   }, []);
 
+  // Classwide Timer broadcasted by Teacher
+  const [classTimer, setClassTimer] = useState(() => {
+    const saved = localStorage.getItem('aulock_class_timer');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return { remainingSeconds: 600, initialSeconds: 600, isRunning: false };
+  });
+
+  useEffect(() => {
+    const handleTimerSync = (e) => {
+      let data = null;
+      if (e && e.detail) {
+        data = e.detail;
+      } else {
+        const saved = localStorage.getItem('aulock_class_timer');
+        if (saved) {
+          try { data = JSON.parse(saved); } catch (err) {}
+        }
+      }
+      if (data) setClassTimer(data);
+    };
+
+    window.addEventListener('storage', handleTimerSync);
+    window.addEventListener('aulock_timer_event', handleTimerSync);
+    return () => {
+      window.removeEventListener('storage', handleTimerSync);
+      window.removeEventListener('aulock_timer_event', handleTimerSync);
+    };
+  }, []);
+
+  // Class timer local countdown
+  useEffect(() => {
+    let interval = null;
+    if (classTimer.isRunning && classTimer.remainingSeconds > 0) {
+      interval = setInterval(() => {
+        setClassTimer(prev => ({
+          ...prev,
+          remainingSeconds: Math.max(0, prev.remainingSeconds - 1)
+        }));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [classTimer.isRunning, classTimer.remainingSeconds]);
+
   // Countdown timer simulation for active live question
   useEffect(() => {
     if (timeLeft > 0 && !hasSubmitted) {
@@ -114,7 +163,7 @@ export default function LiveClassroomStudentHUD() {
     <div className="min-h-screen bg-black text-cyan-100 font-mono p-4 md:p-6 relative selection:bg-emerald-900 rounded-3xl">
       
       {/* 🟢 ACTIVE MODULE HEADER */}
-      <div className="p-3.5 mb-6 bg-gray-950 border-2 border-emerald-500/60 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.2)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="p-3.5 mb-4 bg-gray-950 border-2 border-emerald-500/60 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.2)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
           <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
           <h1 className="text-sm md:text-base font-orbitron font-extrabold text-emerald-300 tracking-widest uppercase">
@@ -122,10 +171,29 @@ export default function LiveClassroomStudentHUD() {
           </h1>
         </div>
         <div className="flex items-center gap-2 bg-emerald-950/60 border border-emerald-500/40 px-3 py-1 rounded-lg shrink-0">
-          <span className="text-xs text-emerald-400 font-bold">⏱️ REMAINING TIME:</span>
+          <span className="text-xs text-emerald-400 font-bold">⏱️ QUESTION TIMER:</span>
           <span className="text-sm font-bold text-white font-orbitron">{timeLeft}s</span>
         </div>
       </div>
+
+      {/* ⏱️ SYNCHRONIZED CLASS TIMER BANNER */}
+      {classTimer && classTimer.isRunning && (
+        <div className="p-4 mb-6 bg-slate-950/95 border-2 border-cyan-400 rounded-2xl shadow-[0_0_30px_rgba(6,182,212,0.4)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 animate-fade-in font-mono">
+          <div className="flex items-center gap-3">
+            <span className="text-xl animate-bounce">⏱️</span>
+            <div>
+              <span className="text-[10px] text-cyan-300 font-bold font-orbitron uppercase block">LIVE TEACHER CLASSROOM TIMER IN PROGRESS</span>
+              <h3 className="text-sm font-bold text-white">Prof. María González launched live class session countdown</h3>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 bg-slate-900 px-4 py-2 rounded-xl border border-cyan-500">
+            <span className="text-2xl font-black font-orbitron text-amber-300">
+              {String(Math.floor(classTimer.remainingSeconds / 60)).padStart(2, '0')}:{String(classTimer.remainingSeconds % 60).padStart(2, '0')}
+            </span>
+            <span className="px-2 py-0.5 bg-emerald-950 text-emerald-300 text-[10px] font-bold rounded border border-emerald-600 animate-pulse">● LIVE SYNCED</span>
+          </div>
+        </div>
+      )}
 
       {/* 🟢 LIVE QUESTION ZONE */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
