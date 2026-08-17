@@ -134,6 +134,10 @@ const StudentWorkspace = () => {
             setActiveTab(window.history.state.usr.activeTab);
         }
     }, []);
+    const [selectedTutor, setSelectedTutor] = useState(AI_TUTORS[0]);
+    const [selectedGradeLevel, setSelectedGradeLevel] = useState('Senior High A');
+    const [selectedOaId, setSelectedOaId] = useState('OA 06');
+
     // Dispatched Institutional Notice State
     const [dispatchedAlert, setDispatchedAlert] = useState(null);
 
