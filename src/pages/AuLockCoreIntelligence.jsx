@@ -64,6 +64,20 @@ export default function AuLockCoreIntelligence() {
 
             setAlertsList(prev => [newAlert, ...prev]);
             setIsDeploying(false);
+
+            // Broadcast payload to Student Dashboard
+            const dispatchPayload = {
+                id: newAlert.id,
+                category: alertCategory,
+                message: alertMessage,
+                studentName: selectedAlertStudent,
+                date: 'Today',
+                dispatchedBy: 'San Agustín High School Leadership'
+            };
+            localStorage.setItem('aulock_teacher_dispatched_alert', JSON.stringify(dispatchPayload));
+            window.dispatchEvent(new Event('storage'));
+            window.dispatchEvent(new CustomEvent('aulock_dispatch_event', { detail: dispatchPayload }));
+
             setAlertMessage('');
             alert(`🚀 Deployment executed! Preventive alert notified to ${selectedAlertStudent}.`);
         }, 800);

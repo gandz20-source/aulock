@@ -74,53 +74,76 @@ export default function LiveClassroomStudentHUD() {
     }
   }, [timeLeft, hasSubmitted]);
 
-  const handleAnswerSubmit = (optionId) => {
+  const handleAnswerSubmit = (optionId, optionText = '') => {
     setSelectedOption(optionId);
     setHasSubmitted(true);
+
+    const newResponse = {
+      id: 'resp-' + Date.now(),
+      studentName: 'Juan Carlos Pérez',
+      course: 'Senior High A',
+      optionId,
+      optionText,
+      timestamp: new Date().toISOString()
+    };
+
+    // Retrieve and update existing responses array in localStorage
+    const saved = localStorage.getItem('aulock_student_live_responses');
+    const list = saved ? JSON.parse(saved) : [];
+    list.unshift(newResponse);
+    localStorage.setItem('aulock_student_live_responses', JSON.stringify(list));
+
+    // Dispatch real-time events for Teacher Dashboard
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('aulock_student_response_event', { detail: newResponse }));
   };
 
   const handleUnderstandingFeedback = (level) => {
     setUnderstandingLevel(level);
-    localStorage.setItem('aulock_student_understanding', JSON.stringify({
+    const payload = {
+      studentName: 'Juan Carlos Pérez',
       level,
       timestamp: new Date().toISOString()
-    }));
+    };
+    localStorage.setItem('aulock_student_understanding', JSON.stringify(payload));
+    window.dispatchEvent(new Event('storage'));
+    window.dispatchEvent(new CustomEvent('aulock_understanding_event', { detail: payload }));
   };
 
   return (
     <div className="min-h-screen bg-black text-cyan-100 font-mono p-4 md:p-6 relative selection:bg-emerald-900 rounded-3xl">
       
-      {/* 🟢 CABECERA DE MÓDULO ACTIVO (Módulo 3: Aula en Vivo) */}
+      {/* 🟢 ACTIVE MODULE HEADER */}
       <div className="p-3.5 mb-6 bg-gray-950 border-2 border-emerald-500/60 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.2)] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div className="flex items-center gap-3">
           <span className="w-3 h-3 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
           <h1 className="text-sm md:text-base font-orbitron font-extrabold text-emerald-300 tracking-widest uppercase">
-            AULA EN VIVO // SESIÓN ACTIVA CON PROFESORA MARÍA GONZÁLEZ
+            LIVE CLASSROOM // ACTIVE SESSION WITH PROF. MARÍA GONZÁLEZ
           </h1>
         </div>
         <div className="flex items-center gap-2 bg-emerald-950/60 border border-emerald-500/40 px-3 py-1 rounded-lg shrink-0">
-          <span className="text-xs text-emerald-400 font-bold">⏱️ TIEMPO RESTANTE:</span>
+          <span className="text-xs text-emerald-400 font-bold">⏱️ REMAINING TIME:</span>
           <span className="text-sm font-bold text-white font-orbitron">{timeLeft}s</span>
         </div>
       </div>
 
-      {/* 🟢 ZONA PRINCIPAL DE PREGUNTA EN VIVO (Holograma Interactivo) */}
+      {/* 🟢 LIVE QUESTION ZONE */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         
-        {/* Pregunta y Opciones (Ocupa 2 columnas) */}
+        {/* Question & Options */}
         <div className="lg:col-span-2 p-6 rounded-2xl bg-gray-950/90 border-2 border-emerald-500/50 shadow-[0_0_25px_rgba(16,185,129,0.15)] relative space-y-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-[10px] font-orbitron font-bold px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 uppercase">
-              TIPO: ALTERNATIVAS MÚLTIPLES
+              TYPE: MULTIPLE CHOICE
             </span>
-            <span className="text-[10px] text-cyan-400 font-bold">VALOR: 100 PS</span>
+            <span className="text-[10px] text-cyan-400 font-bold">VALUE: 100 PS</span>
           </div>
 
           <h2 className="text-base md:text-lg font-bold text-white mb-6 font-sans border-l-4 border-emerald-400 pl-4 leading-relaxed">
             {activeQuestion.question}
           </h2>
 
-          {/* Opciones de Respuesta Estilo Terminal */}
+          {/* Terminal Style Options */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
             {activeQuestion.options.map((optText, idx) => {
               const letterId = String.fromCharCode(65 + idx); // 'A', 'B', 'C', 'D'
@@ -130,7 +153,7 @@ export default function LiveClassroomStudentHUD() {
                 <button
                   key={idx}
                   disabled={hasSubmitted}
-                  onClick={() => handleAnswerSubmit(letterId)}
+                  onClick={() => handleAnswerSubmit(letterId, optText)}
                   className={`p-4 rounded-xl border text-left font-mono text-xs transition-all flex items-center justify-between cursor-pointer ${
                     isSelected
                       ? 'bg-emerald-950 border-emerald-400 text-white shadow-[0_0_15px_rgba(16,185,129,0.4)]'
@@ -150,69 +173,69 @@ export default function LiveClassroomStudentHUD() {
 
           {hasSubmitted && (
             <div className="p-3.5 bg-emerald-950/60 border border-emerald-500 rounded-xl text-center space-y-1 animate-fade-in">
-              <p className="text-emerald-400 font-bold font-orbitron text-xs uppercase tracking-wider">¡RESPUESTA REGISTRADA EN EL NÚCLEO!</p>
-              <p className="text-[11px] text-cyan-300">Esperando sincronización del profesor para la siguiente fase.</p>
+              <p className="text-emerald-400 font-bold font-orbitron text-xs uppercase tracking-wider">✓ RESPONSE RECORDED IN CORE!</p>
+              <p className="text-[11px] text-cyan-300">Waiting for teacher synchronization for the next phase.</p>
             </div>
           )}
         </div>
 
-        {/* Panel Lateral del Alumno (Sintonía de Aula y Estado) */}
+        {/* Student Sidebar */}
         <div className="space-y-6">
           
-          {/* Widget de Sintonía Emocional en Vivo */}
+          {/* Live Emotional Comprehension Widget */}
           <div className="p-5 rounded-2xl bg-gray-950/80 border-2 border-cyan-500/40 shadow-xl space-y-3">
-            <h3 className="text-xs font-orbitron font-bold text-cyan-300">// SINTONÍA DE COMPRENSIÓN</h3>
-            <p className="text-[11px] text-cyan-400/80">¿Cómo evalúas tu ritmo de aprendizaje actual en esta clase?</p>
+            <h3 className="text-xs font-orbitron font-bold text-cyan-300">// COMPREHENSION PULSE</h3>
+            <p className="text-[11px] text-cyan-400/80">How do you rate your current learning pace in this class?</p>
             <div className="grid grid-cols-3 gap-2">
               <button 
-                onClick={() => handleUnderstandingFeedback('CLARO')}
+                onClick={() => handleUnderstandingFeedback('CLEAR')}
                 className={`p-2.5 rounded-lg border text-[10px] font-bold transition cursor-pointer ${
-                  understandingLevel === 'CLARO'
+                  understandingLevel === 'CLEAR'
                     ? 'bg-green-900 border-green-400 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)]'
                     : 'bg-green-950/50 border-green-700 text-green-300 hover:bg-green-900'
                 }`}
               >
-                🟢 CLARO
+                🟢 CLEAR
               </button>
 
               <button 
-                onClick={() => handleUnderstandingFeedback('RÁPIDO')}
+                onClick={() => handleUnderstandingFeedback('TOO FAST')}
                 className={`p-2.5 rounded-lg border text-[10px] font-bold transition cursor-pointer ${
-                  understandingLevel === 'RÁPIDO'
+                  understandingLevel === 'TOO FAST'
                     ? 'bg-yellow-900 border-yellow-400 text-white shadow-[0_0_10px_rgba(234,179,8,0.5)]'
                     : 'bg-yellow-950/50 border-yellow-700 text-yellow-300 hover:bg-yellow-900'
                 }`}
               >
-                🟡 RÁPIDO
+                🟡 TOO FAST
               </button>
 
               <button 
-                onClick={() => handleUnderstandingFeedback('DUDA')}
+                onClick={() => handleUnderstandingFeedback('CONFUSED')}
                 className={`p-2.5 rounded-lg border text-[10px] font-bold transition cursor-pointer ${
-                  understandingLevel === 'DUDA'
+                  understandingLevel === 'CONFUSED'
                     ? 'bg-red-900 border-red-400 text-white shadow-[0_0_10px_rgba(239,68,68,0.5)]'
                     : 'bg-red-950/50 border-red-700 text-red-300 hover:bg-red-900'
                 }`}
               >
-                🔴 DUDA
+                🔴 CONFUSED
               </button>
             </div>
             {understandingLevel && (
               <p className="text-[10px] text-emerald-400 font-bold text-center pt-1">
-                ✓ Sintonía "{understandingLevel}" enviada al tablero de la Profesora.
+                ✓ Pulse "{understandingLevel}" sent to Teacher Dashboard.
               </p>
             )}
           </div>
 
-          {/* Insignia Semanal */}
+          {/* Weekly Badge */}
           <div className="p-5 rounded-2xl bg-gray-950/80 border-2 border-magenta-500/40 shadow-xl flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-magenta-950 border border-magenta-500 flex items-center justify-center text-xl shadow-[0_0_10px_rgba(217,70,239,0.3)] shrink-0">
               🎖️
             </div>
             <div>
-              <span className="text-[10px] font-orbitron text-magenta-300 font-bold">// INSIGNIA ACTIVA</span>
-              <h4 className="text-xs font-bold text-white">La Escucha Activa</h4>
-              <p className="text-[10px] text-cyan-400">Respeto de turnos en plenaria.</p>
+              <span className="text-[10px] font-orbitron text-magenta-300 font-bold">// ACTIVE BADGE</span>
+              <h4 className="text-xs font-bold text-white">Active Listening Master</h4>
+              <p className="text-[10px] text-cyan-400">Respectful turn-taking in plenary discussions.</p>
             </div>
           </div>
 
@@ -220,37 +243,37 @@ export default function LiveClassroomStudentHUD() {
 
       </div>
 
-      {/* 🟢 SECCIÓN INFERIOR: ACUERDOS, EFEMÉRIDES Y CONVIVENCIA EN MODO CIBER-TECH */}
+      {/* 🟢 BOTTOM SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* Efeméride Ciudadana */}
+        {/* Civic Reflection Capsule */}
         <div className="p-5 rounded-2xl bg-gray-950/80 border-2 border-cyan-500/40 shadow-xl flex flex-col justify-between space-y-3">
           <div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-orbitron text-cyan-400 font-bold">// EFEMÉRIDE CIUDADANA • 2026-05-21</span>
-              <span className="text-[10px] text-green-400 font-bold">MEMORIA ACTIVA</span>
+              <span className="text-[10px] font-orbitron text-cyan-400 font-bold">// CIVIC REFLECTION CAPSULE • 2026</span>
+              <span className="text-[10px] text-green-400 font-bold">ACTIVE MEMORY</span>
             </div>
-            <h3 className="text-sm font-bold text-white mb-2 font-orbitron">Día de las Glorias Navales</h3>
+            <h3 className="text-sm font-bold text-white mb-2 font-orbitron">Civic Education & Respect</h3>
             <p className="text-xs text-cyan-200/90 leading-relaxed font-sans">
-              Hoy recordamos un hito de nuestra historia. Más allá de la batalla, valoremos el diálogo y la paz como herramientas para resolver conflictos.
+              Daily dialogue and empathetic interaction build resilient, inclusive school communities.
             </p>
           </div>
         </div>
 
-        {/* Convivencia y Respeto Escolar (Rediseñado en oscuro) */}
+        {/* School Coexistence Protocol */}
         <div className="p-5 rounded-2xl bg-gray-950/80 border-2 border-magenta-500/40 shadow-xl flex flex-col justify-between space-y-3">
           <div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-[10px] font-orbitron text-magenta-300 font-bold">// CONVIVENCIA & RESPETO ESCOLAR</span>
-              <span className="text-[10px] text-magenta-400 font-bold">PROTOCOLO DE EMPATÍA</span>
+              <span className="text-[10px] font-orbitron text-magenta-300 font-bold">// SCHOOL COEXISTENCE & RESPECT</span>
+              <span className="text-[10px] text-magenta-400 font-bold">EMPATHY PROTOCOL</span>
             </div>
             <p className="text-xs text-magenta-100 italic leading-relaxed font-sans">
-              "El respeto y la empatía hacia el pensamiento de tus compañeros enriquecen el diálogo y fortalecen a toda la comunidad educativa."
+              "Respect and active listening toward your classmates' ideas enrich learning and strengthen our entire community."
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-magenta-900/40 flex justify-between items-center text-[10px] text-cyan-400 font-bold">
-            <span>ESTADO DEL CLIMA: 85% ÓPTIMO</span>
-            <span className="text-green-400">● CONECTADO</span>
+            <span>CLIMATE INDEX: 85% OPTIMAL</span>
+            <span className="text-green-400">● CONNECTED</span>
           </div>
         </div>
 

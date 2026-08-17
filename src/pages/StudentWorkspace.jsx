@@ -134,9 +134,31 @@ const StudentWorkspace = () => {
             setActiveTab(window.history.state.usr.activeTab);
         }
     }, []);
-    const [selectedTutor, setSelectedTutor] = useState(AI_TUTORS[0]);
-    const [selectedGradeLevel, setSelectedGradeLevel] = useState('3ro Básico');
-    const [selectedOaId, setSelectedOaId] = useState('OA 06');
+    // Dispatched Institutional Notice State
+    const [dispatchedAlert, setDispatchedAlert] = useState(null);
+
+    useEffect(() => {
+        const checkDispatchedAlerts = () => {
+            const saved = localStorage.getItem('aulock_teacher_dispatched_alert');
+            if (saved) {
+                try {
+                    setDispatchedAlert(JSON.parse(saved));
+                } catch (e) {
+                    console.error(e);
+                }
+            } else {
+                setDispatchedAlert(null);
+            }
+        };
+
+        checkDispatchedAlerts();
+        window.addEventListener('storage', checkDispatchedAlerts);
+        window.addEventListener('aulock_dispatch_event', checkDispatchedAlerts);
+        return () => {
+            window.removeEventListener('storage', checkDispatchedAlerts);
+            window.removeEventListener('aulock_dispatch_event', checkDispatchedAlerts);
+        };
+    }, []);
 
     // Time-based Motivational Banner
     const [timeGreeting, setTimeGreeting] = useState({ period: 'morning', text: '', icon: Sunrise });
@@ -526,6 +548,32 @@ const StudentWorkspace = () => {
             )}
 
             <div className="max-w-7xl mx-auto space-y-8">
+
+                {/* --- OFFICIAL DISPATCHED INSTITUTIONAL NOTICE BANNER --- */}
+                {dispatchedAlert && (
+                    <div className="p-5 bg-gradient-to-r from-amber-950 via-slate-900 to-amber-950 text-white rounded-3xl border-2 border-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.5)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 font-mono animate-in fade-in duration-300">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                                <span className="px-2.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[10px] rounded-lg uppercase tracking-wider">
+                                    🚨 OFFICIAL INSTITUTIONAL NOTICE
+                                </span>
+                                <span className="text-xs text-amber-300 font-bold">{dispatchedAlert.category}</span>
+                            </div>
+                            <p className="text-sm font-bold text-white font-sans">{dispatchedAlert.message}</p>
+                            <span className="text-[10px] text-slate-400 block">Dispatched by: {dispatchedAlert.dispatchedBy} • {dispatchedAlert.date}</span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem('aulock_teacher_dispatched_alert');
+                                setDispatchedAlert(null);
+                                alert("✓ Official notice acknowledged and confirmed by student.");
+                            }}
+                            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-orbitron font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0"
+                        >
+                            Confirm Reading & Acknowledge
+                        </button>
+                    </div>
+                )}
 
                 {/* ==================== BARRA NAVEGACIÓN FIJA CYBERPUNK HUD (7 MÓDULOS) ==================== */}
                 <HeaderNav activeTab={activeTab} setActiveTab={setActiveTab} />

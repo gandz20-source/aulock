@@ -143,6 +143,47 @@ export default function TeacherDashboard() {
     const [activeMode, setActiveMode] = useState('Projector / Desktop');
     const [groupSize, setGroupSize] = useState('3 Groups of 4 Students');
 
+    // Live Student Responses State & Real-Time Sync Listeners
+    const [liveResponsesList, setLiveResponsesList] = useState([]);
+    const [latestStudentResponse, setLatestStudentResponse] = useState(null);
+    const [comprehensionPulse, setComprehensionPulse] = useState(null);
+
+    useEffect(() => {
+        const handleSyncStudentResponses = (e) => {
+            const saved = localStorage.getItem('aulock_student_live_responses');
+            if (saved) {
+                try {
+                    const list = JSON.parse(saved);
+                    setLiveResponsesList(list);
+                    if (list.length > 0) {
+                        setLatestStudentResponse(list[0]);
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            const understandingSaved = localStorage.getItem('aulock_student_understanding');
+            if (understandingSaved) {
+                try {
+                    setComprehensionPulse(JSON.parse(understandingSaved));
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        };
+
+        handleSyncStudentResponses();
+        window.addEventListener('storage', handleSyncStudentResponses);
+        window.addEventListener('aulock_student_response_event', handleSyncStudentResponses);
+        window.addEventListener('aulock_understanding_event', handleSyncStudentResponses);
+        return () => {
+            window.removeEventListener('storage', handleSyncStudentResponses);
+            window.removeEventListener('aulock_student_response_event', handleSyncStudentResponses);
+            window.removeEventListener('aulock_understanding_event', handleSyncStudentResponses);
+        };
+    }, []);
+
     // Forced Focus Mode State & Synchronized Handler
     const [isForceFocusActive, setIsForceFocusActive] = useState(() => {
         return localStorage.getItem('aulock_force_focus_mode') === 'true';
@@ -395,9 +436,28 @@ export default function TeacherDashboard() {
 
                             {/* REAL-TIME RESPONSES CHART */}
                             <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
-                                <h3 className="text-base font-orbitron font-extrabold text-white tracking-wider uppercase">
-                                    REAL-TIME STUDENT RESPONSES
-                                </h3>
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-base font-orbitron font-extrabold text-white tracking-wider uppercase">
+                                        REAL-TIME STUDENT RESPONSES
+                                    </h3>
+                                    <span className="text-xs text-emerald-400 font-mono font-bold bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-700">
+                                        {liveResponsesList.length} Responses Received
+                                    </span>
+                                </div>
+
+                                {latestStudentResponse && (
+                                    <div className="p-3 bg-emerald-950/80 border border-emerald-500/50 rounded-xl text-xs font-mono text-emerald-200 flex flex-wrap items-center justify-between gap-2 animate-fade-in">
+                                        <span className="font-bold">✓ Latest Student Answer Received:</span>
+                                        <span className="text-white font-black">{latestStudentResponse.studentName} ({latestStudentResponse.course}) selected Option {latestStudentResponse.optionId}</span>
+                                    </div>
+                                )}
+
+                                {comprehensionPulse && (
+                                    <div className="p-2.5 bg-cyan-950/80 border border-cyan-500/50 rounded-xl text-xs font-mono text-cyan-200 flex flex-wrap items-center justify-between gap-2">
+                                        <span className="font-bold">✓ Student Comprehension Pulse:</span>
+                                        <span className="text-cyan-300 font-black">{comprehensionPulse.studentName}: {comprehensionPulse.level}</span>
+                                    </div>
+                                )}
 
                                 <div className="h-60 w-full pt-2">
                                     <ResponsiveContainer width="100%" height="100%">
