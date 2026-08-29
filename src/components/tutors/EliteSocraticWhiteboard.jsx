@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { handleTutorQueryService } from '../../services/GeminiService';
 
 export default function EliteSocraticWhiteboardFixed() {
   const specialists = [
@@ -32,74 +33,74 @@ export default function EliteSocraticWhiteboardFixed() {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([
-    { sender: 'ai', text: 'Hola. He sincronizado la pizarra digital. Escribe tu duda o concepto de física/matemática para iniciar el desglose analítico.' }
+    { sender: 'ai', text: 'Hola. Soy tu tutor socrático. Escribe cualquier concepto o duda que desees explorar (ej: derivadas, leyes de Newton, estequiometría, cinemática) para comenzar.' }
   ]);
   
-  // Estado real de la pizarra sincronizado con la consulta
+  // Estado real de la pizarra sincronizado dinámicamente con Gemini 2.5 Flash
   const [boardContent, setBoardContent] = useState({
-    topic: 'Esperando Consulta Académica',
-    coreFormula: '---',
+    topic: 'Cálculo Diferencial: Derivadas y Razón de Cambio',
+    coreFormula: "f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h} = \\frac{df}{dx}",
     steps: [
-      { num: '01', title: 'Planteamiento del Sistema', desc: 'Ingresa un concepto arriba (ej: "movimiento rectilineo", "leyes de newton") para proyectar el análisis.' }
+      { num: '01', title: 'Definición Conceptual', desc: 'La derivada mide la tasa de cambio instantánea de una función con respecto a su variable independiente, geométricamente equivalente a la pendiente de la recta tangente a la curva en un punto dado.' },
+      { num: '02', title: 'Teorema o Ecuación de Gobernanza', desc: 'Regla de la Potencia: d/dx(xⁿ) = n·xⁿ⁻¹ | Regla de la Cadena: (f∘g)\'(x) = f\'(g(x))·g\'(x) | Regla del Producto: (f·g)\' = f\'g + fg\'' },
+      { num: '03', title: 'Aplicación Práctica y Validación', desc: 'Optimización de Sistemas: Se determinan puntos críticos haciendo f\'(x) = 0. Si f\'\'(x) < 0 se confirma un máximo absoluto (máxima ganancia, menor pérdida de energía).' }
     ]
   });
 
-  // Motor analítico que genera contenido académico real sin textos flojos
-  const handleConsult = (e) => {
+  // Motor analítico socrático conectado a Gemini 2.5 Flash
+  const handleConsult = async (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!query.trim() || loading) return;
 
-    const userText = query;
-    const cleanQ = userText.toLowerCase();
+    const userText = query.trim();
     
     setChatHistory(prev => [...prev, { sender: 'user', text: userText }]);
     setQuery('');
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      
-      let responseText = "";
-      let generatedBoard = {};
+    try {
+      const responseData = await handleTutorQueryService({
+        specialist: selectedSpecialist.name,
+        query: userText,
+        mode: 'SOCRATIC'
+      });
 
-      if (cleanQ.includes('rectilineo') || cleanQ.includes('rectilíneo') || cleanQ.includes('mru') || cleanQ.includes('movimiento')) {
-        responseText = `Analicemos el Movimiento Rectilíneo Uniforme (MRU). La clave aquí es entender que la velocidad es constante, lo que significa que la aceleración es estrictamente cero. Observa el modelo físico en la pizarra.`;
-        generatedBoard = {
-          topic: 'Movimiento Rectilíneo Uniforme (MRU)',
-          coreFormula: 'd = v · t  ==>  v = Δx / Δt',
-          steps: [
-            { num: '01', title: 'Condición de Aceleración Nula', desc: 'En el MRU, a = 0 m/s². La trayectoria es una línea recta y la velocidad no experimenta variaciones temporales.' },
-            { num: '02', title: 'Ecuación Horaria de Posición', desc: 'x(t) = x₀ + v · t (Donde x₀ es la posición inicial y v la velocidad constante del móvil).' },
-            { num: '03', title: 'Análisis Gráfico (Posición vs Tiempo)', desc: 'La pendiente de la recta en un gráfico x-t representa exactamente el valor numérico de la velocidad.' }
-          ]
-        };
-      } else if (cleanQ.includes('newton') || cleanQ.includes('fuerza') || cleanQ.includes('fisica') || cleanQ.includes('física')) {
-        responseText = `Las Leyes de Newton rigen la mecánica clásica. Para la segunda ley, el cambio de movimiento es proporcional a la fuerza motriz impresa. Revísalo en la pizarra.`;
-        generatedBoard = {
-          topic: 'Segunda Ley de Newton (Dinámica)',
-          coreFormula: 'F_net = m · a  [N = kg · m/s²]',
-          steps: [
-            { num: '01', title: 'Diagrama de Cuerpo Libre (DCL)', desc: 'Identifica y vectoriza todas las fuerzas concurrentes que actúan sobre el objeto de estudio.' },
-            { num: '02', title: 'Sumatoria de Fuerzas (ΣF)', desc: 'Aplica la ecuación vectorial ΣF = m·a descomponiendo los ejes cartesianos X e Y.' },
-            { num: '03', title: 'Resolución Analítica', desc: 'Despeja la incógnita solicitada (masa, aceleración o magnitud de la fuerza aplicada).' }
-          ]
-        };
-      } else {
-        responseText = `Excelente consulta sobre "${userText}". He estructurado los fundamentos analíticos y teóricos de este concepto en la pizarra digital para tu estudio formal.`;
-        generatedBoard = {
-          topic: `Estudio Analítico: ${userText.toUpperCase()}`,
-          coreFormula: 'Principio Teórico / Modelo Base',
-          steps: [
-            { num: '01', title: 'Definición Conceptual', desc: `Desglose formal de las variables críticas que componen "${userText}".` },
-            { num: '02', title: 'Teorema o Ecuación de Gobernanza', desc: 'Relación matemática o lógica que permite calcular el comportamiento del sistema.' },
-            { num: '03', title: 'Aplicación Práctica y Validación', desc: 'Criterio de comprobación analítica para evitar errores comunes en pruebas.' }
-          ]
-        };
-      }
+      const responseText = responseData.chat_response || responseData.tutor_response;
+      const bb = responseData.blackboard || {};
+
+      const dynamicBoard = {
+        topic: bb.topic || `Análisis Analítico: ${userText.toUpperCase()}`,
+        coreFormula: bb.core_equation || 'f(x) = y',
+        steps: [
+          {
+            num: '01',
+            title: 'Definición Conceptual',
+            desc: bb.definition || `Estudio riguroso de las variables y fundamentos conceptuales de "${userText}".`
+          },
+          {
+            num: '02',
+            title: 'Teorema o Ecuación de Gobernanza',
+            desc: bb.equation_governance || 'Relación analítica y fórmulas rectoras para el cálculo del sistema.'
+          },
+          {
+            num: '03',
+            title: 'Aplicación Práctica y Validación',
+            desc: bb.practical_application || 'Criterio de validación empírica y comprobación dimensional para evaluaciones.'
+          }
+        ]
+      };
 
       setChatHistory(prev => [...prev, { sender: 'ai', text: responseText }]);
-      setBoardContent(generatedBoard);
-    }, 900);
+      setBoardContent(dynamicBoard);
+    } catch (err) {
+      console.error("Error consultando tutor socrático:", err);
+      setChatHistory(prev => [...prev, { 
+        sender: 'ai', 
+        text: `Imagina que estás modelando este fenómeno como una balanza en equilibrio. Si alteramos las condiciones iniciales de "${userText}", ¿qué variable crees que responderá primero?` 
+      }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -936,13 +936,39 @@ function getFallbackDebateEvaluation(topic, stance, argumentText) {
 }
 
 /**
- * Official Gemini 2.5 Flash Tutor Query Service (Structured JSON Mode)
+ * Official Gemini 2.5 Flash Socratic Tutor & Dynamic Blackboard Service
+ * Generates non-meta-talk conversational Socratic response + structured blackboard JSON schema
  */
 export async function handleTutorQueryService({ specialist, query, mode }) {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const apiKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) 
+        || (typeof process !== 'undefined' && process?.env?.VITE_GEMINI_API_KEY)
+        || '';
+
+    const cleanQuery = query || 'Concepto General';
+    const activeSpecialist = specialist || 'Tutor de Ciencias y Matemáticas';
+
+    const systemInstructionText = `Eres un Tutor Socrático de Elite en ${activeSpecialist} para la plataforma AuLock (Currículum MINEDUC & PAES Chile).
+REGLAS ESTRICTAS DE RESPUESTA:
+1. CERO META-TALK: NUNCA digas "he estructurado la pizarra", "revisa el tablero", "he preparado este desglose", ni frases robóticas sobre la interfaz.
+2. ENFOQUE SOCRÁTICO INMEDIATO: Inicia el texto de chat INMEDIATAMENTE con una analogía del mundo real potente e intuitiva que aterrice el concepto "${cleanQuery}" (por ejemplo, para derivadas: la diferencia entre el velocímetro en un milisegundo vs la distancia total del viaje).
+3. PREGUNTA GUÍA FINAL: Cierra el mensaje con una pregunta socrática reflexiva y guiada que invite al estudiante a razonar y responder.
+4. RIGOR EN LA PIZARRA: Completa cada campo de "blackboard" con contenido técnico, ecuaciones explícitas y aplicaciones reales sin ningún texto genérico de relleno.
+
+Formato JSON obligatorio:
+{
+  "status": "SUCCESS",
+  "chat_response": "Analogía intuitiva inicial + explicación socrática + pregunta detonante al alumno.",
+  "blackboard": {
+    "topic": "Nombre formal y preciso del tema",
+    "core_equation": "Fórmula matemática central o principio rector",
+    "definition": "Definición conceptual rigurosa y rol de las variables principales.",
+    "equation_governance": "Ecuaciones de gobierno, teoremas o reglas operativas paso a paso.",
+    "practical_application": "Aplicación práctica en ingeniería/ciencias y criterio de validación analítica para evitar errores en pruebas."
+  }
+}`;
 
     if (!apiKey || apiKey === 'DEMO_KEY') {
-        return getFallbackTutorQueryResponse(specialist, query, mode);
+        return getFallbackTutorQueryResponse(activeSpecialist, cleanQuery, mode);
     }
 
     try {
@@ -952,16 +978,18 @@ export async function handleTutorQueryService({ specialist, query, mode }) {
             body: JSON.stringify({
                 contents: [{
                     parts: [{
-                        text: `El alumno consulta: "${query}". El especialista activo es ${specialist}. El modo de entrega solicitado es: ${mode}.`
+                        text: `El estudiante pregunta: "${cleanQuery}". Tutor: ${activeSpecialist}. Genera la analogía socrática y la pizarra analítica en JSON estructurado.`
                     }]
                 }],
                 systemInstruction: {
                     parts: [{
-                        text: `Eres un tutor experto en ${specialist}. Responde de forma rigurosa, socrática y estructurada para pizarra digital en formato JSON estructurado con las claves "status", "tutor_response", "mode", "whiteboard_data" (con slide_1, slide_2, slide_3).`
+                        text: systemInstructionText
                     }]
                 },
                 generationConfig: {
-                    responseMimeType: 'application/json'
+                    responseMimeType: 'application/json',
+                    temperature: 0.7,
+                    maxOutputTokens: 800
                 }
             })
         });
@@ -972,31 +1000,98 @@ export async function handleTutorQueryService({ specialist, query, mode }) {
 
         const data = await response.json();
         const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        return JSON.parse(jsonText);
+        if (jsonText) {
+            const parsed = JSON.parse(jsonText);
+            // Asegurar compatibilidad de campos
+            if (parsed.blackboard) {
+                return {
+                    status: "SUCCESS",
+                    chat_response: parsed.chat_response || parsed.tutor_response,
+                    tutor_response: parsed.chat_response || parsed.tutor_response,
+                    blackboard: parsed.blackboard
+                };
+            }
+        }
+        return getFallbackTutorQueryResponse(activeSpecialist, cleanQuery, mode);
     } catch (err) {
         console.warn('Gemini 2.5 Flash query failed, using fallback:', err);
-        return getFallbackTutorQueryResponse(specialist, query, mode);
+        return getFallbackTutorQueryResponse(activeSpecialist, cleanQuery, mode);
     }
 }
 
 function getFallbackTutorQueryResponse(specialist, query, mode) {
+    const q = (query || '').toLowerCase();
+
+    if (q.includes('derivad') || q.includes('calculo') || q.includes('cálculo') || q.includes('tasa de cambio') || q.includes('razon de cambio') || q.includes('razón de cambio')) {
+        return {
+            status: "SUCCESS",
+            chat_response: "Imagina que vas en un automóvil por la carretera. Si miras el odómetro al final del viaje, calculas tu velocidad promedio dividiendo la distancia total entre las horas. Pero si miras el velocímetro en una curva cerrada, estás viendo exactamente tu velocidad instantánea en ese milisegundo: la derivada de la posición respecto al tiempo. Si una partícula se mueve según la posición s(t) = 3t² + 2t, ¿qué crees que le ocurre a la velocidad cuando el intervalo de tiempo tiende a cero?",
+            tutor_response: "Imagina que vas en un automóvil por la carretera. Si miras el odómetro al final del viaje, calculas tu velocidad promedio dividiendo la distancia total entre las horas. Pero si miras el velocímetro en una curva cerrada, estás viendo exactamente tu velocidad instantánea en ese milisegundo: la derivada de la posición respecto al tiempo. Si una partícula se mueve según la posición s(t) = 3t² + 2t, ¿qué crees que le ocurre a la velocidad cuando el intervalo de tiempo tiende a cero?",
+            blackboard: {
+                topic: "Cálculo Diferencial: Derivadas y Razón de Cambio Instantánea",
+                core_equation: "f'(x) = \\lim_{h \\to 0} \\frac{f(x+h) - f(x)}{h} = \\frac{df}{dx}",
+                definition: "La derivada representa la tasa de cambio instantánea de una función con respecto a su variable independiente, geométricamente equivalente a la pendiente de la recta tangente a la curva en un punto dado.",
+                equation_governance: "Regla de la Potencia: d/dx(xⁿ) = n·xⁿ⁻¹ | Regla del Producto: (f·g)' = f'g + fg' | Regla de la Cadena: (f∘g)'(x) = f'(g(x))·g'(x)",
+                practical_application: "Optimización de Sistemas: Se determinan puntos críticos haciendo f'(x) = 0. Si f''(x) < 0 se confirma un máximo absoluto (máxima ganancia, menor pérdida de energía)."
+            }
+        };
+    }
+
+    if (q.includes('newton') || q.includes('fuerza') || q.includes('dinamica') || q.includes('dinámica') || q.includes('aceleracion') || q.includes('aceleración')) {
+        return {
+            status: "SUCCESS",
+            chat_response: "Imagina empujar un carro de supermercado vacío frente a uno completamente lleno de compras. Con la misma fuerza en tus brazos, el carro vacío acelera rápidamente, mientras que el lleno apenas cambia su velocidad. Esa resistencia natural es la masa inercial. Si duplicas la masa de un cohete espacial pero mantienes el empuje constante de los motores, ¿qué fracción de su aceleración original experimentará?",
+            tutor_response: "Imagina empujar un carro de supermercado vacío frente a uno completamente lleno de compras. Con la misma fuerza en tus brazos, el carro vacío acelera rápidamente, mientras que el lleno apenas cambia su velocidad. Esa resistencia natural es la masa inercial. Si duplicas la masa de un cohete espacial pero mantienes el empuje constante de los motores, ¿qué fracción de su aceleración original experimentará?",
+            blackboard: {
+                topic: "Mecánica Clásica: Segunda Ley de Newton & Dinámica Vectorial",
+                core_equation: "\\vec{F}_{net} = m \\cdot \\vec{a} = \\frac{d\\vec{p}}{dt}",
+                definition: "La aceleración que adquiere un cuerpo es directamente proporcional a la fuerza neta resultante que actúa sobre él e inversamente proporcional a su masa inercial total.",
+                equation_governance: "Sumatoria Vectorial: ΣF_x = m·a_x  y  ΣF_y = m·a_y | Fuerza de Roce: f_r = μ·N | Peso Gravitatorio: P = m·g",
+                practical_application: "Diagramas de Cuerpo Libre (DCL): Aislamiento de tensiones, normales y fuerzas de fricción para predecir trayectorias balísticas y estructuras estáticas seguras."
+            }
+        };
+    }
+
+    if (q.includes('mru') || q.includes('mruv') || q.includes('rectilineo') || q.includes('rectilíneo') || q.includes('cinematica') || q.includes('cinemática')) {
+        return {
+            status: "SUCCESS",
+            chat_response: "Piensa en el piloto automático de un tren de alta velocidad en una vía recta e infinita: el velocímetro permanece clavado en 200 km/h sin moverse ni un milímetro. Como no hay variación de velocidad, la aceleración es exactamente cero. Si este tren viaja durante 45 minutos a velocidad constante, ¿cómo despejarías la distancia recorrida sin confundir los minutos con horas?",
+            tutor_response: "Piensa en el piloto automático de un tren de alta velocidad en una vía recta e infinita: el velocímetro permanece clavado en 200 km/h sin moverse ni un milímetro. Como no hay variación de velocidad, la aceleración es exactamente cero. Si este tren viaja durante 45 minutos a velocidad constante, ¿cómo despejarías la distancia recorrida sin confundir los minutos con horas?",
+            blackboard: {
+                topic: "Cinemática 1D: Movimiento Rectilíneo Uniforme y Variado",
+                core_equation: "x(t) = x_0 + v_0 \\cdot t + \\frac{1}{2} a \\cdot t^2",
+                definition: "Estudio del movimiento unidimensional continuo. En MRU la aceleración es nula (a = 0) y la velocidad constante; en MRUV la aceleración es constante y la velocidad varía linealmente.",
+                equation_governance: "Ecuación de Torricelli: v_f² = v_i² + 2·a·Δx | Velocidad Instantánea: v(t) = v₀ + a·t | Pendiente x-t = Velocidad",
+                practical_application: "Cálculo de Distancia de Frenado: Determinación del tiempo y distancia segura de detención vehicular ante emergencias de tráfico."
+            }
+        };
+    }
+
+    if (q.includes('quimic') || q.includes('química') || q.includes('mol') || q.includes('estequiometr') || q.includes('reaccion') || q.includes('reacción')) {
+        return {
+            status: "SUCCESS",
+            chat_response: "Imagina preparar emparedados: si cada sándwich requiere exactamente 2 rebanadas de pan y 1 lámina de queso, tener 20 panes y solo 3 quesos significa que el queso es tu reactivo limitante y solo obtendrás 3 sándwiches completos. En química los átomos se combinan con esta misma proporción molar estricta. Si tienes 4 moles de H₂ y 1 mol de O₂, ¿cuántos moles de agua líquida H₂O puedes sintetizar?",
+            tutor_response: "Imagina preparar emparedados: si cada sándwich requiere exactamente 2 rebanadas de pan y 1 lámina de queso, tener 20 panes y solo 3 quesos significa que el queso es tu reactivo limitante y solo obtendrás 3 sándwiches completos. En química los átomos se combinan con esta misma proporción molar estricta. Si tienes 4 moles de H₂ y 1 mol de O₂, ¿cuántos moles de agua líquida H₂O puedes sintetizar?",
+            blackboard: {
+                topic: "Estequiometría & Conservación de Masa: Ley de Lavoisier",
+                core_equation: "n = \\frac{m}{\\text{MM}} \\quad | \\quad aA + bB \\longrightarrow cC + dD",
+                definition: "Relación cuantitativa ponderal y volumétrica entre reactantes y productos en una reacción balanceada, gobernada por el Número de Avogadro (6.022 × 10²³ partículas/mol).",
+                equation_governance: "Rendimiento Porcentual: %R = (Masa Real / Masa Teórica) × 100% | Reactivo Limitante: Comparación estequiométrica mol a mol",
+                practical_application: "Síntesis Farmacéutica & Industrial: Maximización del rendimiento de síntesis química minimizando residuos y costos de reactivos no transformados."
+            }
+        };
+    }
+
     return {
         status: "SUCCESS",
-        tutor_response: `Para comprender "${query}", aislamos las variables clave y aplicamos los teoremas fundamentales guiados por ${specialist}.`,
-        mode: mode || "EXPRESS",
-        whiteboard_data: {
-            slide_1: {
-                title: `Fundamentos Teóricos: ${query}`,
-                content: `Demostración analítica inicial de los principios que rigen ${query}.`
-            },
-            slide_2: {
-                title: "Fórmula / Regla General",
-                content: "Modelo Matemático: f(X) = Y  |  Principio de Equivalencia"
-            },
-            slide_3: {
-                title: "Impacto en Evaluaciones",
-                content: "Atención a la conservación de unidades y signos en el despeje algebraico."
-            }
+        chat_response: `Pensemos en "${query}" a través de un sistema de balance energético: cuando una variable aumenta en el sistema, otra debe compensarla para preservar el equilibrio. Si analizamos este fenómeno en condiciones ideales de laboratorio frente a condiciones reales con fricción o ruido, ¿cuál es el factor clave que determinaría el cambio en la respuesta?`,
+        tutor_response: `Pensemos en "${query}" a través de un sistema de balance energético: cuando una variable aumenta en el sistema, otra debe compensarla para preservar el equilibrio. Si analizamos este fenómeno en condiciones ideales de laboratorio frente a condiciones reales con fricción o ruido, ¿cuál es el factor clave que determinaría el cambio en la respuesta?`,
+        blackboard: {
+            topic: `Análisis Fundamental: ${query.toUpperCase()}`,
+            core_equation: "f(\\vec{X}) = \\sum_{i=1}^n w_i \\cdot x_i + b",
+            definition: `Desglose analítico riguroso de las propiedades esenciales y comportamiento dimensional de "${query}" bajo estándares PAES/MINEDUC.`,
+            equation_governance: "Relación de Conservación: Variables de Entrada [X] ⟷ Función de Transferencia [H] ⟷ Variables de Salida [Y]",
+            practical_application: "Metodología de Validación: Verificación de unidades dimensionales consistentes y evaluación en valores límite (asíntotas y condiciones iniciales)."
         }
     };
 }
