@@ -214,6 +214,101 @@ Devuelve estrictamente en formato JSON:
 }
 
 /**
+ * Official Google Gemini 2.5 Flash Multi-Turn Socratic Tutor Engine
+ * Permite una conversación fluida, natural, cálida y socrática para los tutores de AuLock.
+ */
+export async function generarRespuestaTutor(
+    historialChat = [], 
+    mensajeUsuario = '', 
+    { 
+        tutorName = 'Profesor Carlos Rivas', 
+        materia = 'Matemáticas y PAES (Chile)', 
+        nivel = '4° Medio / PAES',
+        interes = 'Fútbol ⚽',
+        systemInstructionCustom = null,
+        temperature = 0.7,
+        maxOutputTokens = 500
+    } = {}
+) {
+    const apiKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) 
+        || (typeof process !== 'undefined' && process?.env?.VITE_GEMINI_API_KEY)
+        || '';
+
+    const defaultSystemInstruction = `Eres ${tutorName}, tutor experto en ${materia} para el nivel de ${nivel} en el sistema educativo chileno (MINEDUC / PAES).
+Tu enfoque pedagógico es SOCRÁTICO, CÁLIDO, MOTIVADOR y FLUIDO:
+1. NUNCA des la respuesta o cálculo final directamente.
+2. Guía al estudiante haciéndole preguntas clave y desglosando el problema paso a paso.
+3. Conecta los conceptos con analogías cotidianas o intereses del alumno (${interes}) de forma natural.
+4. Mantén un tono empático, cercano y entusiasta. Valida sus aciertos y retroalimenta los errores constructivamente.
+5. Responde con fluidez conversacional en 2 a 4 párrafos claros y directos.`;
+
+    const activeSystemInstruction = systemInstructionCustom || defaultSystemInstruction;
+
+    // Normalizar historial para el formato de Gemini (roles: 'user' y 'model')
+    const formattedHistory = (historialChat || []).map(msg => {
+        const role = (msg.sender === 'user' || msg.role === 'user') ? 'user' : 'model';
+        const text = msg.text || (msg.parts && msg.parts[0]?.text) || '';
+        return {
+            role,
+            parts: [{ text }]
+        };
+    }).filter(m => m.parts[0].text.trim() !== '');
+
+    const contents = [
+        ...formattedHistory,
+        { role: 'user', parts: [{ text: mensajeUsuario }] }
+    ];
+
+    if (!apiKey || apiKey === 'DEMO_KEY') {
+        return getFallbackLearnYourWay(tutorName, mensajeUsuario, interes);
+    }
+
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                systemInstruction: {
+                    parts: [{ text: activeSystemInstruction }]
+                },
+                contents,
+                generationConfig: {
+                    temperature,
+                    maxOutputTokens
+                }
+            })
+        });
+
+        if (!response.ok) {
+            // Intentar fallback si el endpoint no soporta systemInstruction directo en el body
+            const fallbackBody = {
+                contents: [
+                    { role: 'user', parts: [{ text: `[INSTRUCCIÓN DEL SISTEMA: ${activeSystemInstruction}]\n\nPregunta actual:\n${mensajeUsuario}` }] }
+                ],
+                generationConfig: { temperature, maxOutputTokens }
+            };
+            const retryRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fallbackBody)
+            });
+            if (retryRes.ok) {
+                const retryData = await retryRes.json();
+                return retryData.candidates?.[0]?.content?.parts?.[0]?.text || getFallbackLearnYourWay(tutorName, mensajeUsuario, interes);
+            }
+            throw new Error(`Gemini API HTTP Error ${response.status}`);
+        }
+
+        const data = await response.json();
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        return responseText || getFallbackLearnYourWay(tutorName, mensajeUsuario, interes);
+    } catch (error) {
+        console.warn("Error en generarRespuestaTutor:", error);
+        return getFallbackLearnYourWay(tutorName, mensajeUsuario, interes);
+    }
+}
+
+/**
  * Generate Google AI "Learn Your Way" personalized tutor response (MINEDUC Multinivel)
  */
 export async function generateLearnYourWayResponse({ 
@@ -225,9 +320,12 @@ export async function generateLearnYourWayResponse({
     userQuestion, 
     interest, 
     currentStudentLevelId, 
-    currentOAId 
+    currentOAId,
+    chatHistory = []
 }) {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const apiKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) 
+        || (typeof process !== 'undefined' && process?.env?.VITE_GEMINI_API_KEY)
+        || '';
     const questionText = userQuestion || topicOrQuestion || 'Explicar concepto clave.';
 
     // 1. Recuperar el Tutor Específico
@@ -250,7 +348,7 @@ export async function generateLearnYourWayResponse({
     // 3. CONSTRUCCIÓN DEL SYSTEM PROMPT DINÁMICO MULTINIVEL CON RÚBRICA MINEDUC
     const systemPrompt = `
         Eres ${matchedTutor.name}, experto pedagógico en ${matchedTutor.eje_mineduc} para el nivel de **${levelName}** del Currículum Nacional de Chile.
-        El alumno está cursando la asignatura de Ciencias Naturales.
+        Asignatura: ${matchedTutor.specialty || 'Ciencias / Matemáticas'}.
         Objetivo de Aprendizaje (OA): **"(${oaEspecifico.oa_id}) - ${oaEspecifico.descripcion_completa || oaEspecifico.descripcion_corta}"**.
         Indicadores de Evaluación MINEDUC Auditados: ${indicadoresStr}.
         Rúbrica Sugerida MINEDUC: Niveles [Inicial, Intermedio, Avanzado, Destacado].
@@ -258,28 +356,19 @@ export async function generateLearnYourWayResponse({
         Instrucciones Pedagógicas:
         - Adapta la explicación pedagógica a la edad del estudiante (${levelName}).
         - Utiliza el motor 'Learn Your Way' para adaptar la analogía al interés del alumno: "${interest || 'Fútbol ⚽'}".
-        - Guía al alumno socráticamente, nunca des la respuesta directa.
-        - Evalúa la respuesta del alumno e indica sutilmente en qué Nivel de Rúbrica MINEDUC (Inicial, Intermedio, Avanzado o Destacado) se proyecta su progreso.
+        - Guía al alumno de forma SOCRÁTICA, cálida y natural (temperatura 0.7). Nunca des la respuesta directa.
+        - Evalúa la respuesta del alumno e indica sutilmente en qué Nivel de Rúbrica MINEDUC se proyecta su progreso.
     `;
 
-    try {
-        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: `${systemPrompt}\n\nPregunta del Alumno: ${questionText}` }] }]
-            })
-        });
-
-        if (!response.ok) throw new Error(`Gemini API HTTP Error ${response.status}`);
-        const data = await response.json();
-        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        
-        return responseText || getFallbackLearnYourWay(matchedTutor.name, questionText, interest);
-
-    } catch (error) {
-        return getFallbackLearnYourWay(matchedTutor.name, questionText, interest);
-    }
+    return generarRespuestaTutor(chatHistory, questionText, {
+        tutorName: matchedTutor.name,
+        materia: matchedTutor.eje_mineduc,
+        nivel: levelName,
+        interes: interest,
+        systemInstructionCustom: systemPrompt,
+        temperature: 0.7,
+        maxOutputTokens: 500
+    });
 }
 
 /**

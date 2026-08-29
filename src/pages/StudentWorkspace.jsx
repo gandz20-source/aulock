@@ -449,7 +449,8 @@ const StudentWorkspace = () => {
                     userQuestion: promptCopy,
                     interest: studentInterest,
                     currentStudentLevelId: selectedGradeLevel,
-                    currentOAId: selectedOaId
+                    currentOAId: selectedOaId,
+                    chatHistory: chatMessages
                 });
             }
 
