@@ -787,13 +787,11 @@ const StudentWorkspace = () => {
                     </div>
                 )}
 
-                {/* ==================== PÁGINA 3: AGENTES TUTORES IA & TEAsisto (CALMA & APOYO EMOCIONAL) ==================== */}
+                {/* ==================== PÁGINA 3: AGENTES TUTORES IA (PIZARRA SOCRÁTICA & CHAT DOCENTE) ==================== */}
                 {activeTab === 'tutors' && (
                     <div className="space-y-8 animate-in fade-in duration-300">
+                        {/* PIZARRA SOCRÁTICA DE ALTO RENDIMIENTO */}
                         <EliteSocraticWhiteboard />
-
-                        {/* MÓDULO DE APOYO EMOCIONAL & NEURODIVERSIDAD (TEAsisto) */}
-                        <TEAsisto />
                     </div>
                 )}
 
