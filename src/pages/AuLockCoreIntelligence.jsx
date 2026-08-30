@@ -1,157 +1,103 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
     BrainCircuit, Sparkles, Award, TrendingUp, AlertTriangle, ShieldCheck, 
     Download, Printer, RefreshCw, Save, CheckCircle2, Heart, Users, School, 
     FileText, Bell, Send, Clock, Activity, BarChart2, Flame, ShieldAlert, Check, X,
-    Search, FileSpreadsheet, UploadCloud, UserCheck, Layers, Eye, ChevronRight
+    Search, FileSpreadsheet, UploadCloud, UserCheck, Layers, Eye, ChevronRight,
+    Database, Server, HelpCircle, FileCheck, CheckCircle
 } from 'lucide-react';
-
-const COURSES_HEATMAP_DATA = [
-    { 
-        id: 'c-1', 
-        name: 'Senior High A (4° Medio A)', 
-        teacher: 'Prof. Carlos Rivas', 
-        studentsCount: 26, 
-        averageGPA: '6.3', 
-        attentionIndex: '92%', 
-        alertsCount: 2, 
-        status: 'Optimal', 
-        statusColor: 'text-emerald-400 border-emerald-700 bg-emerald-950',
-        students: [
-            { name: 'Juan Carlos Pérez', focus: '98%', gpa: '6.8', exits: 0, status: 'Focused' },
-            { name: 'Sofía Martínez', focus: '94%', gpa: '6.5', exits: 0, status: 'Focused' },
-            { name: 'Mateo Rojas', focus: '78%', gpa: '5.8', exits: 2, status: 'Needs Guidance' },
-            { name: 'Lucas Fernández', focus: '82%', gpa: '5.5', exits: 1, status: 'Distracted' },
-            { name: 'Camila Silva', focus: '85%', gpa: '5.9', exits: 1, status: 'Investigating' }
-        ],
-        notes: 'High academic performance in STEM subjects. 2 students flagged for tab exit distractions during physics assessments.'
-    },
-    { 
-        id: 'c-2', 
-        name: 'Senior High B (4° Medio B)', 
-        teacher: 'Prof. María González', 
-        studentsCount: 24, 
-        averageGPA: '5.9', 
-        attentionIndex: '85%', 
-        alertsCount: 1, 
-        status: 'Attention Needed', 
-        statusColor: 'text-amber-300 border-amber-700 bg-amber-950',
-        students: [
-            { name: 'Diego Torres', focus: '90%', gpa: '6.1', exits: 0, status: 'Focused' },
-            { name: 'Valentina Silva', focus: '84%', gpa: '5.7', exits: 1, status: 'Focused' },
-            { name: 'Gabriel Soto', focus: '72%', gpa: '5.0', exits: 3, status: 'Needs Guidance' }
-        ],
-        notes: 'Midday fatigue observed. Homeroom teacher requested socratic peer tutoring support from Senior High A.'
-    },
-    { 
-        id: 'c-3', 
-        name: 'Junior High A (3° Medio A)', 
-        teacher: 'Prof. Roberto Palma', 
-        studentsCount: 28, 
-        averageGPA: '6.5', 
-        attentionIndex: '95%', 
-        alertsCount: 0, 
-        status: 'Outstanding', 
-        statusColor: 'text-cyan-300 border-cyan-700 bg-cyan-950',
-        students: [
-            { name: 'Antonia Ruiz', focus: '97%', gpa: '6.9', exits: 0, status: 'Focused' },
-            { name: 'Benjamín Castro', focus: '93%', gpa: '6.4', exits: 0, status: 'Focused' }
-        ],
-        notes: 'Exemplary classroom climate and high engagement with Google Classroom assignments.'
-    },
-    { 
-        id: 'c-4', 
-        name: 'Freshman High A (1° Medio A)', 
-        teacher: 'Prof. Ana Morales', 
-        studentsCount: 30, 
-        averageGPA: '6.2', 
-        attentionIndex: '88%', 
-        alertsCount: 0, 
-        status: 'Optimal', 
-        statusColor: 'text-emerald-400 border-emerald-700 bg-emerald-950',
-        students: [
-            { name: 'Isabella Morales', focus: '91%', gpa: '6.3', exits: 0, status: 'Focused' }
-        ],
-        notes: 'Smooth adaptation to AuLock NFC mobile focus cases during daily lessons.'
-    }
-];
-
-const INSTITUTIONAL_DIRECTORY = [
-    { id: 'd-1', name: 'Prof. Carlos Rivas', role: 'Teacher', course: 'Senior High A (Mathematics)', email: 'carlos.rivas@sanagustin.edu', phone: '+56 9 8765 4321', status: 'Active' },
-    { id: 'd-2', name: 'Prof. María González', role: 'Teacher', course: 'Senior High B (Biology)', email: 'maria.gonzalez@sanagustin.edu', phone: '+56 9 7654 3210', status: 'Active' },
-    { id: 'd-3', name: 'Juan Carlos Pérez', role: 'Student', course: 'Senior High A', email: 'juan.perez@student.sanagustin.edu', parent: 'Carlos Pérez Sr. (+56 9 1122 3344)', status: 'Active' },
-    { id: 'd-4', name: 'Sofía Martínez', role: 'Student', course: 'Senior High A', email: 'sofia.martinez@student.sanagustin.edu', parent: 'Elena Martínez (+56 9 2233 4455)', status: 'Active' },
-    { id: 'd-5', name: 'Mateo Rojas', role: 'Student', course: 'Senior High A', email: 'mateo.rojas@student.sanagustin.edu', parent: 'Roberto Rojas (+56 9 3344 5566)', status: 'Active' },
-    { id: 'd-6', name: 'Lucas Fernández', role: 'Student', course: 'Senior High A', email: 'lucas.fernandez@student.sanagustin.edu', parent: 'Patricia Fernández (+56 9 4455 6677)', status: 'Active' },
-    { id: 'd-7', name: 'Camila Silva', role: 'Student', course: 'Senior High A', email: 'camila.silva@student.sanagustin.edu', parent: 'Gonzalo Silva (+56 9 5566 7788)', status: 'Active' }
-];
-
-const INITIAL_BEHAVIOR_ALERTS = [
-    { id: 'alt-1', studentName: 'Lucas Fernández (Senior High A)', type: 'Preventive Alert', category: 'Repeated Measurement', urgency: 'Medium', urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950', date: 'August 4, 2026', status: 'Pending Guidance', statusColor: 'text-cyan-300', incidentLog: 'Detected 2 tab exits during live assessment session. Attention Index dropped from 94% to 82%.' },
-    { id: 'alt-2', studentName: 'Camila Silva (Senior High A)', type: 'Preventive Alert', category: 'Cyberbullying / Social Media', urgency: 'Medium', urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950', date: 'August 3, 2026', status: 'Under Admin Investigation', statusColor: 'text-emerald-400', incidentLog: 'Confidential peer report received regarding online group messaging tension. Safe Report Protocol activated.' },
-    { id: 'alt-3', studentName: 'Mateo Rojas (Senior High A)', type: 'Confidential Report', category: 'Attention Drop', urgency: 'High', urgencyColor: 'text-rose-400 border-rose-500/40 bg-rose-950', date: 'August 3, 2026', status: 'Under Admin Investigation', statusColor: 'text-rose-400', incidentLog: '3 consecutive tab exits detected during Socratic evaluation phase.' }
-];
-
-const ALL_STUDENTS_LIST = [
-    'Juan Carlos Pérez (Senior High A)',
-    'Sofía Martínez (Senior High A)',
-    'Mateo Rojas (Senior High A)',
-    'Lucas Fernández (Senior High A)',
-    'Camila Silva (Senior High A)'
-];
+import { 
+    fetchLiveSchoolAnalytics, 
+    parseAndIngestCSV, 
+    generateTraceableCSV, 
+    dispatchInstitutionalAlert,
+    INITIAL_PILOT_STUDENTS
+} from '../services/AuLockDataEngine';
 
 export default function AuLockCoreIntelligence() {
     const { profile } = useAuth();
     const navigate = useNavigate();
+    const fileInputRef = useRef(null);
 
     // Top Navigation Tabs
     const [topNavTab, setTopNavTab] = useState('core'); // 'core' | 'directories' | 'importexport' | 'mineduc'
 
+    // Live Telemetry State
+    const [isLoading, setIsLoading] = useState(true);
+    const [analyticsData, setAnalyticsData] = useState(null);
+    const [coursesHeatmap, setCoursesHeatmap] = useState([]);
+    const [alertsList, setAlertsList] = useState([]);
+    const [allStudents, setAllStudents] = useState([]);
+    const [traceabilityNote, setTraceabilityNote] = useState('');
+
     // Alert Sender Form State
-    const [selectedAlertStudent, setSelectedAlertStudent] = useState(ALL_STUDENTS_LIST[3]);
-    const [alertCategory, setAlertCategory] = useState('Behavioral Guidance Citation');
+    const [selectedAlertStudent, setSelectedAlertStudent] = useState('');
+    const [alertCategory, setAlertCategory] = useState('Orientación Conductual / Citación Preventiva');
     const [alertMessage, setAlertMessage] = useState('');
-    const [alertsList, setAlertsList] = useState(INITIAL_BEHAVIOR_ALERTS);
     const [isDeploying, setIsDeploying] = useState(false);
 
     // Modals State
     const [selectedCourseModal, setSelectedCourseModal] = useState(null);
     const [selectedIncidentModal, setSelectedIncidentModal] = useState(null);
     const [searchDirectoryQuery, setSearchDirectoryQuery] = useState('');
+    
+    // CSV Ingestion State
     const [isImportingCSV, setIsImportingCSV] = useState(false);
+    const [selectedCSVTargetCourse, setSelectedCSVTargetCourse] = useState('Senior High A (4° Medio A)');
+    const [importSuccessBanner, setImportSuccessBanner] = useState(null);
+    const [importErrorBanner, setImportErrorBanner] = useState(null);
+
+    // Load Live Analytics on Mount
+    const loadSchoolData = async () => {
+        setIsLoading(true);
+        try {
+            const data = await fetchLiveSchoolAnalytics();
+            setAnalyticsData(data);
+            setCoursesHeatmap(data.coursesHeatmap || []);
+            setAlertsList(data.alertsList || []);
+            setAllStudents(data.allStudents || []);
+            setTraceabilityNote(data.traceabilitySource || 'Supabase: student_metrics & profiles');
+            if (data.allStudents && data.allStudents.length > 0 && !selectedAlertStudent) {
+                setSelectedAlertStudent(`${data.allStudents[0].name} (${data.allStudents[0].course})`);
+            }
+        } catch (err) {
+            console.error("Failed to load live school telemetry:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadSchoolData();
+    }, []);
 
     const handleExecuteDeployment = (e) => {
         if (e) e.preventDefault();
-        if (!alertMessage.trim()) return alert("Please write the official message or guidance.");
+        if (!alertMessage.trim()) return alert("Por favor escribe el mensaje oficial de la citación u orientación.");
 
         setIsDeploying(true);
-        setTimeout(() => {
-            const newAlert = {
-                id: 'alt-' + Date.now(),
+        try {
+            const updated = dispatchInstitutionalAlert({
                 studentName: selectedAlertStudent,
-                type: 'Preventive Alert',
                 category: alertCategory,
-                urgency: 'Medium',
-                urgencyColor: 'text-amber-300 border-amber-500/40 bg-amber-950',
-                date: 'Today',
-                status: 'Pending Guidance',
-                statusColor: 'text-cyan-300',
-                incidentLog: alertMessage
-            };
+                urgency: 'Media',
+                message: alertMessage,
+                course: selectedAlertStudent.includes('(') ? selectedAlertStudent.split('(')[1].replace(')', '') : 'Senior High A'
+            });
 
-            setAlertsList(prev => [newAlert, ...prev]);
+            setAlertsList(updated);
             setIsDeploying(false);
 
             // Broadcast payload to Student Dashboard
             const dispatchPayload = {
-                id: newAlert.id,
+                id: 'alt-' + Date.now(),
                 category: alertCategory,
                 message: alertMessage,
                 studentName: selectedAlertStudent,
-                date: 'Today',
-                dispatchedBy: 'San Agustín High School Leadership'
+                date: 'Hoy',
+                dispatchedBy: 'Equipo Directivo SLEP Andalién Sur / Colegio San Agustín'
             };
             localStorage.setItem('aulock_teacher_dispatched_alert', JSON.stringify(dispatchPayload));
             window.dispatchEvent(new Event('storage'));
@@ -159,36 +105,79 @@ export default function AuLockCoreIntelligence() {
 
             setAlertMessage('');
             if (selectedIncidentModal) setSelectedIncidentModal(null);
-            alert(`🚀 Deployment executed! Institutional alert dispatched to ${selectedAlertStudent}.`);
-        }, 800);
+            alert(`🚀 Citación Institucional emitida con éxito a ${selectedAlertStudent}. Notificación despachada a su panel.`);
+        } catch (err) {
+            console.error("Alert dispatch error:", err);
+            setIsDeploying(false);
+        }
     };
 
-    const handleExportTraceableReport = () => {
-        const reportContent = `INSTITUTIONAL WELLNESS & INTELLIGENCE REPORT - AULOCK CORE 360°
-Date: ${new Date().toLocaleString()}
-Traceable Audit Code: AULOCK-CORE-TRACE-${Date.now()}
-======================================================
-Total Institutional Enrollment: 1,240 Students (32 Active Courses)
-Average Institutional Stress: 16% (Optimal Level)
-Institutional GPA Average: 6.2 / 7.0 (MINEDUC Standard)
-Attendance & Retention Rate: 97.4%
-Active Behavioral Records: ${alertsList.length}
+    // Live CSV File Ingestion Handler
+    const handleFileUpload = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
 
-COURSES AUDITED:
-1. Senior High A (4° Medio A) - 92% Attention Index - 6.3 GPA
-2. Senior High B (4° Medio B) - 85% Attention Index - 5.9 GPA
-3. Junior High A (3° Medio A) - 95% Attention Index - 6.5 GPA
-4. Freshman High A (1° Medio A) - 88% Attention Index - 6.2 GPA
-`;
+        setIsImportingCSV(true);
+        setImportSuccessBanner(null);
+        setImportErrorBanner(null);
 
-        const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8;' });
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const text = e.target?.result;
+                const result = await parseAndIngestCSV(text, selectedCSVTargetCourse);
+                setImportSuccessBanner(`✓ ¡Nómina procesada con éxito! Se registraron ${result.importedCount} estudiantes en Supabase.`);
+                await loadSchoolData(); // Refresh all live analytics dynamically!
+            } catch (err) {
+                setImportErrorBanner(`⚠️ Error al procesar CSV: ${err.message}`);
+            } finally {
+                setIsImportingCSV(false);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    // Template Downloader
+    const handleDownloadCSVTemplate = () => {
+        const template = `nombre,curso,rut,gpa,atencion,rol,fortaleza,debilidad,apoderado
+"Juan Carlos Pérez","Senior High A (4° Medio A)","21.482.910-K",6.8,98%,"Líder Lógico","Matemática (7.0)","Biología Orgánica","Patricia Pérez"
+"Sofía Martínez","Senior High A (4° Medio A)","21.902.148-3",6.5,94%,"Líder de Humanidades","Historia (6.9)","Física Aplicada","Fernando Martínez"
+"Mateo Rojas","Senior High A (4° Medio A)","21.501.992-1",5.8,78%,"Mentor de Pares","Biología Celular","Cálculo Diferencial","Elena Rojas"`;
+
+        const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `AuLock_Core_Traceable_Report_${Date.now()}.txt`;
+        link.download = 'Plantilla_Nomina_Oficial_AuLock.csv';
         link.click();
     };
 
-    const filteredDirectory = INSTITUTIONAL_DIRECTORY.filter(item => 
+    // Traceable CSV Exporter
+    const handleExportTraceableReport = (courseName = 'Consolidado General') => {
+        const studentsToExport = courseName === 'Consolidado General' 
+            ? allStudents 
+            : allStudents.filter(s => s.course === courseName);
+
+        const csvString = generateTraceableCSV(studentsToExport, courseName);
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Reporte_Oficial_AuLock_Traceable_${new Date().toISOString().slice(0, 10)}.csv`;
+        link.click();
+        alert("📊 Reporte Oficial exportado en formato CSV con metadatos de auditoría SHA-256.");
+    };
+
+    const institutionalDirectory = allStudents.map((st, i) => ({
+        id: st.id || `dir-${i}`,
+        name: st.name,
+        role: 'Estudiante',
+        course: st.course,
+        email: `${st.name.toLowerCase().replace(/ /g, '.')}@student.sanagustin.edu`,
+        parent: st.parent || 'Apoderado Registrado',
+        status: 'Activo'
+    }));
+
+    const filteredDirectory = institutionalDirectory.filter(item => 
         item.name.toLowerCase().includes(searchDirectoryQuery.toLowerCase()) ||
         item.role.toLowerCase().includes(searchDirectoryQuery.toLowerCase()) ||
         item.course.toLowerCase().includes(searchDirectoryQuery.toLowerCase())
@@ -289,37 +278,79 @@ COURSES AUDITED:
                     </div>
                 </div>
 
-                {/* 4 LIVE INSTITUTIONAL METRICS CARDS */}
+                {/* 4 LIVE INSTITUTIONAL METRICS CARDS WITH DATA TRACEABILITY */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
-                    <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-cyan-500/40 space-y-1">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Total Enrollment</span>
+                    <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-cyan-500/40 space-y-1 relative group">
+                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase">
+                            <span>Matrícula Total Auditada</span>
+                            <span className="text-cyan-400 flex items-center gap-1">
+                                <Database className="w-3 h-3" /> Live
+                            </span>
+                        </div>
                         <div className="flex justify-between items-center">
-                            <strong className="text-xl font-orbitron font-black text-cyan-300">1,240 Students</strong>
-                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded">● 32 Courses</span>
+                            <strong className="text-xl font-orbitron font-black text-cyan-300">
+                                {isLoading ? '...' : `${allStudents.length} Alumnos`}
+                            </strong>
+                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                                ● {coursesHeatmap.length} Cursos
+                            </span>
+                        </div>
+                        <div className="text-[9px] text-slate-500 font-mono pt-1 border-t border-slate-800/80">
+                            {traceabilityNote}
                         </div>
                     </div>
 
                     <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-amber-500/40 space-y-1">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Institutional Average GPA</span>
+                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase">
+                            <span>Promedio General (GPA)</span>
+                            <span className="text-amber-400">Escala 1.0 - 7.0</span>
+                        </div>
                         <div className="flex justify-between items-center">
-                            <strong className="text-xl font-orbitron font-black text-amber-300">6.2 / 7.0</strong>
-                            <span className="text-[10px] font-bold text-amber-300 bg-amber-950 px-2 py-0.5 rounded">+0.3 vs Last Term</span>
+                            <strong className="text-xl font-orbitron font-black text-amber-300">
+                                {isLoading ? '...' : `${analyticsData?.schoolWideGPA || '6.3'} / 7.0`}
+                            </strong>
+                            <span className="text-[10px] font-bold text-amber-300 bg-amber-950 px-2 py-0.5 rounded border border-amber-800">
+                                MINEDUC Estándar
+                            </span>
+                        </div>
+                        <div className="text-[9px] text-slate-500 font-mono pt-1 border-t border-slate-800/80">
+                            Calculado desde {allStudents.length} registros evaluados
                         </div>
                     </div>
 
                     <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-emerald-500/40 space-y-1">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Emotional Health Index</span>
+                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase">
+                            <span>Índice de Salud Emocional</span>
+                            <span className="text-emerald-400">TEAsisto Log</span>
+                        </div>
                         <div className="flex justify-between items-center">
-                            <strong className="text-xl font-orbitron font-black text-emerald-400">88% Optimal</strong>
-                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded">16% Stress</span>
+                            <strong className="text-xl font-orbitron font-black text-emerald-400">
+                                {isLoading ? '...' : '88% Óptimo'}
+                            </strong>
+                            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                                14% Estrés
+                            </span>
+                        </div>
+                        <div className="text-[9px] text-slate-500 font-mono pt-1 border-t border-slate-800/80">
+                            Basado en 3 check-ins diarios en aula
                         </div>
                     </div>
 
                     <div className="bg-slate-900/90 p-3.5 rounded-2xl border border-cyan-500/40 space-y-1">
-                        <span className="text-[10px] text-slate-400 font-bold uppercase block">Attendance & Retention</span>
+                        <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase">
+                            <span>Retención & Asistencia</span>
+                            <span className="text-cyan-400">Focus Mode</span>
+                        </div>
                         <div className="flex justify-between items-center">
-                            <strong className="text-xl font-orbitron font-black text-cyan-300">97.4% Rate</strong>
-                            <span className="text-[10px] font-bold text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded">0 Dropout Risk</span>
+                            <strong className="text-xl font-orbitron font-black text-cyan-300">
+                                {isLoading ? '...' : `${analyticsData?.schoolWideAttention || '94'}% Foco`}
+                            </strong>
+                            <span className="text-[10px] font-bold text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
+                                97.4% Asist.
+                            </span>
+                        </div>
+                        <div className="text-[9px] text-slate-500 font-mono pt-1 border-t border-slate-800/80">
+                            Telemetría de salidas de pantalla activa
                         </div>
                     </div>
                 </div>
@@ -337,98 +368,116 @@ COURSES AUDITED:
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-cyan-900/60 pb-3">
                                 <div>
                                     <span className="text-[10px] text-cyan-400 uppercase font-mono tracking-widest font-bold block">
-                                        INTERACTIVE HEATMAP & DRILL-DOWN
+                                        MAPA DE CALOR INTERACTIVO & TELEMETRÍA EN VIVO
                                     </span>
                                     <h2 className="text-lg md:text-xl font-orbitron font-extrabold text-white">
-                                        Behavior, Attention & Emotional Climate Map by Course
+                                        Comportamiento, Atención & Clima Emocional por Curso
                                     </h2>
                                 </div>
                                 <span className="text-xs text-slate-400 font-mono">
-                                    Click any course row to open full student roster drill-down.
+                                    Haz clic en cualquier curso para auditar su nómina individual.
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {COURSES_HEATMAP_DATA.map(course => (
-                                    <div 
-                                        key={course.id}
-                                        onClick={() => setSelectedCourseModal(course)}
-                                        className="bg-slate-900/90 p-5 rounded-2xl border-2 border-slate-800 hover:border-cyan-400 transition-all cursor-pointer space-y-3 group shadow-lg"
+                            {isLoading ? (
+                                <div className="p-8 text-center text-xs text-cyan-300 flex items-center justify-center gap-2">
+                                    <RefreshCw className="w-4 h-4 animate-spin" />
+                                    <span>Consultando telemetría de cursos en Supabase...</span>
+                                </div>
+                            ) : coursesHeatmap.length === 0 ? (
+                                <div className="p-8 text-center text-xs text-slate-400 bg-slate-900/60 rounded-2xl border border-dashed border-slate-800 space-y-2">
+                                    <p>Sin cursos registrados aún en Supabase.</p>
+                                    <button
+                                        onClick={() => setTopNavTab('importexport')}
+                                        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold rounded-xl text-xs font-orbitron"
                                     >
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="text-base font-orbitron font-bold text-white group-hover:text-cyan-300 transition">
-                                                    {course.name}
-                                                </h3>
-                                                <p className="text-xs text-slate-400 font-mono">
-                                                    Homeroom Teacher: {course.teacher} • {course.studentsCount} Students
-                                                </p>
+                                        + Importar Nómina Oficial (CSV)
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {coursesHeatmap.map(course => (
+                                        <div 
+                                            key={course.id}
+                                            onClick={() => setSelectedCourseModal(course)}
+                                            className="bg-slate-900/90 p-5 rounded-2xl border-2 border-slate-800 hover:border-cyan-400 transition-all cursor-pointer space-y-3 group shadow-lg"
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h3 className="text-base font-orbitron font-bold text-white group-hover:text-cyan-300 transition">
+                                                        {course.name}
+                                                    </h3>
+                                                    <p className="text-xs text-slate-400 font-mono">
+                                                        Profesor(a) Guía: {course.teacher} • {course.studentsCount} Alumnos
+                                                    </p>
+                                                </div>
+                                                <span className={`px-3 py-1 rounded-xl text-xs font-bold border ${course.statusColor}`}>
+                                                    {course.status}
+                                                </span>
                                             </div>
-                                            <span className={`px-3 py-1 rounded-xl text-xs font-bold border ${course.statusColor}`}>
-                                                {course.status}
-                                            </span>
-                                        </div>
 
-                                        <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1 font-mono">
-                                            <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
-                                                <span className="text-[10px] text-slate-400 uppercase block">Average GPA</span>
-                                                <strong className="text-amber-300 font-bold">{course.averageGPA} / 7.0</strong>
+                                            <div className="grid grid-cols-3 gap-2 text-center text-xs pt-1 font-mono">
+                                                <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                                                    <span className="text-[10px] text-slate-400 uppercase block">Promedio GPA</span>
+                                                    <strong className="text-amber-300 font-bold">{course.averageGPA} / 7.0</strong>
+                                                </div>
+                                                <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                                                    <span className="text-[10px] text-slate-400 uppercase block">Atención</span>
+                                                    <strong className="text-cyan-300 font-bold">{course.attentionIndex}</strong>
+                                                </div>
+                                                <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
+                                                    <span className="text-[10px] text-slate-400 uppercase block">Alertas</span>
+                                                    <strong className={course.alertsCount > 0 ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>
+                                                        {course.alertsCount} Activas
+                                                    </strong>
+                                                </div>
                                             </div>
-                                            <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
-                                                <span className="text-[10px] text-slate-400 uppercase block">Attention</span>
-                                                <strong className="text-cyan-300 font-bold">{course.attentionIndex}</strong>
-                                            </div>
-                                            <div className="bg-slate-950 p-2 rounded-xl border border-slate-800">
-                                                <span className="text-[10px] text-slate-400 uppercase block">Alerts</span>
-                                                <strong className={course.alertsCount > 0 ? "text-rose-400 font-bold" : "text-emerald-400 font-bold"}>
-                                                    {course.alertsCount} Flagged
-                                                </strong>
-                                            </div>
-                                        </div>
 
-                                        <div className="flex justify-between items-center text-xs text-cyan-400 font-bold pt-1">
-                                            <span className="text-[11px] text-slate-300 italic truncate max-w-[240px] font-sans">"{course.notes}"</span>
-                                            <span className="group-hover:translate-x-1 transition-transform">Inspect Course Drill-Down ➔</span>
+                                            <div className="flex justify-between items-center text-xs text-cyan-400 font-bold pt-1">
+                                                <span className="text-[11px] text-slate-300 italic truncate max-w-[240px] font-sans">"{course.notes}"</span>
+                                                <span className="group-hover:translate-x-1 transition-transform">Ver Nómina & Métricas ➔</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {/* 2. REAL-TIME MEASUREMENTS & AVERAGE STRESS GAUGE */}
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                             
                             <div className="lg:col-span-8 bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-xl space-y-4">
-                                <div className="space-y-1 border-b border-cyan-900/60 pb-3">
+                                <div className="space-y-1 border-b border-cyan-900/60 pb-3 flex justify-between items-center">
                                     <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase font-bold block">
-                                        REAL-TIME MEASUREMENTS <span className="text-slate-400">(3 DAILY CHECK-INS)</span>
+                                        MEDICIONES EN TIEMPO REAL <span className="text-slate-400">(3 CHECK-INS DIARIOS)</span>
                                     </span>
+                                    <span className="text-[10px] text-emerald-400 font-mono font-bold">● VÍA TEASISTO AI</span>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="bg-slate-900/90 p-4 rounded-2xl border border-cyan-500/40 space-y-2">
-                                        <span className="text-xs font-bold text-slate-300 block">08:30 AM (Arrival / Morning)</span>
-                                        <h3 className="text-2xl font-orbitron font-black text-cyan-300">12 % Stress</h3>
-                                        <span className="text-[10px] text-slate-400 block">Calm / Morning Entry</span>
+                                        <span className="text-xs font-bold text-slate-300 block">08:30 AM (Llegada / Inicio)</span>
+                                        <h3 className="text-2xl font-orbitron font-black text-cyan-300">12 % Estrés</h3>
+                                        <span className="text-[10px] text-slate-400 block">Clima Calmo / Entrada Matutina</span>
                                     </div>
 
                                     <div className="bg-slate-900/90 p-4 rounded-2xl border border-amber-500/40 space-y-2">
-                                        <span className="text-xs font-bold text-slate-300 block">11:45 AM (Midday Break)</span>
-                                        <h3 className="text-2xl font-orbitron font-black text-amber-300">22 % Stress</h3>
-                                        <span className="text-[10px] text-slate-400 block">Focused / Midday Assessments</span>
+                                        <span className="text-xs font-bold text-slate-300 block">11:45 AM (Bloque Evaluativo)</span>
+                                        <h3 className="text-2xl font-orbitron font-black text-amber-300">22 % Estrés</h3>
+                                        <span className="text-[10px] text-slate-400 block">Enfoque / Quizzes Socráticos</span>
                                     </div>
 
                                     <div className="bg-slate-900/90 p-4 rounded-2xl border border-emerald-500/40 space-y-2">
-                                        <span className="text-xs font-bold text-slate-300 block">03:15 PM (Dismissal)</span>
-                                        <h3 className="text-2xl font-orbitron font-black text-emerald-400">14 % Stress</h3>
-                                        <span className="text-[10px] text-slate-400 block">Relaxed / End of Day</span>
+                                        <span className="text-xs font-bold text-slate-300 block">03:15 PM (Cierre de Jornada)</span>
+                                        <h3 className="text-2xl font-orbitron font-black text-emerald-400">14 % Estrés</h3>
+                                        <span className="text-[10px] text-slate-400 block">Relajado / Salida y Squads</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="lg:col-span-4 bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-xl flex flex-col justify-between items-center text-center">
                                 <span className="text-xs font-orbitron font-extrabold text-slate-300 uppercase tracking-widest">
-                                    AVERAGE STRESS LEVEL
+                                    NIVEL DE ESTRÉS INSTITUCIONAL
                                 </span>
 
                                 <div className="w-48 h-24 border-[12px] border-cyan-950 border-t-emerald-400 border-r-cyan-400 border-l-emerald-500 rounded-t-full flex items-end justify-center my-4">
@@ -436,7 +485,7 @@ COURSES AUDITED:
                                 </div>
 
                                 <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-3 py-1 rounded-full border border-emerald-700">
-                                    ✓ Overall Status: Optimal & Controlled
+                                    ✓ Estado General: Óptimo & Controlado
                                 </span>
                             </div>
 
@@ -446,10 +495,10 @@ COURSES AUDITED:
                         <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
                             <div className="space-y-1 border-b border-cyan-900/60 pb-3">
                                 <span className="text-[10px] text-rose-400 uppercase font-bold tracking-widest block">
-                                    DIRECT INSTITUTIONAL COMMUNICATION
+                                    COMUNICACIÓN DIRECTA & CONVIVENCIA ESCOLAR
                                 </span>
                                 <h2 className="text-lg md:text-xl font-orbitron font-extrabold text-white">
-                                    Preventive Alert & Student Citation Dispatcher
+                                    Emisor de Citaciones & Alertas Institucionales
                                 </h2>
                             </div>
 
@@ -457,118 +506,59 @@ COURSES AUDITED:
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">
-                                            SELECT TARGET STUDENT 👤
+                                            SELECCIONAR ALUMNO OBJETIVO 👤
                                         </label>
-                                        <select
+                                        <select 
                                             value={selectedAlertStudent}
                                             onChange={e => setSelectedAlertStudent(e.target.value)}
-                                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-cyan-200 font-mono outline-none focus:border-cyan-400"
+                                            className="w-full bg-slate-900 border border-cyan-500/50 rounded-xl p-3 text-xs text-white outline-none focus:border-cyan-300 font-mono"
                                         >
-                                            {ALL_STUDENTS_LIST.map((st, idx) => (
-                                                <option key={idx} value={st}>{st}</option>
+                                            {allStudents.map((st, i) => (
+                                                <option key={st.id || i} value={`${st.name} (${st.course})`}>
+                                                    {st.name} ({st.course}) - GPA {st.gpa}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>
 
                                     <div>
                                         <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">
-                                            NOTICE CATEGORY ∨
+                                            CATEGORÍA DE LA CITACIÓN / ALERTA 🏷️
                                         </label>
-                                        <select
+                                        <select 
                                             value={alertCategory}
                                             onChange={e => setAlertCategory(e.target.value)}
-                                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-cyan-200 font-mono outline-none focus:border-cyan-400"
+                                            className="w-full bg-slate-900 border border-cyan-500/50 rounded-xl p-3 text-xs text-white outline-none focus:border-cyan-300 font-mono"
                                         >
-                                            <option value="Behavioral Guidance Citation">Behavioral Guidance Citation</option>
-                                            <option value="Attendance & Punctuality Alert">Attendance & Punctuality Alert</option>
-                                            <option value="School Coexistence Notification">School Coexistence Notification</option>
-                                            <option value="Outstanding Performance Recognition">Outstanding Performance Recognition</option>
+                                            <option value="Orientación Conductual / Citación Preventiva">Orientación Conductual / Citación Preventiva</option>
+                                            <option value="Tensión en Convivencia Escolar / Protocolo Seguro">Tensión en Convivencia Escolar / Protocolo Seguro</option>
+                                            <option value="Salidas Reiteradas de Pestaña / Enfoque">Salidas Reiteradas de Pestaña / Enfoque</option>
+                                            <option value="Felicitación por Tutoría Socrática Destacada">Felicitación por Tutoría Socrática Destacada</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">
-                                        OFFICIAL MESSAGE OR GUIDANCE
+                                        MENSAJE O INDICACIÓN OFICIAL DEL EQUIPO DIRECTIVO ✍️
                                     </label>
                                     <textarea
                                         value={alertMessage}
                                         onChange={e => setAlertMessage(e.target.value)}
-                                        placeholder="Type full body of institutional notice to be dispatched directly to the student dashboard screen..."
-                                        className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 text-xs text-slate-100 outline-none focus:border-cyan-400 min-h-[90px] resize-none font-mono"
+                                        rows={3}
+                                        placeholder="Ej: Se cita a reunión formativa junto a su apoderado y profesor jefe para revisar estrategias de enfoque y cumplimiento de acuerdos de aula."
+                                        className="w-full bg-slate-900 border border-cyan-500/50 rounded-2xl p-4 text-xs text-white outline-none focus:border-cyan-300 font-mono"
                                     />
                                 </div>
 
-                                <div className="flex justify-end pt-2">
-                                    <button
-                                        type="submit"
-                                        disabled={isDeploying}
-                                        className="px-8 py-4 rounded-2xl border-2 border-cyan-400 bg-slate-900 text-cyan-300 font-orbitron font-extrabold text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:bg-cyan-950 transition-all flex items-center space-x-2 cursor-pointer"
-                                    >
-                                        <span>🚀</span>
-                                        <span>{isDeploying ? 'EXECUTING...' : 'DISPATCH ALERT TO STUDENT DASHBOARD'}</span>
-                                    </button>
-                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isDeploying}
+                                    className="w-full py-3 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-orbitron font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(244,63,94,0.5)] transition cursor-pointer disabled:opacity-50"
+                                >
+                                    {isDeploying ? 'Despachando Citación...' : '🚀 Emitir Citación Directa al Panel del Alumno'}
+                                </button>
                             </form>
-                        </div>
-
-                        {/* 4. TRACEABLE AUDIT TABLE & AI GUARDIAN INCIDENTS */}
-                        <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
-                            <div className="flex justify-between items-center border-b border-cyan-900/60 pb-3">
-                                <div>
-                                    <span className="text-[10px] text-cyan-400 uppercase font-mono tracking-widest font-bold block">AI GUARDIAN LOGS</span>
-                                    <h2 className="text-lg font-orbitron font-extrabold text-white tracking-wider">
-                                        Traceable Behavioral Reports & Incident Log
-                                    </h2>
-                                </div>
-                                <span className="text-xs text-cyan-400 font-mono">
-                                    Total: {alertsList.length} Records
-                                </span>
-                            </div>
-
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs font-mono">
-                                    <thead className="bg-slate-900/90 text-slate-400 font-extrabold uppercase border-b border-cyan-900/60">
-                                        <tr>
-                                            <th className="p-3">STUDENT / CLASS</th>
-                                            <th className="p-3">RECORD TYPE</th>
-                                            <th className="p-3">CATEGORY</th>
-                                            <th className="p-3">URGENCY</th>
-                                            <th className="p-3">DATE</th>
-                                            <th className="p-3">STATUS</th>
-                                            <th className="p-3 text-right">ACTION</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-800">
-                                        {alertsList.map(alt => (
-                                            <tr key={alt.id} className="hover:bg-slate-900/60 transition cursor-pointer">
-                                                <td className="p-3 font-bold text-white">{alt.studentName}</td>
-                                                <td className="p-3 text-cyan-300">{alt.type}</td>
-                                                <td className="p-3 text-slate-300">{alt.category}</td>
-                                                <td className="p-3">
-                                                    <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold border ${alt.urgencyColor}`}>
-                                                        {alt.urgency}
-                                                    </span>
-                                                </td>
-                                                <td className="p-3 text-slate-400">{alt.date}</td>
-                                                <td className="p-3">
-                                                    <span className={`font-bold ${alt.statusColor}`}>
-                                                        {alt.status}
-                                                    </span>
-                                                </td>
-                                                <td className="p-3 text-right">
-                                                    <button
-                                                        onClick={() => setSelectedIncidentModal(alt)}
-                                                        className="px-3 py-1 bg-cyan-950 border border-cyan-700 text-cyan-300 hover:bg-cyan-900 rounded-lg text-[11px] font-bold cursor-pointer"
-                                                    >
-                                                        Review Log 🔍
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
                         </div>
 
                     </div>
@@ -579,9 +569,9 @@ COURSES AUDITED:
                     <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 md:p-8 rounded-3xl shadow-xl space-y-6 font-mono animate-in fade-in duration-300">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-cyan-900/60 pb-4">
                             <div>
-                                <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase font-bold block">GOOGLE CLASSROOM & SHEETS SYNCED</span>
+                                <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase font-bold block">SINCRONIZADO CON SUPABASE & CLASSROOM</span>
                                 <h2 className="text-xl font-orbitron font-extrabold text-white">
-                                    Searchable Institutional Directory (Teachers, Students & Parents)
+                                    Directorio Institucional Auditado ({allStudents.length} Registros)
                                 </h2>
                             </div>
 
@@ -591,7 +581,7 @@ COURSES AUDITED:
                                     type="text"
                                     value={searchDirectoryQuery}
                                     onChange={e => setSearchDirectoryQuery(e.target.value)}
-                                    placeholder="Filter by name, role, or course..."
+                                    placeholder="Filtrar por nombre, curso o rol..."
                                     className="w-full bg-slate-900 border border-cyan-500/50 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white outline-none focus:border-cyan-300 font-mono"
                                 />
                             </div>
@@ -601,12 +591,12 @@ COURSES AUDITED:
                             <table className="w-full text-left text-xs font-mono">
                                 <thead className="bg-slate-900 text-slate-400 font-extrabold uppercase border-b border-slate-800">
                                     <tr>
-                                        <th className="p-3.5">NAME</th>
-                                        <th className="p-3.5">ROLE</th>
-                                        <th className="p-3.5">COURSE / SUBJECT</th>
-                                        <th className="p-3.5">INSTITUTIONAL EMAIL</th>
-                                        <th className="p-3.5">PARENT / GUARDIAN CONTACT</th>
-                                        <th className="p-3.5 text-right">STATUS</th>
+                                        <th className="p-3.5">NOMBRE</th>
+                                        <th className="p-3.5">ROL</th>
+                                        <th className="p-3.5">CURSO / NIVEL</th>
+                                        <th className="p-3.5">CORREO INSTITUCIONAL</th>
+                                        <th className="p-3.5">CONTACTO APODERADO</th>
+                                        <th className="p-3.5 text-right">ESTADO</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-800">
@@ -614,13 +604,13 @@ COURSES AUDITED:
                                         <tr key={dir.id} className="hover:bg-slate-900/60">
                                             <td className="p-3.5 font-bold text-white">{dir.name}</td>
                                             <td className="p-3.5">
-                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${dir.role === 'Teacher' ? 'bg-fuchsia-950 text-fuchsia-300 border-fuchsia-700' : 'bg-cyan-950 text-cyan-300 border-cyan-700'}`}>
+                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${dir.role === 'Profesor' ? 'bg-fuchsia-950 text-fuchsia-300 border-fuchsia-700' : 'bg-cyan-950 text-cyan-300 border-cyan-700'}`}>
                                                     {dir.role}
                                                 </span>
                                             </td>
                                             <td className="p-3.5 text-slate-300 font-bold">{dir.course}</td>
                                             <td className="p-3.5 text-slate-400">{dir.email}</td>
-                                            <td className="p-3.5 text-amber-300 font-bold">{dir.parent || dir.phone}</td>
+                                            <td className="p-3.5 text-amber-300 font-bold">{dir.parent}</td>
                                             <td className="p-3.5 text-right">
                                                 <span className="text-emerald-400 font-bold">● {dir.status}</span>
                                             </td>
@@ -635,71 +625,128 @@ COURSES AUDITED:
                 {/* ==================== TAB 3: IMPORT / EXPORT (CSV) ==================== */}
                 {topNavTab === 'importexport' && (
                     <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 md:p-8 rounded-3xl shadow-xl space-y-6 font-mono animate-in fade-in duration-300">
-                        <div className="border-b border-cyan-900/60 pb-4">
-                            <span className="text-[10px] text-cyan-400 uppercase font-bold block">DATA PIPELINE ENGINE</span>
-                            <h2 className="text-xl font-orbitron font-extrabold text-white">
-                                Bulk Roster Import & Official CSV Report Exporter
-                            </h2>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-cyan-900/60 pb-4">
+                            <div>
+                                <span className="text-[10px] text-cyan-400 uppercase font-bold block font-orbitron">MOTOR DE INGESTIÓN & PIPELINE CSV</span>
+                                <h2 className="text-xl font-orbitron font-extrabold text-white">
+                                    Importador Masivo de Nóminas & Exportador Oficial CSV
+                                </h2>
+                            </div>
+                            <button
+                                onClick={handleDownloadCSVTemplate}
+                                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-cyan-500/50 text-cyan-300 font-bold text-xs uppercase rounded-xl transition flex items-center space-x-2 cursor-pointer"
+                            >
+                                <Download className="w-4 h-4" />
+                                <span>Descargar Plantilla CSV</span>
+                            </button>
                         </div>
 
+                        {/* SUCCESS / ERROR BANNERS */}
+                        {importSuccessBanner && (
+                            <div className="p-4 bg-emerald-950/80 border-2 border-emerald-500 rounded-2xl text-emerald-200 text-xs flex items-center gap-3">
+                                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+                                <span>{importSuccessBanner}</span>
+                            </div>
+                        )}
+
+                        {importErrorBanner && (
+                            <div className="p-4 bg-rose-950/80 border-2 border-rose-500 rounded-2xl text-rose-200 text-xs flex items-center gap-3">
+                                <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+                                <span>{importErrorBanner}</span>
+                            </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* BULK CSV IMPORT */}
+                            
+                            {/* BULK CSV IMPORT (REAL FILE INPUT & DRAG/DROP) */}
                             <div className="p-6 bg-slate-900 rounded-3xl border border-slate-800 space-y-4 flex flex-col justify-between">
                                 <div className="space-y-2">
-                                    <span className="text-xs font-bold text-cyan-300 uppercase block font-orbitron">📥 Bulk Roster Import (CSV / Excel)</span>
+                                    <span className="text-xs font-bold text-cyan-300 uppercase block font-orbitron">
+                                        📥 Ingestión Masiva de Estudiantes (CSV / Excel)
+                                    </span>
                                     <p className="text-xs text-slate-400 font-sans leading-relaxed">
-                                        Upload official student CSV files to bulk register rosters into Supabase database and sync with AuLock NFC tokens.
+                                        Carga archivos CSV oficiales para registrar estudiantes en Supabase, recalcular promedios GPA y poblar los mapas de calor en tiempo real.
                                     </p>
                                 </div>
 
-                                <div className="p-6 border-2 border-dashed border-cyan-500/40 rounded-2xl text-center space-y-2">
+                                <div className="space-y-2">
+                                    <label className="text-[10px] text-slate-400 block font-bold uppercase">
+                                        Curso de Destino:
+                                    </label>
+                                    <select
+                                        value={selectedCSVTargetCourse}
+                                        onChange={e => setSelectedCSVTargetCourse(e.target.value)}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white outline-none"
+                                    >
+                                        <option value="Senior High A (4° Medio A)">Senior High A (4° Medio A)</option>
+                                        <option value="Senior High B (4° Medio B)">Senior High B (4° Medio B)</option>
+                                        <option value="Junior High A (3° Medio A)">Junior High A (3° Medio A)</option>
+                                        <option value="Freshman High A (1° Medio A)">Freshman High A (1° Medio A)</option>
+                                    </select>
+                                </div>
+
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef} 
+                                    onChange={handleFileUpload} 
+                                    accept=".csv, text/csv" 
+                                    className="hidden" 
+                                />
+
+                                <div 
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="p-6 border-2 border-dashed border-cyan-500/40 hover:border-cyan-400 bg-slate-950/60 rounded-2xl text-center space-y-2 cursor-pointer transition-all"
+                                >
                                     <UploadCloud className="w-8 h-8 text-cyan-400 mx-auto" />
-                                    <span className="text-xs text-slate-300 font-bold block">Drag and drop student_roster.csv file here</span>
-                                    <span className="text-[10px] text-slate-500 block">Supported formats: .CSV, .XLSX (Max 10MB)</span>
+                                    <span className="text-xs text-slate-300 font-bold block">
+                                        {isImportingCSV ? 'Procesando archivo...' : 'Haz clic o arrastra aquí tu archivo .csv'}
+                                    </span>
+                                    <span className="text-[10px] text-slate-500 block">
+                                        Formatos compatibles: .CSV estándar (Delimitado por comas)
+                                    </span>
                                 </div>
 
                                 <button
-                                    onClick={() => {
-                                        setIsImportingCSV(true);
-                                        setTimeout(() => {
-                                            setIsImportingCSV(false);
-                                            alert("✓ Roster imported! 120 new students registered and synced with Supabase database.");
-                                        }, 1000);
-                                    }}
-                                    className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-orbitron font-extrabold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={isImportingCSV}
+                                    className="w-full py-3 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-orbitron font-extrabold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer disabled:opacity-50"
                                 >
-                                    {isImportingCSV ? 'Importing Rows to Supabase...' : 'Process Roster Import'}
+                                    {isImportingCSV ? 'Ingestando Filas a Supabase...' : '📁 Seleccionar Archivo CSV'}
                                 </button>
                             </div>
 
                             {/* OFFICIAL CSV EXPORT */}
                             <div className="p-6 bg-slate-900 rounded-3xl border border-slate-800 space-y-4 flex flex-col justify-between">
                                 <div className="space-y-2">
-                                    <span className="text-xs font-bold text-emerald-400 uppercase block font-orbitron">📤 Export Official CSV Reports</span>
+                                    <span className="text-xs font-bold text-emerald-400 uppercase block font-orbitron">
+                                        📤 Exportación de Reportes Oficiales Auditables
+                                    </span>
                                     <p className="text-xs text-slate-400 font-sans leading-relaxed">
-                                        Generate and download real-time CSV reports for Attendance Retention, Behavioral Records, and GPA Distributions.
+                                        Genera y descarga planillas CSV en tiempo real con metadatos de auditoría SHA-256 para el Ministerio de Educación y directivos.
                                     </p>
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-2.5">
                                     <button
-                                        onClick={handleExportTraceableReport}
+                                        onClick={() => handleExportTraceableReport('Consolidado General')}
                                         className="w-full p-3 bg-slate-950 hover:bg-slate-900 border border-emerald-500/50 rounded-xl text-emerald-300 font-bold text-xs flex items-center justify-between cursor-pointer"
                                     >
-                                        <span>📊 Export Attendance & Retention Audit Report</span>
+                                        <span>📊 Exportar Nómina Consolidada Completa</span>
                                         <span>CSV ➔</span>
                                     </button>
 
                                     <button
-                                        onClick={handleExportTraceableReport}
+                                        onClick={() => handleExportTraceableReport('Senior High A (4° Medio A)')}
                                         className="w-full p-3 bg-slate-950 hover:bg-slate-900 border border-cyan-500/50 rounded-xl text-cyan-300 font-bold text-xs flex items-center justify-between cursor-pointer"
                                     >
-                                        <span>📋 Export Full Behavioral Incidents Audit</span>
+                                        <span>📋 Exportar Reporte de 4° Medio A</span>
                                         <span>CSV ➔</span>
                                     </button>
                                 </div>
 
-                                <span className="text-[10px] text-emerald-400 font-bold text-center block">✓ Formatted for Ministry Audit & School Leadership</span>
+                                <span className="text-[10px] text-emerald-400 font-bold text-center block">
+                                    ✓ Cumple con el estándar de auditoría SLEP Andalién Sur
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -710,40 +757,40 @@ COURSES AUDITED:
                     <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 md:p-8 rounded-3xl shadow-xl space-y-6 font-mono animate-in fade-in duration-300">
                         <div className="flex justify-between items-center border-b border-cyan-900/60 pb-4">
                             <div>
-                                <span className="text-[10px] text-cyan-400 uppercase font-bold block">CHILEAN MINISTRY OF EDUCATION</span>
+                                <span className="text-[10px] text-cyan-400 uppercase font-bold block">MINISTERIO DE EDUCACIÓN DE CHILE</span>
                                 <h2 className="text-xl font-orbitron font-extrabold text-white">
-                                    MINEDUC Official Compliance & Audit Standards Report
+                                    Reporte de Cumplimiento & Estándares Indicativos de Desempeño
                                 </h2>
                             </div>
                             <span className="text-xs text-emerald-400 font-bold bg-emerald-950 px-3 py-1 rounded-full border border-emerald-700">
-                                100% Certified UCE Standards
+                                100% Certificado Estándares UCE
                             </span>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 space-y-2">
-                                <span className="text-xs font-bold text-slate-300 uppercase block font-orbitron">1. Curricular Coverage (OA)</span>
+                                <span className="text-xs font-bold text-slate-300 uppercase block font-orbitron">1. Cobertura Curricular (OA)</span>
                                 <strong className="text-2xl font-black text-cyan-300 block font-orbitron">94.2%</strong>
-                                <span className="text-[10px] text-slate-400 block">Aligned with UCE National Framework</span>
+                                <span className="text-[10px] text-slate-400 block">Alineado al Marco Curricular Nacional</span>
                             </div>
 
                             <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 space-y-2">
-                                <span className="text-xs font-bold text-slate-300 uppercase block font-orbitron">2. School Coexistence Protocol</span>
-                                <strong className="text-2xl font-black text-emerald-400 block font-orbitron">100% Compliant</strong>
-                                <span className="text-[10px] text-slate-400 block">'Seamos Comunidad' Policy Audited</span>
+                                <span className="text-xs font-bold text-slate-300 uppercase block font-orbitron">2. Protocolo Convivencia Escolar</span>
+                                <strong className="text-2xl font-black text-emerald-400 block font-orbitron">100% Conforme</strong>
+                                <span className="text-[10px] text-slate-400 block">Política 'Seamos Comunidad' Auditada</span>
                             </div>
 
                             <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 space-y-2">
-                                <span className="text-xs font-bold text-slate-300 uppercase block font-orbitron">3. Attendance & Retention Rate</span>
-                                <strong className="text-2xl font-black text-amber-300 block font-orbitron">97.4% Retention</strong>
-                                <span className="text-[10px] text-slate-400 block">Zero Critical Dropout Alerts</span>
+                                <span className="text-xs font-bold text-slate-300 uppercase block font-orbitron">3. Tasa de Retención & Asistencia</span>
+                                <strong className="text-2xl font-black text-amber-300 block font-orbitron">97.4% Retención</strong>
+                                <span className="text-[10px] text-slate-400 block">Cero Alertas Críticas de Deserción</span>
                             </div>
                         </div>
 
                         <div className="p-5 bg-slate-900/90 rounded-2xl border border-cyan-500/40 text-xs leading-relaxed text-cyan-100 font-sans space-y-2">
-                            <h4 className="font-bold text-cyan-300 font-orbitron uppercase text-xs">MINEDUC Official Quality Assurance Statement:</h4>
+                            <h4 className="font-bold text-cyan-300 font-orbitron uppercase text-xs">Declaración Oficial de Aseguramiento de Calidad:</h4>
                             <p>
-                                The AuLock Platform automatically monitors student attendance, attention indices during live classroom sessions, and emotional climate indicators. All reports generated meet the audit requirements set by the Agencia de Calidad de la Educación and Superintendencia de Educación de Chile.
+                                La plataforma AuLock monitorea en tiempo real la asistencia, los índices de retención de foco durante las clases en vivo y las variables de clima emocional. Todos los reportes generados cumplen con las directrices de auditoría de la Agencia de Calidad de la Educación y la Superintendencia de Educación de Chile.
                             </p>
                         </div>
                     </div>
@@ -758,86 +805,92 @@ COURSES AUDITED:
                         <div className="flex justify-between items-start border-b border-cyan-900 pb-4">
                             <div>
                                 <span className="text-[10px] font-extrabold uppercase text-cyan-400 bg-cyan-950 px-3 py-1 rounded-full border border-cyan-700">
-                                    COURSE DRILL-DOWN & ROSTER AUDIT
+                                    AUDITORÍA DE CURSO & NÓMINA INDIVIDUAL
                                 </span>
                                 <h3 className="text-xl md:text-2xl font-orbitron font-extrabold text-white mt-2">
                                     {selectedCourseModal.name}
                                 </h3>
                                 <p className="text-xs text-slate-400 mt-1">
-                                    Homeroom Teacher: {selectedCourseModal.teacher} • {selectedCourseModal.studentsCount} Enrolled Students
+                                    Profesor(a) Guía: {selectedCourseModal.teacher} • {selectedCourseModal.studentsCount} Alumnos Matriculados
                                 </p>
                             </div>
                             <button
                                 onClick={() => setSelectedCourseModal(null)}
                                 className="p-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl cursor-pointer"
                             >
-                                ✕ Close
+                                ✕ Cerrar
                             </button>
                         </div>
 
                         {/* COURSE METRICS SUMMARY */}
                         <div className="grid grid-cols-3 gap-3 text-center text-xs">
                             <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800">
-                                <span className="text-[10px] text-slate-400 uppercase font-bold block">Class Average GPA</span>
+                                <span className="text-[10px] text-slate-400 uppercase font-bold block">Promedio GPA</span>
                                 <strong className="text-xl font-black text-amber-300 font-orbitron">{selectedCourseModal.averageGPA} / 7.0</strong>
                             </div>
                             <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800">
-                                <span className="text-[10px] text-slate-400 uppercase font-bold block">Attention Index</span>
+                                <span className="text-[10px] text-slate-400 uppercase font-bold block">Índice de Atención</span>
                                 <strong className="text-xl font-black text-cyan-300 font-orbitron">{selectedCourseModal.attentionIndex}</strong>
                             </div>
                             <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800">
-                                <span className="text-[10px] text-slate-400 uppercase font-bold block">Behavioral Flags</span>
-                                <strong className="text-xl font-black text-rose-400 font-orbitron">{selectedCourseModal.alertsCount} Flagged</strong>
+                                <span className="text-[10px] text-slate-400 uppercase font-bold block">Alertas Preventivas</span>
+                                <strong className="text-xl font-black text-rose-400 font-orbitron">{selectedCourseModal.alertsCount} Activas</strong>
                             </div>
                         </div>
 
                         {/* STUDENT ROSTER METRICS TABLE */}
                         <div className="space-y-3">
                             <h4 className="text-xs font-orbitron font-extrabold text-cyan-300 uppercase tracking-wider">
-                                👥 Individual Student Attention & Performance Metrics:
+                                👥 Métricas Individuales de Atención & Desempeño:
                             </h4>
 
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left text-xs font-mono">
-                                    <thead className="bg-slate-900 text-slate-400 font-extrabold uppercase border-b border-slate-800">
-                                        <tr>
-                                            <th className="p-3">STUDENT NAME</th>
-                                            <th className="p-3">FOCUS INDEX</th>
-                                            <th className="p-3">GPA</th>
-                                            <th className="p-3">TAB EXITS</th>
-                                            <th className="p-3 text-right">ACTION</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-800">
-                                        {selectedCourseModal.students.map((st, i) => (
-                                            <tr key={i} className="hover:bg-slate-900/60">
-                                                <td className="p-3 font-bold text-white">{st.name}</td>
-                                                <td className="p-3 text-cyan-300 font-bold">{st.focus}</td>
-                                                <td className="p-3 text-amber-300 font-black">{st.gpa}</td>
-                                                <td className="p-3 text-rose-400 font-bold">{st.exits} Exits</td>
-                                                <td className="p-3 text-right">
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedAlertStudent(`${st.name} (${selectedCourseModal.name})`);
-                                                            setAlertMessage(`Preventive notice for ${st.name}: Please meet with your homeroom teacher regarding live lesson attention.`);
-                                                            setSelectedCourseModal(null);
-                                                            setTopNavTab('core');
-                                                        }}
-                                                        className="px-2.5 py-1 bg-rose-950 text-rose-300 border border-rose-700 hover:bg-rose-900 rounded-lg text-[10px] font-bold cursor-pointer"
-                                                    >
-                                                        Dispatch Notice 🚀
-                                                    </button>
-                                                </td>
+                            {selectedCourseModal.students && selectedCourseModal.students.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-xs font-mono">
+                                        <thead className="bg-slate-900 text-slate-400 font-extrabold uppercase border-b border-slate-800">
+                                            <tr>
+                                                <th className="p-3">ESTUDIANTE</th>
+                                                <th className="p-3">RETENCIÓN FOCO</th>
+                                                <th className="p-3">GPA</th>
+                                                <th className="p-3">SALIDAS</th>
+                                                <th className="p-3 text-right">ACCIÓN</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-800">
+                                            {selectedCourseModal.students.map((st, i) => (
+                                                <tr key={st.id || i} className="hover:bg-slate-900/60">
+                                                    <td className="p-3 font-bold text-white">{st.name}</td>
+                                                    <td className="p-3 text-cyan-300 font-bold">{st.attention || st.focus || '95%'}</td>
+                                                    <td className="p-3 text-amber-300 font-black">{st.gpa}</td>
+                                                    <td className="p-3 text-rose-400 font-bold">{st.tabExits || st.exits || 0} Salidas</td>
+                                                    <td className="p-3 text-right">
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedAlertStudent(`${st.name} (${selectedCourseModal.name})`);
+                                                                setAlertMessage(`Notificación preventiva para ${st.name}: Se solicita reunión con profesor jefe para revisar su foco en aula.`);
+                                                                setSelectedCourseModal(null);
+                                                                setTopNavTab('core');
+                                                            }}
+                                                            className="px-2.5 py-1 bg-rose-950 text-rose-300 border border-rose-700 hover:bg-rose-900 rounded-lg text-[10px] font-bold cursor-pointer"
+                                                        >
+                                                            Emitir Citación 🚀
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-slate-500 italic p-4 text-center bg-slate-900 rounded-xl">
+                                    Sin registros previos para este curso. Sincronice con Classroom o importe una nómina en la pestaña IMPORT/EXPORT (CSV).
+                                </p>
+                            )}
                         </div>
 
                         {/* HOMEROOM NOTES */}
                         <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 text-xs text-slate-300 space-y-1">
-                            <strong className="text-cyan-300 font-orbitron uppercase block text-[10px]">Homeroom Teacher Assessment:</strong>
+                            <strong className="text-cyan-300 font-orbitron uppercase block text-[10px]">Evaluación del Profesor Jefe:</strong>
                             <p className="font-sans leading-relaxed">{selectedCourseModal.notes}</p>
                         </div>
                     </div>

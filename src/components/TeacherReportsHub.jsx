@@ -11,9 +11,16 @@ import {
 } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import { generateTeacherRemediationAdvisory } from '../services/GeminiService';
+import { 
+    calculateHumanCoreRadarFromData, 
+    calculateAggregatedGPA, 
+    calculateAttentionIndex, 
+    INITIAL_PILOT_STUDENTS,
+    generateTraceableCSV
+} from '../services/AuLockDataEngine';
 
-// Dataset telemetry per course
-const COURSE_TELEMETRY_DATA = {
+// Dataset telemetry baseline
+const BASELINE_COURSE_DATA = {
     senior_a: {
         id: 'senior_a',
         name: 'Senior High A (Advanced Math)',
@@ -38,16 +45,7 @@ const COURSE_TELEMETRY_DATA = {
             { id: 'cf-3', topic: 'Comportamiento Asintótico & Límites al Infinito', failureRate: 28, affectedStudents: 9, severity: 'MODERADA', category: 'Límites y Continuidad' },
             { id: 'cf-4', topic: 'Interpretación de Pendiente Recta Tangente', failureRate: 14, affectedStudents: 4, severity: 'BAJA', category: 'Geometría Analítica' }
         ],
-        students: [
-            { id: 'st-1', name: 'Juan Carlos Pérez', gpa: 6.8, humanCoreScore: 96, attention: '96%', role: 'Líder Lógico', weaknesses: 'Biología Orgánica', alerts: 0 },
-            { id: 'st-2', name: 'Mateo Rojas', gpa: 6.2, humanCoreScore: 88, attention: '88%', role: 'Mentor de Pares', weaknesses: 'Matemática Avanzada', alerts: 1 },
-            { id: 'st-3', name: 'Sofía Martínez', gpa: 6.5, humanCoreScore: 92, attention: '94%', role: 'Colaborador Humanista', weaknesses: 'Física Aplicada', alerts: 0 },
-            { id: 'st-4', name: 'Camila Silva', gpa: 6.4, humanCoreScore: 90, attention: '91%', role: 'Capitana de Debate', weaknesses: 'Química', alerts: 0 },
-            { id: 'st-5', name: 'Lucas Fernández', gpa: 6.1, humanCoreScore: 84, attention: '86%', role: 'Colaborador Creativo', weaknesses: 'Cálculo', alerts: 2 },
-            { id: 'st-6', name: 'Valentina Soto', gpa: 6.6, humanCoreScore: 94, attention: '95%', role: 'Mentora Ciencias', weaknesses: 'Historia', alerts: 0 },
-            { id: 'st-7', name: 'Diego Morales', gpa: 6.3, humanCoreScore: 91, attention: '93%', role: 'Coordinador Algoritmos', weaknesses: 'Comprensión Lectora', alerts: 0 },
-            { id: 'st-8', name: 'Constanza Silva', gpa: 6.2, humanCoreScore: 87, attention: '90%', role: 'Linguistics Lead', weaknesses: 'Álgebra Lineal', alerts: 1 }
-        ]
+        students: INITIAL_PILOT_STUDENTS.filter(s => s.course.includes('Senior High A'))
     },
     junior_b: {
         id: 'junior_b',
@@ -73,51 +71,81 @@ const COURSE_TELEMETRY_DATA = {
             { id: 'cf-7', topic: 'Despeje de Ecuaciones Racionales', failureRate: 24, affectedStudents: 7, severity: 'MODERADA', category: 'Álgebra' },
             { id: 'cf-8', topic: 'Teorema del Valor Medio', failureRate: 18, affectedStudents: 5, severity: 'BAJA', category: 'Teoría de Funciones' }
         ],
-        students: [
-            { id: 'st-9', name: 'Martín Araya', gpa: 6.3, humanCoreScore: 89, attention: '91%', role: 'Líder Lógico', weaknesses: 'Geometría', alerts: 0 },
-            { id: 'st-10', name: 'Isidora Castro', gpa: 6.5, humanCoreScore: 92, attention: '93%', role: 'Mentora de Pares', weaknesses: 'Álgebra', alerts: 0 },
-            { id: 'st-11', name: 'Ignacio Fuentes', gpa: 5.9, humanCoreScore: 81, attention: '84%', role: 'Colaborador', weaknesses: 'Cálculo', alerts: 1 },
-            { id: 'st-12', name: 'Francisca Vega', gpa: 6.2, humanCoreScore: 88, attention: '89%', role: 'Debate Captain', weaknesses: 'Física', alerts: 0 }
-        ]
+        students: INITIAL_PILOT_STUDENTS.filter(s => s.course.includes('Senior High B') || s.course.includes('Junior High A'))
     },
     global: {
         id: 'global',
         name: 'Todos Mis Cursos (Global Analytics)',
         subject: 'Consolidado Docente • Matemática & Cálculo',
-        studentCount: 60,
+        studentCount: INITIAL_PILOT_STUDENTS.length,
         averageGpa: 6.3,
         attendanceRate: '94.0%',
         attentionRetention: 92,
         socraticQueriesCount: 326,
         passRate: '92%',
-        humanCore: [
-            { subject: 'Lógica & Deducción', A: 90, fullMark: 100 },
-            { subject: 'Creatividad', A: 85, fullMark: 100 },
-            { subject: 'Resiliencia PAES', A: 84, fullMark: 100 },
-            { subject: 'Comunicación & Lenguaje', A: 85, fullMark: 100 },
-            { subject: 'Ética Ciudadana', A: 91, fullMark: 100 },
-            { subject: 'Ciencias & Modelación', A: 86, fullMark: 100 },
-        ],
+        humanCore: calculateHumanCoreRadarFromData(INITIAL_PILOT_STUDENTS),
         conceptFailures: [
             { id: 'cf-1', topic: 'Regla de la Cadena & Derivadas Compuestas', failureRate: 41, affectedStudents: 24, severity: 'ALTA', category: 'Cálculo Diferencial' },
             { id: 'cf-5', topic: 'Factorización de Polinomios & Álgebra Racional', failureRate: 36, affectedStudents: 21, severity: 'ALTA', category: 'Álgebra y Funciones' },
             { id: 'cf-2', topic: 'Optimización y Puntos Críticos f\'(x) = 0', failureRate: 32, affectedStudents: 19, severity: 'MODERADA', category: 'Aplicaciones de la Derivada' },
             { id: 'cf-3', topic: 'Límites Indeterminados y Asíntotas', failureRate: 26, affectedStudents: 15, severity: 'MODERADA', category: 'Límites y Continuidad' }
         ],
-        students: []
+        students: INITIAL_PILOT_STUDENTS
     }
 };
 
 export default function TeacherReportsHub() {
     const [selectedCourseKey, setSelectedCourseKey] = useState('senior_a');
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedFailure, setSelectedFailure] = useState(COURSE_TELEMETRY_DATA.senior_a.conceptFailures[0]);
+    const [selectedFailure, setSelectedFailure] = useState(BASELINE_COURSE_DATA.senior_a.conceptFailures[0]);
     const [isGeneratingAdvisory, setIsGeneratingAdvisory] = useState(false);
     const [advisoryResult, setAdvisoryResult] = useState(null);
     const [lastSyncTime, setLastSyncTime] = useState(new Date().toLocaleTimeString());
-    const [supabaseStatus, setSupabaseStatus] = useState('CONNECTED');
+    const [supabaseStatus, setSupabaseStatus] = useState('CONNECTED (Live Telemetry)');
+    const [courseTelemetry, setCourseTelemetry] = useState(BASELINE_COURSE_DATA);
 
-    const activeData = COURSE_TELEMETRY_DATA[selectedCourseKey] || COURSE_TELEMETRY_DATA.senior_a;
+    // Sync live roster from local storage / Supabase
+    useEffect(() => {
+        try {
+            const savedRoster = localStorage.getItem('aulock_pilot_students_roster_v2');
+            if (savedRoster) {
+                const parsed = JSON.parse(savedRoster);
+                const seniorAStudents = parsed.filter(s => s.course.includes('Senior High A') || s.course.includes('4° Medio A'));
+                const juniorBStudents = parsed.filter(s => s.course.includes('Senior High B') || s.course.includes('Junior High A') || s.course.includes('3° Medio A'));
+                
+                setCourseTelemetry({
+                    senior_a: {
+                        ...BASELINE_COURSE_DATA.senior_a,
+                        studentCount: seniorAStudents.length,
+                        averageGpa: calculateAggregatedGPA(seniorAStudents),
+                        attentionRetention: calculateAttentionIndex(seniorAStudents),
+                        humanCore: calculateHumanCoreRadarFromData(seniorAStudents),
+                        students: seniorAStudents
+                    },
+                    junior_b: {
+                        ...BASELINE_COURSE_DATA.junior_b,
+                        studentCount: juniorBStudents.length,
+                        averageGpa: calculateAggregatedGPA(juniorBStudents),
+                        attentionRetention: calculateAttentionIndex(juniorBStudents),
+                        humanCore: calculateHumanCoreRadarFromData(juniorBStudents),
+                        students: juniorBStudents
+                    },
+                    global: {
+                        ...BASELINE_COURSE_DATA.global,
+                        studentCount: parsed.length,
+                        averageGpa: calculateAggregatedGPA(parsed),
+                        attentionRetention: calculateAttentionIndex(parsed),
+                        humanCore: calculateHumanCoreRadarFromData(parsed),
+                        students: parsed
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn("Live roster sync fallback:", e);
+        }
+    }, []);
+
+    const activeData = courseTelemetry[selectedCourseKey] || courseTelemetry.senior_a;
 
     // Load initial advisory or sync when failure topic changes
     useEffect(() => {
@@ -130,11 +158,13 @@ export default function TeacherReportsHub() {
     useEffect(() => {
         const checkSupabase = async () => {
             try {
-                const { data, error } = await supabase.from('profiles').select('id').limit(1);
-                if (!error) {
-                    setSupabaseStatus('CONNECTED (Live Telemetry)');
-                } else {
-                    setSupabaseStatus('STANDALONE BUFFERED');
+                if (supabase) {
+                    const { data, error } = await supabase.from('profiles').select('id').limit(1);
+                    if (!error) {
+                        setSupabaseStatus('CONNECTED (Live Telemetry)');
+                    } else {
+                        setSupabaseStatus('STANDALONE BUFFERED');
+                    }
                 }
             } catch (e) {
                 setSupabaseStatus('BUFFERED STREAM');
