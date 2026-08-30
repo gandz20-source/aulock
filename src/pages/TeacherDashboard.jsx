@@ -1548,9 +1548,6 @@ export default function TeacherDashboard() {
                                 </div>
                             )}
                         </div>
-
-                        {/* GESTIÓN DE SQUADS */}
-                        <TeacherSquadManager />
                     </div>
                 )}
 
