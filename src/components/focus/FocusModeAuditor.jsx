@@ -5,17 +5,46 @@ export default function FocusModeAuditor({ showExplanations = true }) {
   const focusContext = useFocusMode() || {};
   const { isPhoneInCase, currentSession, handleNfcEvent } = focusContext;
 
-  const [isFocused, setIsFocused] = useState(isPhoneInCase || false);
-  const [focusSeconds, setFocusSeconds] = useState(0);
-  const [attentionPoints, setAttentionPoints] = useState(100);
-  const [penaltyCount, setPenaltyCount] = useState(0);
+  const [isFocused, setIsFocused] = useState(() => {
+    return isPhoneInCase || localStorage.getItem('aulock_auditor_focused') === 'true';
+  });
+
+  const [sessionStartTime, setSessionStartTime] = useState(() => {
+    const saved = localStorage.getItem('aulock_auditor_session_start');
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+    return null;
+  });
+
+  const [focusSeconds, setFocusSeconds] = useState(() => {
+    const savedStart = parseInt(localStorage.getItem('aulock_auditor_session_start') || '0', 10);
+    const isAct = localStorage.getItem('aulock_auditor_focused') === 'true';
+    return (isAct && savedStart > 0) ? Math.floor((Date.now() - savedStart) / 1000) : 0;
+  });
+
+  const [attentionPoints, setAttentionPoints] = useState(() => {
+    const saved = localStorage.getItem('aulock_auditor_points');
+    return saved ? parseInt(saved, 10) : 100;
+  });
+
+  const [penaltyCount, setPenaltyCount] = useState(() => {
+    const saved = localStorage.getItem('aulock_auditor_penalties');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
   const [currentSubject] = useState(currentSession?.className || 'Mathematics: Quadratic Equations');
   const [professorName] = useState(currentSession?.teacherName || 'Prof. Carlos Rivas');
   const [activationSource, setActivationSource] = useState('STUDENT_OR_TEACHER');
 
   useEffect(() => {
-    if (isPhoneInCase) {
+    if (isPhoneInCase && !isFocused) {
+      const now = Date.now();
       setIsFocused(true);
+      setSessionStartTime(now);
+      localStorage.setItem('aulock_auditor_focused', 'true');
+      localStorage.setItem('aulock_auditor_session_start', String(now));
       setActivationSource('NFC_CASE');
     }
   }, [isPhoneInCase]);
@@ -24,11 +53,16 @@ export default function FocusModeAuditor({ showExplanations = true }) {
   useEffect(() => {
     const checkForceFocus = () => {
       const forced = localStorage.getItem('aulock_force_focus_mode') === 'true';
-      if (forced) {
+      if (forced && !isFocused) {
+        const now = Date.now();
         setIsFocused(true);
+        setSessionStartTime(now);
+        localStorage.setItem('aulock_auditor_focused', 'true');
+        localStorage.setItem('aulock_auditor_session_start', String(now));
         setActivationSource('TEACHER_FORCED');
-      } else if (localStorage.getItem('aulock_force_focus_mode') === 'false') {
+      } else if (localStorage.getItem('aulock_force_focus_mode') === 'false' && isFocused) {
         setIsFocused(false);
+        localStorage.setItem('aulock_auditor_focused', 'false');
       }
     };
 
@@ -39,33 +73,65 @@ export default function FocusModeAuditor({ showExplanations = true }) {
       window.removeEventListener('storage', checkForceFocus);
       window.removeEventListener('aulock_focus_event', checkForceFocus);
     };
-  }, []);
+  }, [isFocused]);
 
+  // Absolute Timestamp Timer Calculation & Decoupled Visibility Change
   useEffect(() => {
     let timer = null;
 
-    if (isFocused) {
+    if (isFocused && sessionStartTime) {
+      // Immediate tick to prevent any delay
+      const initialElapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+      setFocusSeconds(initialElapsed);
+
       timer = setInterval(() => {
-        setFocusSeconds(prev => prev + 1);
-        if (focusSeconds > 0 && focusSeconds % 10 === 0) {
-          setAttentionPoints(prev => Math.min(200, prev + 2));
+        const now = Date.now();
+        const elapsed = Math.floor((now - sessionStartTime) / 1000);
+        setFocusSeconds(elapsed);
+
+        if (elapsed > 0 && elapsed % 10 === 0) {
+          setAttentionPoints(prev => {
+            const updated = Math.min(200, prev + 2);
+            localStorage.setItem('aulock_auditor_points', String(updated));
+            return updated;
+          });
         }
       }, 1000);
-
-      const handleVisibilityChange = () => {
-        if (document.hidden) {
-          setPenaltyCount(prev => prev + 1);
-          setAttentionPoints(prev => Math.max(0, prev - 15));
-        }
-      };
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      return () => {
-        clearInterval(timer);
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      };
     }
-  }, [isFocused, focusSeconds]);
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // ONLY log distraction penalty, NEVER reset the timer!
+        setPenaltyCount(prev => {
+          const updated = prev + 1;
+          localStorage.setItem('aulock_auditor_penalties', String(updated));
+          return updated;
+        });
+        setAttentionPoints(prev => {
+          const updated = Math.max(0, prev - 15);
+          localStorage.setItem('aulock_auditor_points', String(updated));
+          return updated;
+        });
+      } else {
+        // Tab restored: Recompute exact elapsed time from absolute timestamp
+        if (sessionStartTime) {
+          setFocusSeconds(Math.floor((Date.now() - sessionStartTime) / 1000));
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', () => {
+      if (sessionStartTime) {
+        setFocusSeconds(Math.floor((Date.now() - sessionStartTime) / 1000));
+      }
+    });
+
+    return () => {
+      if (timer) clearInterval(timer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isFocused, sessionStartTime]);
 
   const formatTime = (totalSecs) => {
     const mins = Math.floor(totalSecs / 60);
@@ -75,11 +141,17 @@ export default function FocusModeAuditor({ showExplanations = true }) {
 
   const toggleFocusMode = () => {
     if (!isFocused) {
+      const now = Date.now();
       setIsFocused(true);
+      setSessionStartTime(now);
+      setFocusSeconds(0);
+      localStorage.setItem('aulock_auditor_focused', 'true');
+      localStorage.setItem('aulock_auditor_session_start', String(now));
       setActivationSource('STUDENT_MANUAL');
     } else {
-      if (window.confirm("Are you sure you want to end Focus Mode and record your session metrics?")) {
+      if (window.confirm("¿Seguro que deseas finalizar el Modo Enfoque y registrar las métricas de la sesión?")) {
         setIsFocused(false);
+        localStorage.setItem('aulock_auditor_focused', 'false');
       }
     }
   };

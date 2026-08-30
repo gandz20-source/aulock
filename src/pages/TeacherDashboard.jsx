@@ -305,32 +305,110 @@ export default function TeacherDashboard() {
         alert(`🚀 Live Question Broadcasted to Class! Time Limit: ${timer}s. Student HUD updated instantly.`);
     };
 
-    // Synchronized Class Timer Launcher & Controls
-    const [classTimerInitial, setClassTimerInitial] = useState(600); // Default 10 min (600s)
-    const [classTimerRemaining, setClassTimerRemaining] = useState(600);
-    const [isClassTimerRunning, setIsClassTimerRunning] = useState(false);
+    // Synchronized Class Timer Launcher & Controls (Timestamp-Based Absolute Clock)
+    const [classTimerInitial, setClassTimerInitial] = useState(() => {
+        const saved = localStorage.getItem('aulock_class_timer');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return parsed.initialSeconds || 600;
+            } catch (e) {}
+        }
+        return 600;
+    });
 
+    const [classTimerTargetEnd, setClassTimerTargetEnd] = useState(() => {
+        const saved = localStorage.getItem('aulock_class_timer');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                return parsed.targetEndTime || null;
+            } catch (e) {}
+        }
+        return null;
+    });
+
+    const [isClassTimerRunning, setIsClassTimerRunning] = useState(() => {
+        const saved = localStorage.getItem('aulock_class_timer');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.isRunning && parsed.targetEndTime && parsed.targetEndTime > Date.now()) {
+                    return true;
+                }
+            } catch (e) {}
+        }
+        return false;
+    });
+
+    const [classTimerRemaining, setClassTimerRemaining] = useState(() => {
+        const saved = localStorage.getItem('aulock_class_timer');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed.isRunning && parsed.targetEndTime) {
+                    return Math.max(0, Math.ceil((parsed.targetEndTime - Date.now()) / 1000));
+                }
+                return parsed.remainingSeconds !== undefined ? parsed.remainingSeconds : (parsed.initialSeconds || 600);
+            } catch (e) {}
+        }
+        return 600;
+    });
+
+    // Precision timestamp tick engine
     useEffect(() => {
         let interval = null;
-        if (isClassTimerRunning && classTimerRemaining > 0) {
+
+        if (isClassTimerRunning && classTimerTargetEnd) {
+            // Immediate sync
+            const now = Date.now();
+            const rem = Math.max(0, Math.ceil((classTimerTargetEnd - now) / 1000));
+            setClassTimerRemaining(rem);
+            if (rem === 0) {
+                setIsClassTimerRunning(false);
+            }
+
             interval = setInterval(() => {
-                setClassTimerRemaining(prev => Math.max(0, prev - 1));
-            }, 1000);
-        } else if (classTimerRemaining === 0 && isClassTimerRunning) {
-            setIsClassTimerRunning(false);
+                const currentNow = Date.now();
+                const currentRem = Math.max(0, Math.ceil((classTimerTargetEnd - currentNow) / 1000));
+                setClassTimerRemaining(currentRem);
+                if (currentRem === 0) {
+                    setIsClassTimerRunning(false);
+                }
+            }, 500);
         }
-        return () => clearInterval(interval);
-    }, [isClassTimerRunning, classTimerRemaining]);
+
+        const handleTabFocus = () => {
+            if (classTimerTargetEnd && isClassTimerRunning) {
+                const rem = Math.max(0, Math.ceil((classTimerTargetEnd - Date.now()) / 1000));
+                setClassTimerRemaining(rem);
+            }
+        };
+
+        window.addEventListener('focus', handleTabFocus);
+        document.addEventListener('visibilitychange', handleTabFocus);
+
+        return () => {
+            if (interval) clearInterval(interval);
+            window.removeEventListener('focus', handleTabFocus);
+            document.removeEventListener('visibilitychange', handleTabFocus);
+        };
+    }, [isClassTimerRunning, classTimerTargetEnd]);
 
     const handleStartClassTimer = (secondsToSet) => {
         const targetSeconds = secondsToSet !== undefined ? secondsToSet : (classTimerRemaining > 0 ? classTimerRemaining : classTimerInitial);
+        const now = Date.now();
+        const targetEndTime = now + (targetSeconds * 1000);
+
         setClassTimerRemaining(targetSeconds);
+        setClassTimerTargetEnd(targetEndTime);
         setIsClassTimerRunning(true);
 
         const payload = {
             initialSeconds: classTimerInitial,
             remainingSeconds: targetSeconds,
-            startedAt: Date.now(),
+            startTime: now,
+            targetEndTime,
             isRunning: true,
             label: 'Live Class Session Timer'
         };
@@ -338,15 +416,18 @@ export default function TeacherDashboard() {
         localStorage.setItem('aulock_class_timer', JSON.stringify(payload));
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new CustomEvent('aulock_timer_event', { detail: payload }));
-        alert(`⏱️ Class Timer Started (${Math.floor(targetSeconds / 60)}m ${targetSeconds % 60}s)! Broadcasted live to all student devices.`);
+        alert(`⏱️ Temporizador de Clase Iniciado (${Math.floor(targetSeconds / 60)}m ${targetSeconds % 60}s)! Sincronizado en tiempo absoluto a todos los alumnos.`);
     };
 
     const handlePauseClassTimer = () => {
         setIsClassTimerRunning(false);
+        setClassTimerTargetEnd(null);
+
         const payload = {
             initialSeconds: classTimerInitial,
             remainingSeconds: classTimerRemaining,
-            startedAt: Date.now(),
+            startTime: Date.now(),
+            targetEndTime: null,
             isRunning: false,
             label: 'Live Class Session Timer'
         };
@@ -357,11 +438,14 @@ export default function TeacherDashboard() {
 
     const handleResetClassTimer = () => {
         setIsClassTimerRunning(false);
+        setClassTimerTargetEnd(null);
         setClassTimerRemaining(classTimerInitial);
+
         const payload = {
             initialSeconds: classTimerInitial,
             remainingSeconds: classTimerInitial,
-            startedAt: Date.now(),
+            startTime: Date.now(),
+            targetEndTime: null,
             isRunning: false,
             label: 'Live Class Session Timer'
         };

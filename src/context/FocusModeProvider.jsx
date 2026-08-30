@@ -4,7 +4,11 @@ import { supabase } from '../config/supabase';
 const FocusModeContext = createContext();
 
 export const FocusModeProvider = ({ children }) => {
-    const [isPhoneInCase, setIsPhoneInCase] = useState(false);
+    // 1. Session Persistence & Absolute Timestamps
+    const [isPhoneInCase, setIsPhoneInCase] = useState(() => {
+        return localStorage.getItem('aulock_phone_in_case') === 'true';
+    });
+
     const [currentSession, setCurrentSession] = useState({
         sessionId: 'SESSION_LIVE_2026',
         className: 'Mathematics & STEM Specialization',
@@ -12,14 +16,45 @@ export const FocusModeProvider = ({ children }) => {
         startedAt: new Date().toLocaleTimeString()
     });
 
-    // 1. Client-Side Page Visibility & Focus Engine States
-    const [isTeacherActive, setIsTeacherActive] = useState(true);
-    const [teacherTimer, setTeacherTimer] = useState(0);
-    const [studentFocusTime, setStudentFocusTime] = useState(0);
-    const [studentFocusScore, setStudentFocusScore] = useState(100); // Initial Student Score = 100
-    const [tabExitCount, setTabExitCount] = useState(0);
+    const [isTeacherActive, setIsTeacherActive] = useState(() => {
+        return localStorage.getItem('aulock_session_active') === 'true' || true;
+    });
+
+    // Persistent session start timestamp (Absolute Time in ms)
+    const [sessionStartTime, setSessionStartTime] = useState(() => {
+        const saved = localStorage.getItem('aulock_session_start_time');
+        if (saved) {
+            const parsed = parseInt(saved, 10);
+            if (!isNaN(parsed) && parsed > 0) return parsed;
+        }
+        const now = Date.now();
+        localStorage.setItem('aulock_session_start_time', String(now));
+        return now;
+    });
+
+    // Dynamic Elapsed Times (Calculated from Absolute Timestamps)
+    const [teacherTimer, setTeacherTimer] = useState(() => {
+        const savedStart = parseInt(localStorage.getItem('aulock_session_start_time') || '0', 10);
+        return savedStart > 0 ? Math.floor((Date.now() - savedStart) / 1000) : 0;
+    });
+
+    const [studentFocusTime, setStudentFocusTime] = useState(() => {
+        const saved = localStorage.getItem('aulock_student_focus_time');
+        return saved ? parseInt(saved, 10) : 0;
+    });
+
+    const [studentFocusScore, setStudentFocusScore] = useState(() => {
+        const saved = localStorage.getItem('aulock_student_focus_score');
+        return saved ? parseInt(saved, 10) : 100;
+    });
+
+    const [tabExitCount, setTabExitCount] = useState(() => {
+        const saved = localStorage.getItem('aulock_student_tab_exits');
+        return saved ? parseInt(saved, 10) : 0;
+    });
+
     const [isTabFocused, setIsTabFocused] = useState(true);
-    const [weeklyBonus, setWeeklyBonus] = useState(true); // Weekly_Bonus flag
+    const [weeklyBonus, setWeeklyBonus] = useState(true);
     const [showWarningModal, setShowWarningModal] = useState(false);
 
     // 2. Live Questions Synchronization
@@ -31,27 +66,34 @@ export const FocusModeProvider = ({ children }) => {
         active: true
     });
 
-    // Teacher-Led Timer
+    // 3. Absolute Timestamp-Based Timer Engine (Ticks every second, always computes Date.now() - sessionStartTime)
     useEffect(() => {
         let interval = null;
-        if (isTeacherActive) {
+
+        if (isTeacherActive && sessionStartTime > 0) {
             interval = setInterval(() => {
-                setTeacherTimer(prev => prev + 1);
+                const now = Date.now();
+                const absoluteElapsed = Math.floor((now - sessionStartTime) / 1000);
+                setTeacherTimer(absoluteElapsed);
+
+                // Accumulate focus time if tab is currently focused
+                if (!document.hidden && isTabFocused) {
+                    setStudentFocusTime(prev => {
+                        const updated = prev + 1;
+                        localStorage.setItem('aulock_student_focus_time', String(updated));
+                        return updated;
+                    });
+                }
             }, 1000);
         }
-        return () => clearInterval(interval);
-    }, [isTeacherActive]);
 
-    // Page Visibility API Audit (document.visibilityState === 'hidden')
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isTeacherActive, sessionStartTime, isTabFocused]);
+
+    // 4. Page Visibility API Audit (Decoupled from timer resets)
     useEffect(() => {
-        let focusInterval = null;
-
-        if (isTeacherActive && isTabFocused) {
-            focusInterval = setInterval(() => {
-                setStudentFocusTime(prev => prev + 1);
-            }, 1000);
-        }
-
         const handleVisibilityChange = () => {
             const currentPath = (window.location.pathname || '').toLowerCase();
             // NEVER trigger out-of-focus warning on teacher or school admin routes
@@ -60,37 +102,53 @@ export const FocusModeProvider = ({ children }) => {
             }
 
             if (document.visibilityState === 'hidden' || document.hidden) {
-                // 1. Pause student focus timer
+                // Tab exited or window minimized: ONLY apply penalty logic, NEVER reset or clear clock timestamps!
                 setIsTabFocused(false);
-                setTabExitCount(prev => prev + 1);
+                setTabExitCount(prev => {
+                    const updated = prev + 1;
+                    localStorage.setItem('aulock_student_tab_exits', String(updated));
+                    return updated;
+                });
 
-                // 2. Deduct 3 points immediately
+                // Deduct 3 points immediately
                 setStudentFocusScore(prev => {
                     const updatedScore = Math.max(0, prev - 3);
-                    if (updatedScore < 100) setWeeklyBonus(false); // Flag Weekly_Bonus false if score drops below 100
+                    localStorage.setItem('aulock_student_focus_score', String(updatedScore));
+                    if (updatedScore < 100) setWeeklyBonus(false);
                     return updatedScore;
                 });
 
-                // 3. Trigger warning alert modal
+                // Trigger warning alert modal
                 setShowWarningModal(true);
-                console.warn("⚠️ ¡Atención! Has salido de la pantalla. -3 puntos de enfoque.");
+                console.warn("⚠️ ¡Atención! Salida de pestaña detectada. -3 puntos de enfoque. (El temporizador maestro continúa intacto).");
             } else {
+                // Tab restored: Re-sync focus and compute exact current elapsed time immediately!
                 setIsTabFocused(true);
-                console.info("👁️ Focus restored. Personal focus timer resumed.");
+                const currentElapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+                setTeacherTimer(currentElapsed);
+                console.info("👁️ Foco restaurado. Temporizador sincronizado con precisión:", currentElapsed, "segundos.");
             }
         };
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('focus', () => {
+            setIsTabFocused(true);
+            setTeacherTimer(Math.floor((Date.now() - sessionStartTime) / 1000));
+        });
+
         return () => {
-            clearInterval(focusInterval);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
-    }, [isTeacherActive, isTabFocused]);
+    }, [sessionStartTime]);
 
-    // 3. Live Questions & Point Recovery (+2 points up to max 100)
+    // 5. Live Questions & Point Recovery (+2 points up to max 100)
     const submitLiveAnswer = (selectedIndex) => {
         if (activeLiveQuestion && selectedIndex === activeLiveQuestion.correctIndex) {
-            setStudentFocusScore(prev => Math.min(100, prev + 2)); // Score never exceeds 100 max
+            setStudentFocusScore(prev => {
+                const updated = Math.min(100, prev + 2);
+                localStorage.setItem('aulock_student_focus_score', String(updated));
+                return updated;
+            });
             console.info("✅ Correct answer! +2 points added back to focus score.");
             return { success: true, pointsAwarded: 2 };
         }
@@ -101,9 +159,11 @@ export const FocusModeProvider = ({ children }) => {
         setActiveLiveQuestion(questionObject);
     };
 
-    // 4. Class Completion & Supabase Sync (`student_session_metrics`)
+    // 6. Class Completion & Supabase Sync (`student_session_metrics`)
     const endClassAndSyncSupabase = async () => {
         setIsTeacherActive(false);
+        localStorage.setItem('aulock_session_active', 'false');
+
         const focusEfficiencyRatio = teacherTimer > 0 ? (studentFocusTime / teacherTimer) * 100 : 100;
         const finalScore = Math.round((studentFocusScore * 0.7) + (focusEfficiencyRatio * 0.3));
 
@@ -120,7 +180,6 @@ export const FocusModeProvider = ({ children }) => {
 
         try {
             if (supabase) {
-                // Upsert to student_session_metrics table
                 await supabase.from('student_session_metrics').insert([sessionPayload]);
             }
             console.info("☁️ SUPABASE: Saved session to student_session_metrics:", sessionPayload);
@@ -131,15 +190,31 @@ export const FocusModeProvider = ({ children }) => {
         return sessionPayload;
     };
 
+    const resetSessionTimer = () => {
+        const now = Date.now();
+        setSessionStartTime(now);
+        setTeacherTimer(0);
+        setStudentFocusTime(0);
+        setStudentFocusScore(100);
+        setTabExitCount(0);
+        localStorage.setItem('aulock_session_start_time', String(now));
+        localStorage.setItem('aulock_student_focus_time', '0');
+        localStorage.setItem('aulock_student_focus_score', '100');
+        localStorage.setItem('aulock_student_tab_exits', '0');
+    };
+
     const closeWarningModal = () => setShowWarningModal(false);
 
     const handleNfcEvent = async (eventPayload) => {
         if (!isPhoneInCase) {
             setIsPhoneInCase(true);
             setIsTeacherActive(true);
+            localStorage.setItem('aulock_phone_in_case', 'true');
+            localStorage.setItem('aulock_session_active', 'true');
         } else {
-            if (window.confirm("End focus session and release NFC case?")) {
+            if (window.confirm("¿Deseas finalizar la sesión de enfoque y liberar el estuche NFC?")) {
                 setIsPhoneInCase(false);
+                localStorage.setItem('aulock_phone_in_case', 'false');
                 endClassAndSyncSupabase();
             }
         }

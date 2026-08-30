@@ -66,17 +66,22 @@ export default function LiveClassroomStudentHUD() {
     };
   }, []);
 
-  // Classwide Timer broadcasted by Teacher
+  // Classwide Timer broadcasted by Teacher (Absolute Timestamp Clock)
   const [classTimer, setClassTimer] = useState(() => {
     const saved = localStorage.getItem('aulock_class_timer');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        const isRunning = parsed.isRunning && parsed.targetEndTime && parsed.targetEndTime > Date.now();
+        const remaining = parsed.targetEndTime 
+          ? Math.max(0, Math.ceil((parsed.targetEndTime - Date.now()) / 1000))
+          : (parsed.remainingSeconds !== undefined ? parsed.remainingSeconds : 600);
+        return { ...parsed, isRunning, remainingSeconds: remaining };
       } catch (e) {
         console.error(e);
       }
     }
-    return { remainingSeconds: 600, initialSeconds: 600, isRunning: false };
+    return { remainingSeconds: 600, initialSeconds: 600, isRunning: false, targetEndTime: null };
   });
 
   useEffect(() => {
@@ -90,38 +95,67 @@ export default function LiveClassroomStudentHUD() {
           try { data = JSON.parse(saved); } catch (err) {}
         }
       }
-      if (data) setClassTimer(data);
+      if (data) {
+        const isRunning = data.isRunning && data.targetEndTime && data.targetEndTime > Date.now();
+        const remaining = data.targetEndTime 
+          ? Math.max(0, Math.ceil((data.targetEndTime - Date.now()) / 1000))
+          : (data.remainingSeconds !== undefined ? data.remainingSeconds : 600);
+        setClassTimer({ ...data, isRunning, remainingSeconds: remaining });
+      }
     };
 
     window.addEventListener('storage', handleTimerSync);
     window.addEventListener('aulock_timer_event', handleTimerSync);
+    window.addEventListener('focus', handleTimerSync);
+    document.addEventListener('visibilitychange', handleTimerSync);
+
     return () => {
       window.removeEventListener('storage', handleTimerSync);
       window.removeEventListener('aulock_timer_event', handleTimerSync);
+      window.removeEventListener('focus', handleTimerSync);
+      document.removeEventListener('visibilitychange', handleTimerSync);
     };
   }, []);
 
-  // Class timer local countdown
+  // Class timer local countdown based on absolute targetEndTime
   useEffect(() => {
     let interval = null;
-    if (classTimer.isRunning && classTimer.remainingSeconds > 0) {
+    if (classTimer.isRunning && classTimer.targetEndTime) {
       interval = setInterval(() => {
+        const rem = Math.max(0, Math.ceil((classTimer.targetEndTime - Date.now()) / 1000));
         setClassTimer(prev => ({
           ...prev,
-          remainingSeconds: Math.max(0, prev.remainingSeconds - 1)
+          remainingSeconds: rem,
+          isRunning: rem > 0
         }));
-      }, 1000);
+      }, 500);
     }
-    return () => clearInterval(interval);
-  }, [classTimer.isRunning, classTimer.remainingSeconds]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [classTimer.isRunning, classTimer.targetEndTime]);
 
-  // Countdown timer simulation for active live question
+  // Countdown timer simulation for active live question (Timestamp-Based)
+  const [questionStartTime, setQuestionStartTime] = useState(() => Date.now());
+
   useEffect(() => {
+    setQuestionStartTime(Date.now());
+  }, [activeQuestion]);
+
+  useEffect(() => {
+    let interval = null;
     if (timeLeft > 0 && !hasSubmitted) {
-      const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-      return () => clearInterval(timer);
+      interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - questionStartTime) / 1000);
+        const limit = activeQuestion.timeLimit || 45;
+        const rem = Math.max(0, limit - elapsed);
+        setTimeLeft(rem);
+      }, 500);
     }
-  }, [timeLeft, hasSubmitted]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [timeLeft, hasSubmitted, questionStartTime, activeQuestion]);
 
   const handleAnswerSubmit = (optionId, optionText = '') => {
     setSelectedOption(optionId);

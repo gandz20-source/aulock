@@ -165,17 +165,24 @@ const StudentWorkspace = () => {
         };
     }, []);
 
-    // Synchronized Class Timer State in Student Workspace
+    // Synchronized Class Timer State in Student Workspace (Absolute Timestamp Clock)
     const [classTimer, setClassTimer] = useState(() => {
         const saved = localStorage.getItem('aulock_class_timer');
         if (saved) {
-            try { return JSON.parse(saved); } catch (e) { console.error(e); }
+            try {
+                const parsed = JSON.parse(saved);
+                const isRunning = parsed.isRunning && parsed.targetEndTime && parsed.targetEndTime > Date.now();
+                const remaining = parsed.targetEndTime 
+                    ? Math.max(0, Math.ceil((parsed.targetEndTime - Date.now()) / 1000))
+                    : (parsed.remainingSeconds !== undefined ? parsed.remainingSeconds : 600);
+                return { ...parsed, isRunning, remainingSeconds: remaining };
+            } catch (e) { console.error(e); }
         }
-        return { remainingSeconds: 600, initialSeconds: 600, isRunning: false };
+        return { remainingSeconds: 600, initialSeconds: 600, isRunning: false, targetEndTime: null };
     });
 
     useEffect(() => {
-        const handleTimerSync = (e) => {
+        const syncFromStorage = (e) => {
             let data = null;
             if (e && e.detail) {
                 data = e.detail;
@@ -185,29 +192,44 @@ const StudentWorkspace = () => {
                     try { data = JSON.parse(saved); } catch (err) {}
                 }
             }
-            if (data) setClassTimer(data);
+            if (data) {
+                const isRunning = data.isRunning && data.targetEndTime && data.targetEndTime > Date.now();
+                const remaining = data.targetEndTime 
+                    ? Math.max(0, Math.ceil((data.targetEndTime - Date.now()) / 1000))
+                    : (data.remainingSeconds !== undefined ? data.remainingSeconds : 600);
+                setClassTimer({ ...data, isRunning, remainingSeconds: remaining });
+            }
         };
 
-        window.addEventListener('storage', handleTimerSync);
-        window.addEventListener('aulock_timer_event', handleTimerSync);
+        window.addEventListener('storage', syncFromStorage);
+        window.addEventListener('aulock_timer_event', syncFromStorage);
+        window.addEventListener('focus', syncFromStorage);
+        document.addEventListener('visibilitychange', syncFromStorage);
+
         return () => {
-            window.removeEventListener('storage', handleTimerSync);
-            window.removeEventListener('aulock_timer_event', handleTimerSync);
+            window.removeEventListener('storage', syncFromStorage);
+            window.removeEventListener('aulock_timer_event', syncFromStorage);
+            window.removeEventListener('focus', syncFromStorage);
+            document.removeEventListener('visibilitychange', syncFromStorage);
         };
     }, []);
 
     useEffect(() => {
         let interval = null;
-        if (classTimer.isRunning && classTimer.remainingSeconds > 0) {
+        if (classTimer.isRunning && classTimer.targetEndTime) {
             interval = setInterval(() => {
+                const rem = Math.max(0, Math.ceil((classTimer.targetEndTime - Date.now()) / 1000));
                 setClassTimer(prev => ({
                     ...prev,
-                    remainingSeconds: Math.max(0, prev.remainingSeconds - 1)
+                    remainingSeconds: rem,
+                    isRunning: rem > 0
                 }));
-            }, 1000);
+            }, 500);
         }
-        return () => clearInterval(interval);
-    }, [classTimer.isRunning, classTimer.remainingSeconds]);
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [classTimer.isRunning, classTimer.targetEndTime]);
 
     // Time-based Motivational Banner
     const [timeGreeting, setTimeGreeting] = useState({ period: 'morning', text: '', icon: Sunrise });
