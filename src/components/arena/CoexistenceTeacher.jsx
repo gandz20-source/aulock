@@ -28,11 +28,12 @@ export const INITIAL_10_SQUADS = [
         progress: 85, 
         status: 'Active', 
         damageDealt: 1000,
+        speakerName: 'Juan Carlos Pérez',
         members: [
-            { name: 'Juan Carlos Pérez', role: 'Líder Lógico', isSpeaker: true },
-            { name: 'Mateo Rojas', role: 'Mentor de Pares', isSpeaker: false },
-            { name: 'Lucas Fernández', role: 'Colaborador Creativo', isSpeaker: false },
-            { name: 'Diego Morales', role: 'Coordinador Algorítmico', isSpeaker: false }
+            { id: 'usr-1', name: 'Juan Carlos Pérez', role: 'Líder Lógico', isSpeaker: true },
+            { id: 'usr-2', name: 'Mateo Rojas', role: 'Mentor de Pares', isSpeaker: false },
+            { id: 'usr-3', name: 'Lucas Fernández', role: 'Colaborador Creativo', isSpeaker: false },
+            { id: 'usr-4', name: 'Diego Morales', role: 'Coordinador Algorítmico', isSpeaker: false }
         ]
     },
     { 
@@ -43,11 +44,12 @@ export const INITIAL_10_SQUADS = [
         progress: 80, 
         status: 'Active', 
         damageDealt: 1000,
+        speakerName: 'Sofía Martínez',
         members: [
-            { name: 'Sofía Martínez', role: 'Líder de Historia', isSpeaker: true },
-            { name: 'Camila Silva', role: 'Capitán de Debate', isSpeaker: false },
-            { name: 'Valentina Soto', role: 'Líder Científica', isSpeaker: false },
-            { name: 'Constanza Silva', role: 'Coordinadora Técnica', isSpeaker: false }
+            { id: 'usr-5', name: 'Sofía Martínez', role: 'Líder de Historia', isSpeaker: true },
+            { id: 'usr-6', name: 'Camila Silva', role: 'Capitán de Debate', isSpeaker: false },
+            { id: 'usr-7', name: 'Valentina Soto', role: 'Líder Científica', isSpeaker: false },
+            { id: 'usr-8', name: 'Constanza Silva', role: 'Coordinadora Técnica', isSpeaker: false }
         ]
     },
     { id: 'sq-3', name: 'Squad Gamma', color: 'from-emerald-500 to-teal-600', score: 390, progress: 75, status: 'Active', damageDealt: 1000 },
@@ -129,12 +131,12 @@ export const GAME_MODES = {
 };
 
 export const CoexistenceTeacher = () => {
-    // --- 1. SELECTION & SETUP STATES ---
+    // --- 1. HARDWIRED SELECTION & SETUP STATES ---
     const [activeScaleTab, setActiveScaleTab] = useState('MICRO'); // 'MICRO' | 'MACRO'
-    const [selectedGameId, setSelectedGameId] = useState('PALABRA_PROHIBIDA');
+    const [selectedGame, setSelectedGame] = useState(GAME_MODES.MICRO[0]); // Direct game object state
     const [selectedTopicId, setSelectedTopicId] = useState('math-quad');
     const [customTopicText, setCustomTopicText] = useState('');
-    const [durationSeconds, setDurationSeconds] = useState(180);
+    const [durationSeconds, setDurationSeconds] = useState(GAME_MODES.MICRO[0].defaultDuration);
     const [difficulty, setDifficulty] = useState('Normal');
     const [autoAssignSquads, setAutoAssignSquads] = useState(false);
     const [isGeneratingWithAI, setIsGeneratingWithAI] = useState(false);
@@ -156,13 +158,6 @@ export const CoexistenceTeacher = () => {
     const [remainingSeconds, setRemainingSeconds] = useState(0);
     const [squadsList, setSquadsList] = useState(INITIAL_10_SQUADS);
     const [bossCurrentHp, setBossCurrentHp] = useState(10000);
-    const [squadSubmissions, setSquadSubmissions] = useState([]);
-
-    // Find current selected game object
-    const allGames = useMemo(() => [...GAME_MODES.MICRO, ...GAME_MODES.MACRO], []);
-    const selectedGame = useMemo(() => {
-        return allGames.find(g => g.id === selectedGameId) || allGames[0];
-    }, [allGames, selectedGameId]);
 
     const activeTopicLabel = useMemo(() => {
         if (selectedTopicId === 'custom' && customTopicText) return customTopicText;
@@ -195,7 +190,6 @@ export const CoexistenceTeacher = () => {
             .on('broadcast', { event: 'student_answer_submitted' }, ({ payload }) => {
                 console.log('📡 Realtime: Student response received:', payload);
                 if (payload) {
-                    setSquadSubmissions(prev => [payload, ...prev.slice(0, 15)]);
                     if (payload.isCorrect && payload.damage) {
                         handleBossAttack(payload.damage);
                     }
@@ -219,8 +213,10 @@ export const CoexistenceTeacher = () => {
                 if (data.targetEndTime) {
                     setRemainingSeconds(Math.max(0, Math.ceil((data.targetEndTime - Date.now()) / 1000)));
                 }
-                if (data.gameData?.bossTotalHp) {
-                    setBossCurrentHp(data.gameData.bossCurrentHp ?? data.gameData.bossTotalHp);
+                if (data.ai_context?.bossTotalHp || data.gameData?.bossTotalHp) {
+                    const total = data.ai_context?.bossTotalHp || data.gameData?.bossTotalHp;
+                    const current = data.ai_context?.bossCurrentHp ?? data.gameData?.bossCurrentHp ?? total;
+                    setBossCurrentHp(current);
                 }
             } else {
                 setActiveSession(null);
@@ -238,7 +234,7 @@ export const CoexistenceTeacher = () => {
         };
     }, [activeSession?.status, activeSession?.targetEndTime]);
 
-    // --- 4. BROADCAST HELPER ---
+    // --- 4. REALTIME BROADCAST HELPER ---
     const broadcastSession = (sessionData) => {
         // 1. LocalStorage & Window Custom Events (instant local sync)
         localStorage.setItem('aulock_arena_game_session', JSON.stringify(sessionData));
@@ -262,13 +258,13 @@ export const CoexistenceTeacher = () => {
         }
     };
 
-    // --- 5. LAUNCH GAME ACTION ---
+    // --- 5. LAUNCH GAME ACTION WITH STRUCTURED JSON PAYLOAD ---
     const handleLaunchGame = async () => {
         setIsGeneratingWithAI(true);
 
         try {
-            // Generate content dynamically with Gemini 2.5 Flash
-            const dynamicGameData = await generateArenaGamificationChallenge({
+            // Generate dynamic content with Gemini 2.5 Flash
+            const dynamicAiContext = await generateArenaGamificationChallenge({
                 gameId: selectedGame.id,
                 gameTitle: selectedGame.title,
                 topic: activeTopicLabel,
@@ -279,22 +275,25 @@ export const CoexistenceTeacher = () => {
             const now = Date.now();
             const targetEndTime = now + (durationSeconds * 1000);
 
-            // Assign speaker per squad (e.g. for Palabra Prohibida)
-            const designatedSpeakerName = 'Juan Carlos Pérez'; // Default speaker for Squad Alfa
-
+            // Construct strictly valid JSON payload
             const sessionPayload = {
                 sessionId: 'ARENA_SESSION_' + now,
+                game_id: selectedGame.id,
                 gameId: selectedGame.id,
                 gameTitle: selectedGame.title,
+                gameIcon: selectedGame.icon,
                 scale: activeScaleTab,
                 topic: activeTopicLabel,
                 difficulty,
+                duration: durationSeconds,
                 durationSeconds,
                 startTime: now,
                 targetEndTime,
                 status: 'RUNNING',
-                speakerName: designatedSpeakerName,
-                gameData: dynamicGameData,
+                speakerName: 'Juan Carlos Pérez',
+                speakerId: 'usr-1',
+                ai_context: dynamicAiContext,
+                gameData: dynamicAiContext,
                 squads: INITIAL_10_SQUADS,
                 launchedBy: 'Prof. Carlos Rivas'
             };
@@ -303,11 +302,11 @@ export const CoexistenceTeacher = () => {
             setActiveSession(sessionPayload);
             setRemainingSeconds(durationSeconds);
             setSquadsList(INITIAL_10_SQUADS);
-            if (dynamicGameData.bossTotalHp) setBossCurrentHp(dynamicGameData.bossTotalHp);
+            if (dynamicAiContext.bossTotalHp) setBossCurrentHp(dynamicAiContext.bossTotalHp);
 
         } catch (err) {
             console.error("Error launching arena game:", err);
-            alert("Error al contactar a Gemini. Se inició la sesión con contenido de respaldo.");
+            alert("Error al conectar con la IA. Se ha iniciado la sesión con contenido de respaldo.");
         } finally {
             setIsGeneratingWithAI(false);
         }
@@ -352,7 +351,7 @@ export const CoexistenceTeacher = () => {
     };
 
     const handleFinishSession = (autoEnded = false) => {
-        if (!autoEnded && !window.confirm("¿Deseas finalizar la ronda actual de la dinámica y consolidar los puntos del curso?")) {
+        if (!autoEnded && !window.confirm("¿Deseas finalizar la ronda actual y consolidar los puntos del curso?")) {
             return;
         }
 
@@ -372,6 +371,10 @@ export const CoexistenceTeacher = () => {
             const nextHp = Math.max(0, prev - damage);
             const updated = {
                 ...activeSession,
+                ai_context: {
+                    ...activeSession.ai_context,
+                    bossCurrentHp: nextHp
+                },
                 gameData: {
                     ...activeSession.gameData,
                     bossCurrentHp: nextHp
@@ -389,10 +392,10 @@ export const CoexistenceTeacher = () => {
     };
 
     // =========================================================================
-    // RENDER 1: LIVE PROJECTOR DASHBOARD (WHEN GAME IS ACTIVE & RUNNING)
+    // RENDER 1: LIVE PROJECTOR DASHBOARD (TEACHER ACTIVE VIEW)
     // =========================================================================
     if (activeSession && (activeSession.status === 'RUNNING' || activeSession.status === 'PAUSED')) {
-        const gameData = activeSession.gameData || {};
+        const gameData = activeSession.ai_context || activeSession.gameData || {};
         const isPaused = activeSession.status === 'PAUSED';
 
         return (
@@ -438,7 +441,7 @@ export const CoexistenceTeacher = () => {
                 <div className="p-4 bg-slate-900/90 border border-emerald-500/40 rounded-2xl flex flex-wrap items-center justify-between gap-3 shadow-lg">
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-emerald-400 font-bold font-orbitron">// CONTROLES MASTER GM:</span>
-                        <span className="text-[10px] text-slate-400 font-sans">Gestión directa de la dinámica proyectada</span>
+                        <span className="text-[10px] text-slate-400 font-sans">Gestión directa de la dinámica en sala</span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
@@ -478,11 +481,11 @@ export const CoexistenceTeacher = () => {
                     <div className="lg:col-span-7 space-y-4">
                         
                         {/* 🔤 PALABRA PROHIBIDA VIEW */}
-                        {activeSession.gameId === 'PALABRA_PROHIBIDA' && (
+                        {activeSession.game_id === 'PALABRA_PROHIBIDA' && (
                             <div className="p-6 rounded-2xl bg-slate-900/90 border-2 border-cyan-500/70 shadow-xl space-y-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] font-orbitron font-bold px-2.5 py-1 rounded bg-cyan-950 text-cyan-300 border border-cyan-700 uppercase">
-                                        DESAFÍO TABÚ // ORADOR EN VIVO: {activeSession.speakerName}
+                                        DESAFÍO TABÚ // ORADOR DESIGNADO: {activeSession.speakerName}
                                     </span>
                                     <span className="text-xs text-amber-300 font-bold font-orbitron">+100 PS / ACIERTO</span>
                                 </div>
@@ -515,7 +518,7 @@ export const CoexistenceTeacher = () => {
                         )}
 
                         {/* 🧩 INFORMACIÓN ASIMÉTRICA VIEW */}
-                        {activeSession.gameId === 'INFO_ASIMETRICA' && (
+                        {activeSession.game_id === 'INFO_ASIMETRICA' && (
                             <div className="p-6 rounded-2xl bg-slate-900/90 border-2 border-indigo-500/70 shadow-xl space-y-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] font-orbitron font-bold px-2.5 py-1 rounded bg-indigo-950 text-indigo-300 border border-indigo-700 uppercase">
@@ -553,7 +556,7 @@ export const CoexistenceTeacher = () => {
                         )}
 
                         {/* ⚔️ DESAFÍO COLOSO VIEW */}
-                        {activeSession.gameId === 'DESAFIO_COLOSO' && (
+                        {activeSession.game_id === 'DESAFIO_COLOSO' && (
                             <div className="p-6 rounded-2xl bg-slate-900/90 border-2 border-rose-500/70 shadow-xl space-y-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[10px] font-orbitron font-bold px-2.5 py-1 rounded bg-rose-950 text-rose-300 border border-rose-700 uppercase">
@@ -594,7 +597,7 @@ export const CoexistenceTeacher = () => {
                         )}
 
                         {/* 🗳️ / 🌐 / 🌡️ OTHER MODES */}
-                        {(activeSession.gameId === 'CONSENSO_OBLIGATORIO' || activeSession.gameId === 'TERMOMETRO_CIUDADANO' || activeSession.gameId === 'RED_EMBAJADORES') && (
+                        {(activeSession.game_id === 'CONSENSO_OBLIGATORIO' || activeSession.game_id === 'TERMOMETRO_CIUDADANO' || activeSession.game_id === 'RED_EMBAJADORES') && (
                             <div className="p-6 rounded-2xl bg-slate-900/90 border-2 border-emerald-500/70 shadow-xl space-y-4">
                                 <span className="text-[10px] font-orbitron font-bold px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-700 uppercase">
                                     DIÁLOGO & DEBATE PLENARIO
@@ -684,7 +687,7 @@ export const CoexistenceTeacher = () => {
                     <button
                         onClick={() => {
                             setActiveScaleTab('MICRO');
-                            setSelectedGameId(GAME_MODES.MICRO[0].id);
+                            setSelectedGame(GAME_MODES.MICRO[0]);
                             setDurationSeconds(GAME_MODES.MICRO[0].defaultDuration);
                         }}
                         className={`px-4 py-2 rounded-xl text-xs font-bold font-orbitron transition cursor-pointer ${
@@ -698,7 +701,7 @@ export const CoexistenceTeacher = () => {
                     <button
                         onClick={() => {
                             setActiveScaleTab('MACRO');
-                            setSelectedGameId(GAME_MODES.MACRO[0].id);
+                            setSelectedGame(GAME_MODES.MACRO[0]);
                             setDurationSeconds(GAME_MODES.MACRO[0].defaultDuration);
                         }}
                         className={`px-4 py-2 rounded-xl text-xs font-bold font-orbitron transition cursor-pointer ${
@@ -715,7 +718,7 @@ export const CoexistenceTeacher = () => {
             {/* MAIN TWO-COLUMN LAYOUT: GAMES GRID (LEFT 60%) & QUICK-LAUNCH SETUP (RIGHT 40%) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                {/* 🎮 LEFT COLUMN (60%): GAME SELECTION CARDS */}
+                {/* 🎮 LEFT COLUMN (60%): HARDWIRED GAME SELECTION CARDS */}
                 <div className="lg:col-span-7 space-y-4">
                     <div className="flex justify-between items-center">
                         <span className="text-xs font-orbitron font-bold text-emerald-300 uppercase">
@@ -725,15 +728,15 @@ export const CoexistenceTeacher = () => {
                     </div>
 
                     <div className="space-y-3">
-                        {(activeScaleTab === 'MICRO' ? GAME_MODES.MICRO : GAME_MODES.MACRO).map((game) => {
-                            const isSelected = selectedGameId === game.id;
+                        {(activeScaleTab === 'MICRO' ? GAME_MODES.MICRO : GAME_MODES.MACRO).map((gameItem) => {
+                            const isSelected = selectedGame.id === gameItem.id;
 
                             return (
                                 <div
-                                    key={game.id}
+                                    key={gameItem.id}
                                     onClick={() => {
-                                        setSelectedGameId(game.id);
-                                        setDurationSeconds(game.defaultDuration);
+                                        setSelectedGame(gameItem);
+                                        setDurationSeconds(gameItem.defaultDuration);
                                     }}
                                     className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-start gap-4 ${
                                         isSelected
@@ -742,18 +745,18 @@ export const CoexistenceTeacher = () => {
                                     }`}
                                 >
                                     <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-2xl shrink-0 shadow-inner">
-                                        {game.icon}
+                                        {gameItem.icon}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between gap-2">
-                                            <h3 className="font-orbitron font-bold text-sm text-white">{game.title}</h3>
+                                            <h3 className="font-orbitron font-bold text-sm text-white">{gameItem.title}</h3>
                                             <span className="text-[9px] font-bold bg-slate-950 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded-full uppercase">
-                                                {game.cooperativeType}
+                                                {gameItem.cooperativeType}
                                             </span>
                                         </div>
-                                        <span className="text-[11px] text-cyan-300 font-medium block mt-0.5">{game.tagline}</span>
+                                        <span className="text-[11px] text-cyan-300 font-medium block mt-0.5">{gameItem.tagline}</span>
                                         <p className="text-xs text-slate-400 font-sans mt-1 leading-relaxed">
-                                            {game.description}
+                                            {gameItem.description}
                                         </p>
                                     </div>
                                 </div>
@@ -776,7 +779,7 @@ export const CoexistenceTeacher = () => {
                             <span className="text-[10px] text-amber-300 font-bold font-mono">IA LISTA</span>
                         </div>
 
-                        {/* Selected Game Preview Pill (DYNAMICALLY UPDATED) */}
+                        {/* Selected Game Preview Pill (DIRECTLY DRIVEN BY selectedGame STATE) */}
                         <div className="p-3.5 bg-slate-950 rounded-2xl border-2 border-emerald-500/60 flex items-center gap-3.5 shadow-inner">
                             <span className="text-3xl">{selectedGame.icon}</span>
                             <div className="min-w-0 flex-1">
