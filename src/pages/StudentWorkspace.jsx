@@ -621,14 +621,14 @@ const StudentWorkspace = () => {
 
             <div className="max-w-7xl mx-auto space-y-8">
 
-                {/* --- SYNCHRONIZED CLASSROOM TIMER BANNER FOR STUDENTS --- */}
-                {classTimer && classTimer.isRunning && (
+                {/* --- SYNCHRONIZED CLASSROOM TIMER BANNER FOR STUDENTS (ONLY ON OTHER TABS) --- */}
+                {classTimer && classTimer.isRunning && activeTab !== 'live_classroom' && (
                     <div className="p-5 bg-slate-950/95 border-2 border-cyan-400 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.4)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4 font-mono animate-fade-in">
                         <div className="flex items-center gap-3">
                             <span className="text-2xl animate-bounce">⏱️</span>
                             <div>
                                 <span className="text-[10px] text-cyan-300 font-bold font-orbitron uppercase block">LIVE TEACHER CLASSROOM TIMER IN PROGRESS</span>
-                                <h3 className="text-sm font-bold text-white font-sans">Prof. María González launched live class session countdown</h3>
+                                <h3 className="text-sm font-bold text-white font-sans">Prof. Carlos Rivas / María González - Sesión Activa</h3>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 bg-slate-900 px-5 py-2.5 rounded-2xl border border-cyan-500 shrink-0">
@@ -781,10 +781,8 @@ const StudentWorkspace = () => {
 
                 {/* ==================== PÁGINA 2: AULA EN VIVO & AUDITORÍA DE MODO ENFOQUE MÓVIL ==================== */}
                 {activeTab === 'live_classroom' && (
-                    <div className="space-y-8 animate-in fade-in duration-300">
-                        {/* AUDITORÍA DE PANTALLA & MODO ENFOQUE DE CLASE */}
-                        <FocusModeAuditor />
-
+                    <div className="animate-in fade-in duration-300">
+                        {/* UNIFIED 3-TIER LIVE CLASSROOM & FOCUS HUD */}
                         <LiveClassroomStudentHUD />
                     </div>
                 )}
