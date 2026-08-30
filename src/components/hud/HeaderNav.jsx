@@ -57,8 +57,18 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     },
     {
       id: 6,
+      key: 'nexus',
+      title: '6. ÁGORA JUEGOS',
+      subtitle: 'Convivencia & Arena',
+      color: 'emerald',
+      borderClass: 'border-emerald-400 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.35)]',
+      bgActive: 'bg-slate-900/90 border-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)]',
+      icon: '🎮'
+    },
+    {
+      id: 7,
       key: 'academic',
-      title: '6. PERFORMANCE',
+      title: '7. PERFORMANCE',
       subtitle: 'Analytics',
       color: 'amber',
       borderClass: 'border-amber-500 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.35)]',
@@ -66,9 +76,9 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
       icon: '📊'
     },
     {
-      id: 7,
+      id: 8,
       key: 'passport',
-      title: '7. AuLock PASSPORT',
+      title: '8. AuLock PASSPORT',
       subtitle: 'AuLock NFC',
       color: 'purple',
       borderClass: 'border-purple-500 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.35)]',
@@ -119,12 +129,12 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
 
       {/* SYSTEM MICRO-CODE */}
       <div className="text-[10px] text-cyan-500 font-mono tracking-widest uppercase flex items-center justify-between px-1">
-        <span>HUD.SYS // 7 SOCRATIC LEARNING MODULES</span>
-        <span className="hidden sm:inline text-slate-500">• • • MATRIX HUD v2.5</span>
+        <span>HUD.SYS // 8 SOCRATIC LEARNING & COEXISTENCE MODULES</span>
+        <span className="hidden sm:inline text-slate-500">• • • MATRIX HUD v2.6</span>
       </div>
 
-      {/* 🔴 LAS 7 PESTAÑAS HUD CALLOUT BARS (Distribución exacta) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3.5">
+      {/* 🔴 LAS 8 PESTAÑAS HUD CALLOUT BARS (Distribución exacta) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
@@ -156,13 +166,13 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
                   </span>
                   <span className="text-base">{tab.icon}</span>
                 </div>
-                <h3 className="text-xs font-orbitron font-extrabold text-white tracking-tight uppercase leading-snug">
+                <h3 className="text-xs font-orbitron font-extrabold text-white tracking-tight uppercase leading-snug truncate">
                   {tab.title}
                 </h3>
               </div>
 
               {/* Subtítulo */}
-              <p className={`text-[10px] font-mono font-semibold uppercase tracking-wider mt-1 ${
+              <p className={`text-[10px] font-mono font-semibold uppercase tracking-wider mt-1 truncate ${
                 isActive ? tab.borderClass.split(' ')[1] : 'text-slate-400 group-hover:text-slate-300'
               }`}>
                 {tab.subtitle}
@@ -179,3 +189,4 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     </div>
   );
 }
+

@@ -597,7 +597,137 @@ export const ClassroomArena = ({ isTeacher = false }) => {
     }
 
     // =========================================================================
-    // RENDER B: GAME MASTER LAUNCHPAD (SETUP VIEW WHEN NO GAME IS RUNNING)
+    // RENDER B: STUDENT ARENA LOBBY (WHEN IS TEACHER === FALSE & NO ACTIVE GAME)
+    // =========================================================================
+    if (!isTeacher) {
+        return (
+            <div className="w-full bg-slate-950 text-white font-mono rounded-3xl border-2 border-emerald-500/60 p-5 md:p-8 shadow-[0_0_40px_rgba(16,185,129,0.25)] space-y-6 animate-in fade-in duration-300">
+                
+                {/* STUDENT LOBBY HEADER */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-emerald-900/60">
+                    <div className="flex items-center gap-3.5">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-2xl text-slate-950 font-bold shadow-[0_0_20px_rgba(16,185,129,0.6)]">
+                            🎮
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-orbitron font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500 uppercase flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                                    <span>TERMINAL DE ALUMNO // CONECTADO A SALA</span>
+                                </span>
+                                <span className="text-[10px] text-slate-400 font-sans">
+                                    4° Medio A • Prof. Carlos Rivas
+                                </span>
+                            </div>
+                            <h1 className="text-lg md:text-2xl font-orbitron font-black text-white tracking-wider uppercase mt-0.5">
+                                Ágora de Convivencia & Arena de Sala
+                            </h1>
+                            <p className="text-xs text-slate-400 font-sans">
+                                Participa en dinámicas cooperativas en vivo, sincronizadas con la pantalla del profesor y tu Escuadrón Alfa.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Class Synergy Stars Bank */}
+                    <div className="flex items-center gap-4 bg-slate-900/95 border-2 border-amber-500/80 px-5 py-2.5 rounded-2xl shadow-xl">
+                        <div className="text-amber-400 text-2xl">⭐</div>
+                        <div>
+                            <span className="text-[9px] text-slate-400 font-bold uppercase block font-orbitron">ESTRELLAS DEL CURSO</span>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-2xl font-black font-orbitron text-amber-300">340</span>
+                                <span className="text-xs text-slate-400 font-bold">/ 500 Meta</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* STANDBY RADAR BANNER */}
+                <div className="p-5 bg-gradient-to-r from-slate-900 via-emerald-950/40 to-slate-900 border-2 border-emerald-500/50 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg">
+                    <div className="flex items-center gap-3.5 text-center sm:text-left">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-400 flex items-center justify-center text-xl shrink-0 animate-pulse">
+                            📡
+                        </div>
+                        <div>
+                            <h3 className="text-xs md:text-sm font-orbitron font-bold text-emerald-300 uppercase">
+                                ESPERANDO ACTIVACIÓN DE DINÁMICA POR EL PROFESOR...
+                            </h3>
+                            <p className="text-xs text-slate-300 font-sans mt-0.5">
+                                En cuanto el docente presione <strong>"Lanzar Dinámica"</strong> en el proyector, tu pantalla se conectará automáticamente a la misión de tu Squad.
+                            </p>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handleLaunchGame}
+                        className="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-slate-950 font-orbitron font-black text-xs uppercase tracking-wider rounded-xl transition shadow-[0_0_15px_rgba(16,185,129,0.4)] whitespace-nowrap cursor-pointer"
+                    >
+                        ⚡ Probar Dinámica Demo
+                    </button>
+                </div>
+
+                {/* GAME MODES CATALOG & SQUAD ROLES EXPLORER */}
+                <div className="space-y-4">
+                    <div className="flex justify-between items-center border-b border-emerald-900/60 pb-2">
+                        <span className="text-xs font-orbitron font-bold text-emerald-300 uppercase">
+                            // MODOS DE JUEGO & MECÁNICAS DE CONVIVENCIA EN SALA
+                        </span>
+                        <span className="text-[10px] text-cyan-300 font-bold">40 ESTUDIANTES / 10 SQUADS</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[...GAME_MODES.MICRO, ...GAME_MODES.MACRO].map((game) => (
+                            <div 
+                                key={game.id}
+                                className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/60 transition-all space-y-2 flex flex-col justify-between"
+                            >
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-2xl">{game.icon}</span>
+                                        <span className="text-[9px] font-bold bg-slate-950 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded-full uppercase">
+                                            {game.cooperativeType}
+                                        </span>
+                                    </div>
+                                    <h4 className="font-orbitron font-bold text-sm text-white">{game.title}</h4>
+                                    <span className="text-[11px] text-cyan-300 font-medium block">{game.tagline}</span>
+                                    <p className="text-xs text-slate-400 font-sans leading-relaxed">
+                                        {game.description}
+                                    </p>
+                                </div>
+
+                                <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-400 font-mono">
+                                    <span>⏱️ Duración: {formatTime(game.defaultDuration)}</span>
+                                    <span className="text-amber-300 font-bold">+100 PS Sinergia</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* SQUAD REWARD GOALS FOOTER */}
+                <div className="p-5 bg-slate-900 rounded-2xl border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="text-2xl">🏆</div>
+                        <div>
+                            <h4 className="text-xs font-orbitron font-bold text-amber-300 uppercase">
+                                META COLECTIVA DEL CURSO (500 ESTRELLAS)
+                            </h4>
+                            <p className="text-xs text-slate-300 font-sans">
+                                Al alcanzar 500 estrellas grupales, el curso desbloquea 15 minutos extra de recreo o música ambiental en sala de clases.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="w-full md:w-48 bg-slate-950 rounded-full h-3 border border-slate-800 overflow-hidden shrink-0">
+                        <div className="bg-gradient-to-r from-amber-500 to-yellow-300 h-full rounded-full" style={{ width: '68%' }}></div>
+                    </div>
+                </div>
+
+            </div>
+        );
+    }
+
+    // =========================================================================
+    // RENDER C: GAME MASTER LAUNCHPAD (TEACHER SETUP VIEW WHEN NO GAME IS RUNNING)
     // =========================================================================
     return (
         <div className="w-full bg-slate-950 text-white font-mono rounded-3xl border-2 border-emerald-500/60 p-5 md:p-8 shadow-[0_0_40px_rgba(16,185,129,0.25)] space-y-6">
