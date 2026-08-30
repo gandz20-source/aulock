@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
     GraduationCap, Sparkles, Timer, BrainCircuit, 
-    Users, Award, QrCode 
+    Users, Award, QrCode, Swords, Gamepad2 
 } from 'lucide-react';
 
 export const HudNavTabs = ({ activeTab, setActiveTab }) => {
@@ -13,15 +13,15 @@ export const HudNavTabs = ({ activeTab, setActiveTab }) => {
                 <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-[11px] font-bold tracking-widest text-cyan-400 uppercase">
                     <div className="flex items-center space-x-2">
                         <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
-                        <span>HUD.SYS // 7 MÓDULOS DE APRENDIZAJE SOCRÁTICO</span>
+                        <span>HUD.SYS // 8 MÓDULOS DE APRENDIZAJE SOCRÁTICO & CONVIVENCIA</span>
                     </div>
                     <div className="hidden sm:flex items-center space-x-3 text-slate-500">
                         <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-cyan-300">SYSTEM: ACTIVE</span>
-                        <span>• • • MATRIX HUD v2.5</span>
+                        <span>• • • MATRIX HUD v2.6</span>
                     </div>
                 </div>
 
-                {/* 7 COLORED HUD CALLOUT BARS GRID / SCROLL */}
+                {/* 8 COLORED HUD CALLOUT BARS GRID / SCROLL */}
                 <div className="flex items-center space-x-5 overflow-x-auto custom-scrollbar py-3 px-1">
                     
                     {/* ==================== 1. MI PERFIL (ORANGE HUD CALLOUT) ==================== */}
@@ -220,7 +220,45 @@ export const HudNavTabs = ({ activeTab, setActiveTab }) => {
                         </div>
                     </button>
 
-                    {/* ==================== 6. DESEMPEÑO & GUÍAS (VIBRANT MAGENTA HUD CALLOUT) ==================== */}
+                    {/* ==================== 6. ÁGORA DE CONVIVENCIA & JUEGOS (AMBER/GOLD HUD CALLOUT) ==================== */}
+                    <button
+                        onClick={() => setActiveTab('nexus')}
+                        className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between shrink-0 select-none min-w-[240px] ${
+                            activeTab === 'nexus'
+                                ? 'bg-slate-900 border-amber-400 text-white shadow-[0_0_25px_rgba(245,158,11,0.5)] scale-[1.03] z-10'
+                                : 'bg-slate-900/80 border-amber-500/40 text-slate-300 hover:border-amber-400 hover:bg-slate-900'
+                        }`}
+                    >
+                        {/* Top Trophy Tag */}
+                        <div className="flex items-center justify-between w-full mb-2">
+                            <div className="flex items-center space-x-1 text-amber-400 font-bold text-[10px]">
+                                <span className="px-1 border border-amber-400/60 rounded text-[9px]">NEXUS</span>
+                                <span className="tracking-widest text-amber-300">ARENA DE SALA</span>
+                            </div>
+                            <span className="text-[9px] text-amber-400/80 font-mono">// 06</span>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex items-center space-x-3 my-1">
+                            <div className="p-2.5 rounded-xl bg-slate-950 border border-amber-500/50 shadow-inner group-hover:scale-110 transition-transform">
+                                <Gamepad2 className="w-8 h-8 text-amber-300 stroke-[2.2]" />
+                            </div>
+                            <div className="text-left">
+                                <h4 className="text-xs font-black text-white uppercase tracking-wider">6. Ágora de Juegos</h4>
+                                <span className="text-[10px] text-amber-300 font-bold block mt-0.5">& Convivencia 🎮</span>
+                            </div>
+                        </div>
+
+                        {/* Bottom Live Synergy Bar */}
+                        <div className="relative mt-2 pt-1 border-t border-amber-500/30 flex items-center justify-between text-[9px] text-amber-400 font-mono">
+                            <span>ARENA: ONLINE</span>
+                            <div className="flex items-center space-x-1">
+                                <span className="text-[10px]">⚔️</span>
+                            </div>
+                        </div>
+                    </button>
+
+                    {/* ==================== 7. DESEMPEÑO & GUÍAS (VIBRANT MAGENTA HUD CALLOUT) ==================== */}
                     <button
                         onClick={() => setActiveTab('academic')}
                         className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between shrink-0 select-none min-w-[240px] ${
@@ -235,7 +273,7 @@ export const HudNavTabs = ({ activeTab, setActiveTab }) => {
                                 <span>&gt;&gt;&gt;</span>
                                 <span className="tracking-widest text-fuchsia-300">ANALYTICS</span>
                             </div>
-                            <span className="text-[9px] text-fuchsia-400/80 font-mono">// 06</span>
+                            <span className="text-[9px] text-fuchsia-400/80 font-mono">// 07</span>
                         </div>
 
                         {/* Content */}
@@ -244,7 +282,7 @@ export const HudNavTabs = ({ activeTab, setActiveTab }) => {
                                 <Award className="w-8 h-8 text-fuchsia-300 stroke-[2.2]" />
                             </div>
                             <div className="text-left">
-                                <h4 className="text-xs font-black text-white uppercase tracking-wider">6. Desempeño</h4>
+                                <h4 className="text-xs font-black text-white uppercase tracking-wider">7. Desempeño</h4>
                                 <span className="text-[10px] text-fuchsia-300 font-bold block mt-0.5">& Guías 📚</span>
                             </div>
                         </div>
@@ -258,7 +296,7 @@ export const HudNavTabs = ({ activeTab, setActiveTab }) => {
                         </div>
                     </button>
 
-                    {/* ==================== 7. PASAPORTE AULOCK (MINT TEAL HUD CALLOUT) ==================== */}
+                    {/* ==================== 8. PASAPORTE AULOCK (MINT TEAL HUD CALLOUT) ==================== */}
                     <button
                         onClick={() => setActiveTab('passport')}
                         className={`group relative p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between shrink-0 select-none min-w-[240px] ${
@@ -275,7 +313,7 @@ export const HudNavTabs = ({ activeTab, setActiveTab }) => {
                                 <div className="w-1.5 h-1.5 bg-teal-400" />
                                 <span className="tracking-widest text-teal-300 ml-1">IDENTITY</span>
                             </div>
-                            <span className="text-[9px] text-teal-400/80 font-mono">// 07</span>
+                            <span className="text-[9px] text-teal-400/80 font-mono">// 08</span>
                         </div>
 
                         {/* Content */}
@@ -284,7 +322,7 @@ export const HudNavTabs = ({ activeTab, setActiveTab }) => {
                                 <QrCode className="w-8 h-8 text-teal-300 stroke-[2.2]" />
                             </div>
                             <div className="text-left">
-                                <h4 className="text-xs font-black text-white uppercase tracking-wider">7. Pasaporte</h4>
+                                <h4 className="text-xs font-black text-white uppercase tracking-wider">8. Pasaporte</h4>
                                 <span className="text-[10px] text-teal-300 font-bold block mt-0.5">AuLock 🆔</span>
                             </div>
                         </div>

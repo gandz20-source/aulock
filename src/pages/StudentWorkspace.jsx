@@ -796,16 +796,18 @@ const StudentWorkspace = () => {
                     </div>
                 )}
 
-                {/* ==================== PÁGINA 4: MI ESCUADRÓN ALFA (HUD TÁCTICO & MENTORÍA IA) ==================== */}
+                {/* ==================== PÁGINA 5: MI ESCUADRÓN ALFA (HUD TÁCTICO & MENTORÍA IA) ==================== */}
                 {activeTab === 'squad' && (
                     <div className="space-y-8 animate-in fade-in duration-300">
                         {/* REDESIGNED CYBERPUNK ALPHA SQUAD MODULE */}
                         <AlphaSquad profile={profile} />
+                    </div>
+                )}
 
-                        {/* 🎮 NEXUS: ÁGORA DE CONVIVENCIA ESCOLAR & JUEGOS DE ARENA */}
-                        <section className="my-8 w-full">
-                            <ClassroomArena isTeacher={false} />
-                        </section>
+                {/* ==================== PÁGINA 6: ÁGORA DE JUEGOS & CONVIVENCIA ESCOLAR (NEXUS ARENA) ==================== */}
+                {activeTab === 'nexus' && (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                        <ClassroomArena isTeacher={false} />
                     </div>
                 )}
 
