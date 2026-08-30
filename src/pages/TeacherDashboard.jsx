@@ -19,6 +19,7 @@ import ClassroomArena from '../components/arena/ClassroomArena';
 import TeacherHeaderNav from '../components/hud/TeacherHeaderNav';
 import TeacherActionBar from '../components/hud/TeacherActionBar';
 import TeacherSquadManager from '../components/TeacherSquadManager';
+import TeacherReportsHub from '../components/TeacherReportsHub';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { 
     BookOpen, Play, Clock, Plus, Trash2, CheckCircle, Users, AlertTriangle, 
@@ -1420,17 +1421,10 @@ export default function TeacherDashboard() {
                     </div>
                 )}
 
-                {/* ==================== PESTAÑA 4: 4. REPORTES (RADAR & BIENESTAR) ==================== */}
+                {/* ==================== PESTAÑA 4: 4. REPORTES (TEACHER INTELLIGENCE & TRACEABILITY HUB) ==================== */}
                 {activeTab === 'reports' && (
-                    <div className="space-y-8 animate-in fade-in duration-300 font-mono">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2">
-                                <HumanCoreRadar data={{ logic: 92, communication: 88, naturalSciences: 55, humanities: 78, creativity: 85, resilience: 80 }} />
-                            </div>
-                            <div className="h-[380px]">
-                                <WellnessAlertsPanel />
-                            </div>
-                        </div>
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                        <TeacherReportsHub />
                     </div>
                 )}
 

@@ -1315,3 +1315,69 @@ function getFallbackTEAsistoResponse(userMessage, activePet) {
     return `Te escucho con mucha atención. Todo lo que sientes es importante y válido. Tómate tu tiempo para expresar lo que necesitas; estoy aquí para acompañarte sin ninguna prisa.${petNote}`;
 }
 
+/**
+ * Generate Actionable AI Remediation Advisory for Teacher Analytics Hub
+ */
+export async function generateTeacherRemediationAdvisory({ topic, courseName = 'Senior High A', strugglePercentage = 42 }) {
+    const apiKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) 
+        || (typeof process !== 'undefined' && process?.env?.VITE_GEMINI_API_KEY)
+        || '';
+
+    const cleanTopic = topic || 'Derivadas y Optimización de Funciones';
+
+    const prompt = `
+Eres el Asesor Pedagógico de Inteligencia Docente de AuLock (Alineado al MBE y MINEDUC Chile).
+Analiza la siguiente brecha conceptual detectada en los logs del Tutor Socrático y evaluaciones:
+- Asignatura: Matemática Avanzada & Cálculo
+- Curso: ${courseName}
+- Concepto Crítico con Dificultades: "${cleanTopic}"
+- Tasa de Error / Dificultad en la Cohorte: ${strugglePercentage}%
+
+Genera una recomendación docente hiper-específica, accionable y estructurada en formato JSON estricto:
+{
+  "recommendationTitle": "Plan de Nivelación Rápida: ${cleanTopic}",
+  "priorityLevel": "ALTA PRIORIDAD (${strugglePercentage}% de estudiantes)",
+  "rootCauseAnalysis": "Explicación del error conceptual frecuente identificado por la IA...",
+  "suggestedIntervention": "Estrategia didáctica concreta para la próxima sesión de aula (20-25 min)...",
+  "interactiveChallenge": "Un micro-desafío o pregunta socrática detonante para proyectar en pizarra...",
+  "squadPeerRemediationStrategy": "Cómo apalancar la mentoría cruzada en los Squads de aprendizaje..."
+}
+`;
+
+    if (!apiKey || apiKey === 'DEMO_KEY') {
+        return getFallbackRemediationAdvisory(cleanTopic, courseName, strugglePercentage);
+    }
+
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: 'application/json', temperature: 0.5 }
+            })
+        });
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (jsonText) return JSON.parse(jsonText);
+        return getFallbackRemediationAdvisory(cleanTopic, courseName, strugglePercentage);
+    } catch (err) {
+        console.warn("Using fallback remediation advisory:", err);
+        return getFallbackRemediationAdvisory(cleanTopic, courseName, strugglePercentage);
+    }
+}
+
+function getFallbackRemediationAdvisory(topic, courseName, strugglePercentage) {
+    return {
+        recommendationTitle: `Plan de Nivelación: ${topic}`,
+        priorityLevel: `ATENCIÓN RECOMENDADA (${strugglePercentage}% de la cohorte)`,
+        rootCauseAnalysis: `Los estudiantes muestran confusión al identificar las dependencias funcionales compuestas y omiten la multiplicación por la derivada interna g'(x).`,
+        suggestedIntervention: `Iniciar la próxima clase con una analogía física (ruedas de bicicleta conectadas por cadena) y descomponer en 3 pasos visuales en la Pizarra Socrática antes de asignar ejercicios individuales.`,
+        interactiveChallenge: `Proyectar en vivo: Si h(x) = (3x² - 5)⁴, ¿cuál es la función exterior f(u) y cuál es la función interior u(x)?`,
+        squadPeerRemediationStrategy: `Emparejar a los Líderes Lógicos con los compañeros que presentaron alertas en este tema dentro del Squad Alfa y Beta para resolver un problema de optimización en 10 minutos.`
+    };
+}
+
+
