@@ -1380,4 +1380,197 @@ function getFallbackRemediationAdvisory(topic, courseName, strugglePercentage) {
     };
 }
 
+/**
+ * Generate Dynamic Gamification Dynamic Content via Gemini 2.5 Flash
+ */
+export async function generateArenaGamificationChallenge({ gameId, gameTitle, topic, difficulty = 'Normal', durationMinutes = 3 }) {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const cleanTopic = topic || 'Ecuaciones Cuadráticas & Matemáticas STEM';
+
+    const prompt = `
+Act as a Senior Educational Game Designer and Gamification Master for AuLock.
+Generate the complete, high-stakes game content for the classroom gamification activity:
+- Game ID: "${gameId}" (${gameTitle})
+- Topic: "${cleanTopic}"
+- Difficulty: "${difficulty}"
+- Target Duration: ${durationMinutes} minutes
+- Target Audience: 40 students organized in 10 squads of 4.
+
+Return ONLY a strictly valid JSON object matching the appropriate structure:
+
+For "PALABRA_PROHIBIDA":
+{
+  "gameId": "PALABRA_PROHIBIDA",
+  "secretWord": "Término secreto principal",
+  "tabooWords": ["Palabra 1", "Palabra 2", "Palabra 3", "Palabra 4"],
+  "hint": "Pista contextual pedagógica para el expositor",
+  "pointsPerRound": 100,
+  "rules": "El orador debe lograr que su escuadrón adivine la palabra secreta sin pronunciar ninguna de las 4 palabras prohibidas."
+}
+
+For "INFO_ASIMETRICA":
+{
+  "gameId": "INFO_ASIMETRICA",
+  "mainObjective": "Objetivo cooperativo central a resolver",
+  "roleClues": [
+    { "role": "Líder Lógico", "clue": "Pista o dato numérico 1..." },
+    { "role": "Mentor de Pares", "clue": "Pista o fórmula 2..." },
+    { "role": "Colaborador Creativo", "clue": "Pista o condición de borde 3..." },
+    { "role": "Coordinador Algorítmico", "clue": "Pista o paso de integración 4..." }
+  ],
+  "expectedSolution": "Solución final sintetizada",
+  "verificationPrompt": "Cómo validar la respuesta unificada del grupo"
+}
+
+For "CONSENSO_OBLIGATORIO":
+{
+  "gameId": "CONSENSO_OBLIGATORIO",
+  "dilemmaTitle": "Título del Dilema Ético o Científico",
+  "scenario": "Situación problema compleja sobre ${cleanTopic} donde no hay solución trivial...",
+  "options": [
+    { "id": "A", "title": "Opción A...", "impact": "Impacto pedagógico o ético A" },
+    { "id": "B", "title": "Opción B...", "impact": "Impacto pedagógico o ético B" },
+    { "id": "C", "title": "Opción C...", "impact": "Impacto pedagógico o ético C" }
+  ],
+  "unanimityBonus": 150,
+  "consensusQuestion": "¿Qué postura unánime defenderá el escuadrón?"
+}
+
+For "DESAFIO_COLOSO":
+{
+  "gameId": "DESAFIO_COLOSO",
+  "bossName": "KRÓNOS // El Titán de la Entropía",
+  "bossAvatar": "👹",
+  "bossTotalHp": 10000,
+  "bossLore": "Una anomalía temporal amenaza con borrar el conocimiento sobre ${cleanTopic}. Los 10 escuadrones deben resolver sus micro-misiones para infligir daño al Coloso.",
+  "squadChallenges": [
+    { "squadIndex": 1, "squadName": "Squad Alfa", "problem": "Micro-desafío 1...", "answer": "Resultado 1", "damage": 1000 },
+    { "squadIndex": 2, "squadName": "Squad Beta", "problem": "Micro-desafío 2...", "answer": "Resultado 2", "damage": 1000 },
+    { "squadIndex": 3, "squadName": "Squad Gamma", "problem": "Micro-desafío 3...", "answer": "Resultado 3", "damage": 1000 },
+    { "squadIndex": 4, "squadName": "Squad Delta", "problem": "Micro-desafío 4...", "answer": "Resultado 4", "damage": 1000 },
+    { "squadIndex": 5, "squadName": "Squad Epsilon", "problem": "Micro-desafío 5...", "answer": "Resultado 5", "damage": 1000 },
+    { "squadIndex": 6, "squadName": "Squad Zeta", "problem": "Micro-desafío 6...", "answer": "Resultado 6", "damage": 1000 },
+    { "squadIndex": 7, "squadName": "Squad Eta", "problem": "Micro-desafío 7...", "answer": "Resultado 7", "damage": 1000 },
+    { "squadIndex": 8, "squadName": "Squad Theta", "problem": "Micro-desafío 8...", "answer": "Resultado 8", "damage": 1000 },
+    { "squadIndex": 9, "squadName": "Squad Iota", "problem": "Micro-desafío 9...", "answer": "Resultado 9", "damage": 1000 },
+    { "squadIndex": 10, "squadName": "Squad Kappa", "problem": "Micro-desafío 10...", "answer": "Resultado 10", "damage": 1000 }
+  ]
+}
+
+For "RED_EMBAJADORES":
+{
+  "gameId": "RED_EMBAJADORES",
+  "missionTitle": "Misión Diplomática de Transferencia Cognitiva",
+  "topic": "${cleanTopic}",
+  "instructions": "Cada squad designa 1 embajador que viajará físicamente a otro escuadrón para transmitir una técnica y traer de vuelta una solución comprobada.",
+  "ambassadorObjective": "Enseñar la estrategia óptima de resolución sobre ${cleanTopic} y validar el método alternativo del equipo anfitrión."
+}
+
+For "TERMOMETRO_CIUDADANO":
+{
+  "gameId": "TERMOMETRO_CIUDADANO",
+  "debateThesis": "Tesis detonante para debate ciudadano sobre ${cleanTopic}",
+  "stances": ["Totalmente de Acuerdo", "En Desacuerdo", "Postura Crítica / Síntesis"],
+  "reflectionPrompt": "Argumenten en 30 segundos con evidencia sólida antes de que se abra el termómetro de votación anónima."
+}
+`;
+
+    if (!apiKey || apiKey === 'DEMO_KEY') {
+        return getFallbackArenaChallenge(gameId, cleanTopic);
+    }
+
+    try {
+        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
+            })
+        });
+
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        const data = await response.json();
+        const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (jsonText) return JSON.parse(jsonText);
+        return getFallbackArenaChallenge(gameId, cleanTopic);
+    } catch (err) {
+        console.warn("Using fallback arena challenge:", err);
+        return getFallbackArenaChallenge(gameId, cleanTopic);
+    }
+}
+
+function getFallbackArenaChallenge(gameId, topic) {
+    if (gameId === 'PALABRA_PROHIBIDA') {
+        return {
+            gameId: 'PALABRA_PROHIBIDA',
+            secretWord: 'PARÁBOLA',
+            tabooWords: ['VÉRTICE', 'CUADRÁTICA', 'CURVA', 'EJE'],
+            hint: `Concepto fundamental relacionado con ${topic}.`,
+            pointsPerRound: 100,
+            rules: 'Explica el término sin mencionar ninguna de las 4 palabras prohibidas en 60 segundos.'
+        };
+    }
+    if (gameId === 'INFO_ASIMETRICA') {
+        return {
+            gameId: 'INFO_ASIMETRICA',
+            mainObjective: `Calcular la trayectoria y punto óptimo en ${topic}`,
+            roleClues: [
+                { role: 'Líder Lógico', clue: 'La velocidad inicial es v0 = 20 m/s con ángulo vertical.' },
+                { role: 'Mentor de Pares', clue: 'La ecuación de altura es h(t) = v0·t - 0.5·g·t².' },
+                { role: 'Colaborador Creativo', clue: 'La aceleración de gravedad efectiva es g = 10 m/s².' },
+                { role: 'Coordinador Algorítmico', clue: 'La altura máxima se alcanza cuando la velocidad vertical es 0 (t = 2 s).' }
+            ],
+            expectedSolution: 'Altura máxima = 20 metros a los 2 segundos.',
+            verificationPrompt: 'Verificar usando h_max = (v0²) / (2g)'
+        };
+    }
+    if (gameId === 'CONSENSO_OBLIGATORIO') {
+        return {
+            gameId: 'CONSENSO_OBLIGATORIO',
+            dilemmaTitle: `Dilema de Optimización y Ética en ${topic}`,
+            scenario: `La comunidad enfrenta una decisión crítica sobre el uso de recursos y modelos predictivos en ${topic}.`,
+            options: [
+                { id: 'A', title: 'Priorizar máxima precisión algorítmica sin restricciones.', impact: 'Alto rendimiento pero requiere mayor tiempo.' },
+                { id: 'B', title: 'Implementar solución rápida con verificación cruzada humana.', impact: 'Equilibrio óptimo entre velocidad y seguridad.' },
+                { id: 'C', title: 'Desarrollar un protocolo híbrido comunitario.', impact: 'Mayor participación pero requiere consenso unánime.' }
+            ],
+            unanimityBonus: 150,
+            consensusQuestion: '¿Cuál opción elegirá el escuadrón de forma 100% unánime?'
+        };
+    }
+    if (gameId === 'DESAFIO_COLOSO') {
+        return {
+            gameId: 'DESAFIO_COLOSO',
+            bossName: 'KRÓNOS // El Coloso de la Entropía',
+            bossAvatar: '👹',
+            bossTotalHp: 10000,
+            bossLore: `Una distorsión en la matriz de ${topic} intenta desestabilizar la sala. Los 10 escuadrones deben resolver sus micro-misiones para derrotarlo.`,
+            squadChallenges: Array.from({ length: 10 }, (_, i) => ({
+                squadIndex: i + 1,
+                squadName: `Squad ${['Alfa', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa'][i]}`,
+                problem: `Calcula el valor crítico para la fase ${i + 1} de ${topic}: ¿Cuánto es (${i + 2} × 4) + ${i * 5}?`,
+                answer: String((i + 2) * 4 + i * 5),
+                damage: 1000
+            }))
+        };
+    }
+    if (gameId === 'RED_EMBAJADORES') {
+        return {
+            gameId: 'RED_EMBAJADORES',
+            missionTitle: 'Protocolo Diplomático de Saberes Cruzados',
+            topic,
+            instructions: `Cada escuadrón envía un embajador a otro squad para intercambiar una estrategia de resolución sobre ${topic}.`,
+            ambassadorObjective: `Transferir la técnica de simplificación rápida y validar el resultado con el squad receptor.`
+        };
+    }
+    return {
+        gameId: 'TERMOMETRO_CIUDADANO',
+        debateThesis: `¿Es la aplicación de ${topic} la vía más justa para resolver los desafíos sociales actuales?`,
+        stances: ['Totalmente de Acuerdo', 'En Desacuerdo', 'Postura Crítica / Síntesis'],
+        reflectionPrompt: 'Argumenten con evidencia de la unidad antes de abrir la votación de la sala.'
+    };
+}
+
+
 
