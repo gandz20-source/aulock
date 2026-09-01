@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFocusMode } from '../../context/FocusModeProvider';
+import { supabase } from '../../config/supabase';
 import { 
     Clock, Radio, HeartHandshake, BrainCircuit, Sparkles, CheckCircle2, 
     AlertTriangle, ShieldCheck, Lock, Unlock, HelpCircle, Send, Award, 
@@ -18,6 +19,10 @@ export default function LiveClassroomStudentHUD() {
     handleNfcEvent, 
     endClassAndSyncSupabase 
   } = focusContext;
+
+  const studentName = 'Juan Carlos Pérez';
+  const studentCourse = '4° Medio A';
+  const squadName = 'Squad Alfa';
 
   // 1. Single Absolute Focus Timer State
   const [sessionStartTime, setSessionStartTime] = useState(() => {
@@ -150,9 +155,11 @@ export default function LiveClassroomStudentHUD() {
           return {
             id: parsed.id || 'q-live-1',
             question: parsed.question || parsed.text || '¿Cuál es el resultado de resolver la ecuación cuadrática x² - 5x + 6 = 0?',
+            type: parsed.type || 'alternatives',
             options: parsed.options || ['A) x = 2 y x = 3', 'B) x = -2 y x = -3', 'C) x = 1 y x = 6', 'D) x = 0 y x = 5'],
             timeLimit: parsed.timeLimit || parsed.timer_seconds || 45,
-            correctAnswer: parsed.correct_answer || 'A) x = 2 y x = 3'
+            targetEndTime: parsed.targetEndTime || (Date.now() + 45000),
+            correctAnswer: parsed.correctAnswer || parsed.correct_answer || 'x = 2 y x = 3'
           };
         }
       } catch (e) {}
@@ -161,88 +168,144 @@ export default function LiveClassroomStudentHUD() {
   });
 
   const [selectedOption, setSelectedOption] = useState(null);
+  const [writtenAnswerText, setWrittenAnswerText] = useState('');
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [submitFeedback, setSubmitFeedback] = useState(null);
   const [questionTimeLeft, setQuestionTimeLeft] = useState(45);
-  const [questionStartTime, setQuestionStartTime] = useState(null);
   const [understandingLevel, setUnderstandingLevel] = useState(null);
 
-  // Listen for real-time question broadcasts from Teacher Dashboard
+  // Listen for real-time question broadcasts from Teacher Dashboard (Dual: Supabase + LocalStorage)
   useEffect(() => {
+    const applyQuestionData = (savedData) => {
+      if (savedData && (savedData.active === true || savedData.active === undefined)) {
+        const timeLimit = savedData.timeLimit || savedData.timer_seconds || 45;
+        const targetEnd = savedData.targetEndTime || (Date.now() + timeLimit * 1000);
+        const rem = Math.max(0, Math.ceil((targetEnd - Date.now()) / 1000));
+
+        setIsQuestionActive(true);
+        setActiveQuestion({
+          id: savedData.id || 'q-live-' + Date.now(),
+          question: savedData.question || savedData.text || 'Pregunta formativa de la clase en vivo',
+          type: savedData.type || (savedData.options && savedData.options.length > 0 ? 'alternatives' : 'written'),
+          options: savedData.options && savedData.options.length > 0 ? savedData.options : [],
+          timeLimit,
+          targetEndTime: targetEnd,
+          correctAnswer: savedData.correctAnswer || savedData.correct_answer || ''
+        });
+        setQuestionTimeLeft(rem > 0 ? rem : timeLimit);
+        setSelectedOption(null);
+        setWrittenAnswerText('');
+        setHasSubmitted(false);
+        setSubmitFeedback(null);
+      } else if (savedData && savedData.active === false) {
+        setIsQuestionActive(false);
+        setActiveQuestion(null);
+        setHasSubmitted(false);
+        setSubmitFeedback(null);
+      }
+    };
+
     const handleQuestionBroadcast = (e) => {
       let savedData = null;
-
       if (e && e.detail && e.detail.data) {
         savedData = e.detail.data;
       } else {
         const saved = localStorage.getItem('aulock_active_question');
         if (saved) {
-          try {
-            savedData = JSON.parse(saved);
-          } catch (err) {
-            console.error(err);
-          }
+          try { savedData = JSON.parse(saved); } catch (err) {}
         }
       }
-
-      if (savedData && (savedData.active === true || savedData.active === undefined)) {
-        const timeLimit = savedData.timeLimit || savedData.timer_seconds || 45;
-        setIsQuestionActive(true);
-        setActiveQuestion({
-          id: savedData.id || 'q-live-' + Date.now(),
-          question: savedData.question || savedData.text || 'Pregunta formativa de la clase en vivo',
-          options: savedData.options && savedData.options.length > 0 ? savedData.options : ['A) Opción 1', 'B) Opción 2', 'C) Opción 3', 'D) Opción 4'],
-          timeLimit,
-          correctAnswer: savedData.correct_answer || ''
-        });
-        setQuestionTimeLeft(timeLimit);
-        setQuestionStartTime(Date.now());
-        setSelectedOption(null);
-        setHasSubmitted(false);
-      } else if (savedData && savedData.active === false) {
-        setIsQuestionActive(false);
-        setActiveQuestion(null);
-      }
+      applyQuestionData(savedData);
     };
 
+    // 1. Supabase Realtime Channel
+    const channel = supabase
+      .channel('coexistence_nexus_arena')
+      .on('broadcast', { event: 'live_question_launched' }, ({ payload }) => {
+        if (payload) {
+          applyQuestionData(payload);
+        }
+      })
+      .on('broadcast', { event: 'live_question_closed' }, () => {
+        setIsQuestionActive(false);
+        setActiveQuestion(null);
+      })
+      .subscribe();
+
+    // 2. Window and storage listeners
     window.addEventListener('storage', handleQuestionBroadcast);
     window.addEventListener('aulock_question_event', handleQuestionBroadcast);
+
     return () => {
+      supabase.removeChannel(channel);
       window.removeEventListener('storage', handleQuestionBroadcast);
       window.removeEventListener('aulock_question_event', handleQuestionBroadcast);
     };
   }, []);
 
-  // Question Timer Countdown (Only ticks when isQuestionActive === true)
+  // Question Timer Countdown based on targetEndTime
   useEffect(() => {
     let interval = null;
-    if (isQuestionActive && activeQuestion && questionStartTime && questionTimeLeft > 0 && !hasSubmitted) {
-      interval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - questionStartTime) / 1000);
-        const rem = Math.max(0, activeQuestion.timeLimit - elapsed);
+    if (isQuestionActive && activeQuestion && activeQuestion.targetEndTime) {
+      const syncQuestionTime = () => {
+        const rem = Math.max(0, Math.ceil((activeQuestion.targetEndTime - Date.now()) / 1000));
         setQuestionTimeLeft(rem);
         if (rem === 0) {
-          clearInterval(interval);
+          // Question expired
         }
-      }, 500);
+      };
+      syncQuestionTime();
+      interval = setInterval(syncQuestionTime, 500);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isQuestionActive, activeQuestion, questionStartTime, questionTimeLeft, hasSubmitted]);
+  }, [isQuestionActive, activeQuestion]);
 
+  // Handle student submitting answer (Supports: Multiple Choice, True/False, Open Written)
   const handleAnswerSubmit = (optionId, optionText = '') => {
+    if (hasSubmitted) return;
+
     setSelectedOption(optionId);
     setHasSubmitted(true);
 
+    const q = activeQuestion || {};
+    const answerSubmitted = optionText || optionId || writtenAnswerText;
+
+    // Check correctness
+    let isCorrect = false;
+    const expected = (q.correctAnswer || '').trim().toLowerCase();
+    const actual = answerSubmitted.trim().toLowerCase();
+
+    if (q.type === 'true_false') {
+      isCorrect = expected.includes('verdadero') ? actual.includes('verdadero') : actual.includes('falso');
+    } else if (q.type === 'written') {
+      isCorrect = actual.length > 5; // Formative written reasoning
+    } else {
+      isCorrect = actual === expected || actual.includes(expected) || expected.includes(actual);
+    }
+
     const newResponse = {
       id: 'resp-' + Date.now(),
-      studentName: 'Juan Carlos Pérez',
-      course: 'Senior High A (4° Medio A)',
-      optionId,
-      optionText,
+      studentName,
+      squadName,
+      course: studentCourse,
+      questionId: q.id,
+      optionId: optionId || 'ESCRITA',
+      optionText: answerSubmitted,
+      answer: answerSubmitted,
+      isCorrect,
       timestamp: new Date().toISOString()
     };
 
+    setSubmitFeedback({
+      isCorrect,
+      text: isCorrect 
+        ? `🎉 ¡Excelente respuesta! Tu selección es correcta (+100 PS Sinergia).`
+        : `✓ Respuesta enviada con éxito al profesor Carlos Rivas.`
+    });
+
+    // 1. Save to local storage & dispatch local event
     const saved = localStorage.getItem('aulock_student_live_responses');
     const list = saved ? JSON.parse(saved) : [];
     list.unshift(newResponse);
@@ -250,18 +313,49 @@ export default function LiveClassroomStudentHUD() {
 
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new CustomEvent('aulock_student_response_event', { detail: newResponse }));
+
+    // 2. Broadcast via Supabase Realtime to Teacher Dashboard
+    try {
+      const channel = supabase.channel('coexistence_nexus_arena');
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          channel.send({
+            type: 'broadcast',
+            event: 'student_live_response',
+            payload: newResponse
+          });
+        }
+      });
+    } catch (err) {
+      console.warn("Supabase student response broadcast error:", err);
+    }
   };
 
   const handleUnderstandingFeedback = (level) => {
     setUnderstandingLevel(level);
     const payload = {
-      studentName: 'Juan Carlos Pérez',
+      studentName,
+      squadName,
       level,
       timestamp: new Date().toISOString()
     };
     localStorage.setItem('aulock_student_understanding', JSON.stringify(payload));
     window.dispatchEvent(new Event('storage'));
     window.dispatchEvent(new CustomEvent('aulock_understanding_event', { detail: payload }));
+
+    // Broadcast to teacher
+    try {
+      const channel = supabase.channel('coexistence_nexus_arena');
+      channel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          channel.send({
+            type: 'broadcast',
+            event: 'student_comprehension_pulse',
+            payload
+          });
+        }
+      });
+    } catch (err) {}
   };
 
   const formatClock = (totalSecs) => {
@@ -416,7 +510,9 @@ export default function LiveClassroomStudentHUD() {
           {isQuestionActive && (
             <div className="flex items-center gap-2 bg-fuchsia-950/80 border border-fuchsia-500 px-3 py-1 rounded-xl shadow-[0_0_12px_rgba(217,70,239,0.4)]">
               <span className="text-[11px] text-fuchsia-300 font-bold">⏱️ TIEMPO PREGUNTA:</span>
-              <span className="text-sm font-black font-orbitron text-amber-300 animate-pulse">{questionTimeLeft}s</span>
+              <span className={`text-sm font-black font-orbitron ${questionTimeLeft < 10 ? 'text-rose-400 animate-bounce' : 'text-amber-300 animate-pulse'}`}>
+                {questionTimeLeft}s
+              </span>
             </div>
           )}
         </div>
@@ -441,7 +537,7 @@ export default function LiveClassroomStudentHUD() {
                   </p>
                 </div>
                 <span className="px-3 py-1 rounded-full bg-slate-950 text-fuchsia-400 border border-fuchsia-800/80 text-[10px] font-mono">
-                  ● Canal Supabase Realtime Conectado (#CANAL-AULA-2026)
+                  ● Canal Realtime Conectado // En espera del docente
                 </span>
               </div>
             ) : (
@@ -449,53 +545,120 @@ export default function LiveClassroomStudentHUD() {
               <div className="p-6 rounded-2xl bg-slate-900/90 border-2 border-fuchsia-500/70 shadow-xl space-y-4 animate-in fade-in duration-200">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-orbitron font-bold px-2.5 py-1 rounded bg-fuchsia-950 text-fuchsia-300 border border-fuchsia-800 uppercase">
-                    EVALUACIÓN FORMATIVA // OPCIÓN MÚLTIPLE
+                    {activeQuestion.type === 'true_false' 
+                      ? 'EVALUACIÓN FORMATIVA // VERDADERO O FALSO' 
+                      : activeQuestion.type === 'written' 
+                      ? 'EVALUACIÓN FORMATIVA // DESARROLLO ESCRITO' 
+                      : 'EVALUACIÓN FORMATIVA // OPCIÓN MÚLTIPLE'}
                   </span>
-                  <span className="text-[10px] text-amber-300 font-bold">+100 PS RECOMPENSA</span>
+                  <span className="text-[10px] text-amber-300 font-bold font-orbitron">+100 PS RECOMPENSA</span>
                 </div>
 
                 <h3 className="text-sm md:text-base font-bold text-white font-sans border-l-4 border-fuchsia-400 pl-4 py-1 leading-relaxed">
                   {activeQuestion.question}
                 </h3>
 
-                {/* Options Grid (A, B, C, D) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  {activeQuestion.options.map((optText, idx) => {
-                    const letterId = String.fromCharCode(65 + idx);
-                    const isSelected = selectedOption === letterId || selectedOption === optText;
+                {/* 1. Multiple Choice Options (A, B, C, D) */}
+                {(!activeQuestion.type || activeQuestion.type === 'alternatives' || activeQuestion.type === 'multiple_choice') && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    {activeQuestion.options.map((optText, idx) => {
+                      const letterId = String.fromCharCode(65 + idx);
+                      const isSelected = selectedOption === letterId || selectedOption === optText;
 
-                    return (
+                      return (
+                        <button
+                          key={idx}
+                          disabled={hasSubmitted}
+                          onClick={() => handleAnswerSubmit(letterId, optText)}
+                          className={`p-3.5 rounded-xl border text-left font-mono text-xs transition-all flex items-center justify-between cursor-pointer ${
+                            isSelected
+                              ? 'bg-fuchsia-950 border-fuchsia-400 text-white shadow-[0_0_15px_rgba(217,70,239,0.5)]'
+                              : 'bg-slate-950/80 border-slate-800 text-slate-200 hover:border-fuchsia-400 hover:bg-slate-900'
+                          }`}
+                        >
+                          <span className="font-medium pr-2">{optText}</span>
+                          <span className={`w-5 h-5 rounded-full border flex items-center justify-center text-[10px] shrink-0 font-bold ${
+                            isSelected 
+                              ? 'border-fuchsia-400 bg-fuchsia-500 text-slate-950' 
+                              : 'border-slate-700 bg-slate-900 text-fuchsia-300'
+                          }`}>
+                            {letterId}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 2. True / False Options */}
+                {activeQuestion.type === 'true_false' && (
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    {['Verdadero', 'Falso'].map((tf) => {
+                      const isSelected = selectedOption === tf;
+                      const isTrue = tf === 'Verdadero';
+
+                      return (
+                        <button
+                          key={tf}
+                          disabled={hasSubmitted}
+                          onClick={() => handleAnswerSubmit(tf, tf)}
+                          className={`p-5 rounded-2xl border-2 font-orbitron font-black text-sm uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                            isSelected
+                              ? isTrue 
+                                ? 'bg-emerald-950 border-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.5)]' 
+                                : 'bg-rose-950 border-rose-400 text-white shadow-[0_0_20px_rgba(244,63,94,0.5)]'
+                              : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-fuchsia-400'
+                          }`}
+                        >
+                          <span>{isTrue ? '🟢' : '🔴'}</span>
+                          <span>{tf}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 3. Open Written Response Form */}
+                {activeQuestion.type === 'written' && (
+                  <form onSubmit={(e) => { e.preventDefault(); handleAnswerSubmit('ESCRITA', writtenAnswerText); }} className="space-y-3 pt-2">
+                    <textarea
+                      rows={3}
+                      disabled={hasSubmitted}
+                      value={writtenAnswerText}
+                      onChange={(e) => setWrittenAnswerText(e.target.value)}
+                      placeholder="Escribe tu razonamiento o respuesta detallada..."
+                      className="w-full bg-slate-950 border-2 border-fuchsia-500/60 rounded-xl p-3.5 text-sm text-white placeholder-slate-500 outline-none focus:border-fuchsia-400 font-sans"
+                    />
+                    {!hasSubmitted && (
                       <button
-                        key={idx}
-                        disabled={hasSubmitted}
-                        onClick={() => handleAnswerSubmit(letterId, optText)}
-                        className={`p-3.5 rounded-xl border text-left font-mono text-xs transition-all flex items-center justify-between cursor-pointer ${
-                          isSelected
-                            ? 'bg-fuchsia-950 border-fuchsia-400 text-white shadow-[0_0_15px_rgba(217,70,239,0.5)]'
-                            : 'bg-slate-950/80 border-slate-800 text-slate-200 hover:border-fuchsia-400 hover:bg-slate-900'
+                        type="submit"
+                        disabled={!writtenAnswerText.trim()}
+                        className={`w-full py-3.5 rounded-xl font-orbitron font-black text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2 ${
+                          writtenAnswerText.trim()
+                            ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 text-white shadow-[0_0_15px_rgba(217,70,239,0.5)]'
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                         }`}
                       >
-                        <span className="font-medium pr-2">{optText}</span>
-                        <span className={`w-5 h-5 rounded-full border flex items-center justify-center text-[10px] shrink-0 font-bold ${
-                          isSelected 
-                            ? 'border-fuchsia-400 bg-fuchsia-500 text-slate-950' 
-                            : 'border-slate-700 bg-slate-900 text-fuchsia-300'
-                        }`}>
-                          {letterId}
-                        </span>
+                        <Send className="w-4 h-4" />
+                        <span>ENVIAR RESPUESTA ESCRITA</span>
                       </button>
-                    );
-                  })}
-                </div>
+                    )}
+                  </form>
+                )}
 
+                {/* Response Feedback Toast */}
                 {hasSubmitted && (
-                  <div className="p-3.5 bg-emerald-950/80 border-2 border-emerald-500 rounded-xl text-center space-y-1 animate-in fade-in duration-200">
-                    <p className="text-emerald-300 font-bold font-orbitron text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
+                  <div className={`p-4 rounded-xl border text-center space-y-1 animate-in fade-in duration-200 ${
+                    submitFeedback?.isCorrect 
+                      ? 'bg-emerald-950/80 border-emerald-400 text-emerald-200 shadow-[0_0_15px_rgba(16,185,129,0.3)]' 
+                      : 'bg-cyan-950/80 border-cyan-400 text-cyan-200'
+                  }`}>
+                    <p className="font-bold font-orbitron text-xs uppercase tracking-wider flex items-center justify-center gap-1.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       <span>¡Respuesta Registrada con Éxito!</span>
                     </p>
-                    <p className="text-[11px] text-cyan-200 font-sans">
-                      Tu selección fue enviada en vivo al panel del profesor Carlos Rivas.
+                    <p className="text-[11px] font-sans">
+                      {submitFeedback?.text || 'Tu respuesta fue enviada en vivo al panel del profesor Carlos Rivas.'}
                     </p>
                   </div>
                 )}
@@ -641,4 +804,3 @@ export default function LiveClassroomStudentHUD() {
     </div>
   );
 }
-

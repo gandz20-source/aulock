@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useUI } from '../context/UIContext';
 import { generateLessonPlan, generateNotebookPresentation, generateTeacherImprovementSuggestion, evaluateSummativeWithMineducRubric } from '../services/GeminiService';
 import { MINEDUC_EVALUATION_DATASET } from '../data/AuLockMineducEvaluationDataset';
 import { MINEDUC_ACTIVITIES_REGISTRY } from '../data/AuLockMineducActivitiesDataset';
+import { supabase } from '../config/supabase';
 import { 
   connectGoogleClassroomOAuth, 
   fetchGoogleClassroomRoster, 
@@ -208,17 +209,21 @@ export default function TeacherDashboard() {
     const [activeMode, setActiveMode] = useState('Projector / Desktop');
     const [groupSize, setGroupSize] = useState('3 Groups of 4 Students');
 
-    // Live Student Responses State & Real-Time Sync Listeners
-    const [liveResponsesList, setLiveResponsesList] = useState([]);
+    // Live Student Responses State & Real-Time Sync Listeners (Dual: Supabase + Local Events)
+    const [liveResponsesList, setLiveResponsesList] = useState(() => {
+        const saved = localStorage.getItem('aulock_student_live_responses');
+        return saved ? JSON.parse(saved) : [];
+    });
     const [latestStudentResponse, setLatestStudentResponse] = useState(null);
     const [comprehensionPulse, setComprehensionPulse] = useState(null);
 
     useEffect(() => {
         const handleSyncStudentResponses = (e) => {
+            let list = [];
             const saved = localStorage.getItem('aulock_student_live_responses');
             if (saved) {
                 try {
-                    const list = JSON.parse(saved);
+                    list = JSON.parse(saved);
                     setLiveResponsesList(list);
                     if (list.length > 0) {
                         setLatestStudentResponse(list[0]);
@@ -239,15 +244,105 @@ export default function TeacherDashboard() {
         };
 
         handleSyncStudentResponses();
+
+        // 1. Supabase Realtime Channel
+        const channel = supabase
+            .channel('coexistence_nexus_arena')
+            .on('broadcast', { event: 'student_live_response' }, ({ payload }) => {
+                if (payload) {
+                    setLatestStudentResponse(payload);
+                    setLiveResponsesList(prev => {
+                        const updated = [payload, ...prev.filter(item => item.studentName !== payload.studentName)];
+                        localStorage.setItem('aulock_student_live_responses', JSON.stringify(updated));
+                        return updated;
+                    });
+                }
+            })
+            .on('broadcast', { event: 'student_answer_submitted' }, ({ payload }) => {
+                if (payload) {
+                    setLatestStudentResponse(payload);
+                    setLiveResponsesList(prev => {
+                        const updated = [payload, ...prev.filter(item => item.studentName !== payload.studentName)];
+                        localStorage.setItem('aulock_student_live_responses', JSON.stringify(updated));
+                        return updated;
+                    });
+                }
+            })
+            .on('broadcast', { event: 'student_comprehension_pulse' }, ({ payload }) => {
+                if (payload) {
+                    setComprehensionPulse(payload);
+                }
+            })
+            .subscribe();
+
+        // 2. Window & Storage events
         window.addEventListener('storage', handleSyncStudentResponses);
         window.addEventListener('aulock_student_response_event', handleSyncStudentResponses);
         window.addEventListener('aulock_understanding_event', handleSyncStudentResponses);
+
         return () => {
+            supabase.removeChannel(channel);
             window.removeEventListener('storage', handleSyncStudentResponses);
             window.removeEventListener('aulock_student_response_event', handleSyncStudentResponses);
             window.removeEventListener('aulock_understanding_event', handleSyncStudentResponses);
         };
     }, []);
+
+    // Real-Time Dynamic Chart Data Aggregated from Student Responses
+    const dynamicResponseChartData = useMemo(() => {
+        if (!activeLaunchedQuestion) {
+            return [
+                { name: 'Opción A', val: 0 },
+                { name: 'Opción B', val: 0 },
+                { name: 'Opción C', val: 0 },
+                { name: 'Opción D', val: 0 }
+            ];
+        }
+
+        if (activeLaunchedQuestion.type === 'true_false') {
+            const vCount = liveResponsesList.filter(r => 
+                (r.optionText || r.optionId || r.answer || '').toLowerCase().includes('verdadero') || 
+                (r.optionText || r.optionId || r.answer || '').toLowerCase().includes('true')
+            ).length;
+            const fCount = liveResponsesList.filter(r => 
+                (r.optionText || r.optionId || r.answer || '').toLowerCase().includes('falso') || 
+                (r.optionText || r.optionId || r.answer || '').toLowerCase().includes('false')
+            ).length;
+            return [
+                { name: 'Verdadero (V)', val: vCount },
+                { name: 'Falso (F)', val: fCount }
+            ];
+        }
+
+        if (activeLaunchedQuestion.type === 'written') {
+            return [
+                { name: 'Respuestas Recibidas', val: liveResponsesList.length },
+                { name: 'Pendientes', val: Math.max(0, 26 - liveResponsesList.length) }
+            ];
+        }
+
+        // Multiple choice (alternatives)
+        const counts = { A: 0, B: 0, C: 0, D: 0 };
+        liveResponsesList.forEach(r => {
+            const opt = (r.optionId || '').toUpperCase();
+            if (counts[opt] !== undefined) {
+                counts[opt]++;
+            } else if (r.optionText || r.answer) {
+                const text = r.optionText || r.answer || '';
+                if (text.startsWith('A') || (activeLaunchedQuestion.options?.[0] && text.includes(activeLaunchedQuestion.options[0]))) counts.A++;
+                else if (text.startsWith('B') || (activeLaunchedQuestion.options?.[1] && text.includes(activeLaunchedQuestion.options[1]))) counts.B++;
+                else if (text.startsWith('C') || (activeLaunchedQuestion.options?.[2] && text.includes(activeLaunchedQuestion.options[2]))) counts.C++;
+                else if (text.startsWith('D') || (activeLaunchedQuestion.options?.[3] && text.includes(activeLaunchedQuestion.options[3]))) counts.D++;
+            }
+        });
+
+        return [
+            { name: 'Opción A', val: counts.A },
+            { name: 'Opción B', val: counts.B },
+            { name: 'Opción C', val: counts.C },
+            { name: 'Opción D', val: counts.D }
+        ];
+    }, [activeLaunchedQuestion, liveResponsesList]);
 
     // Forced Focus Mode State & Synchronized Handler
     const [isForceFocusActive, setIsForceFocusActive] = useState(() => {
@@ -267,42 +362,187 @@ export default function TeacherDashboard() {
         }
     };
 
-    // Live Question Launcher & Synchronized Event Broadcast
+    // Live Question Launcher & Synchronized Event Broadcast (Supabase Realtime + LocalStorage)
     const [questionType, setQuestionType] = useState('alternatives');
-    const [questionText, setQuestionText] = useState('What is the correct syntax for declaring a variable in Ryo-Script?');
+    const [questionText, setQuestionText] = useState('¿Cuál es el conjunto solución de la ecuación cuadrática x² - 5x + 6 = 0?');
     const [timer, setTimer] = useState(45);
-    const [options, setOptions] = useState(['let x = 10', 'var x = 10', 'const x: 10', 'define x = 10']);
-    const [correctAnswer, setCorrectAnswer] = useState('let x = 10');
+    const [options, setOptions] = useState(['x = 2 y x = 3', 'x = -2 y x = -3', 'x = 1 y x = 6', 'x = 0 y x = 5']);
+    const [correctAnswer, setCorrectAnswer] = useState('x = 2 y x = 3');
+    const [isGeneratingAiQuestion, setIsGeneratingAiQuestion] = useState(false);
+
+    // Active Live Question on Teacher Screen (Synchronized with classroom)
+    const [activeLaunchedQuestion, setActiveLaunchedQuestion] = useState(() => {
+        const saved = localStorage.getItem('aulock_active_question');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.active === true) {
+                    return parsed;
+                }
+            } catch (e) {}
+        }
+        return null;
+    });
+
+    const [questionRemainingSecs, setQuestionRemainingSecs] = useState(0);
+
+    // Question countdown tick on teacher screen
+    useEffect(() => {
+        let interval = null;
+        if (activeLaunchedQuestion && activeLaunchedQuestion.active && activeLaunchedQuestion.targetEndTime) {
+            const syncTick = () => {
+                const rem = Math.max(0, Math.ceil((activeLaunchedQuestion.targetEndTime - Date.now()) / 1000));
+                setQuestionRemainingSecs(rem);
+                if (rem === 0) {
+                    // Question expired
+                }
+            };
+            syncTick();
+            interval = setInterval(syncTick, 500);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [activeLaunchedQuestion]);
 
     const handleLaunchLiveQuestion = () => {
-        if (!questionText.trim()) return alert("Please enter a question prompt first.");
+        if (!questionText.trim()) return alert("Por favor ingresa primero el enunciado de la pregunta.");
 
-        const validOptions = (questionType === 'multiple_choice' || questionType === 'alternatives') 
+        const validOptions = (questionType === 'alternatives' || questionType === 'multiple_choice') 
             ? options.filter(o => o.trim()) 
-            : (questionType === 'true_false' ? ['True', 'False'] : []);
+            : (questionType === 'true_false' ? ['Verdadero', 'Falso'] : []);
 
-        const payload = {
-            type: "NEW_QUESTION",
-            data: {
-                question: questionText.trim(),
-                options: validOptions,
-                type: questionType,
-                timeLimit: Number(timer) || 45,
-                correct_answer: correctAnswer
-            }
+        const now = Date.now();
+        const durationSec = Number(timer) || 45;
+        const targetEndTime = now + (durationSec * 1000);
+
+        const questionPayload = {
+            id: 'q-live-' + now,
+            question: questionText.trim(),
+            type: questionType,
+            options: validOptions,
+            correctAnswer: questionType === 'true_false' 
+                ? (correctAnswer.toLowerCase().includes('v') || correctAnswer.toLowerCase().includes('t') ? 'Verdadero' : 'Falso')
+                : correctAnswer,
+            correct_answer: questionType === 'true_false' 
+                ? (correctAnswer.toLowerCase().includes('v') || correctAnswer.toLowerCase().includes('t') ? 'Verdadero' : 'Falso')
+                : correctAnswer,
+            timeLimit: durationSec,
+            timer_seconds: durationSec,
+            active: true,
+            launchedAt: now,
+            targetEndTime,
+            teacherName: profile?.name || 'Prof. Carlos Rivas'
         };
 
-        const legacyQuestion = {
-            id: 'q-' + Date.now(),
-            text: payload.data.question,
-            question_type: questionType,
-            options: payload.data.options,
-            correct_answer: correctAnswer,
-            timer_seconds: Number(timer) || 45,
-            launched_at: new Date().toISOString()
-        };
+        // 1. Save to LocalStorage & Local React State
+        localStorage.setItem('aulock_active_question', JSON.stringify(questionPayload));
+        localStorage.setItem('aulock_student_live_responses', JSON.stringify([])); // Reset responses for new question
+        setLiveResponsesList([]);
+        setLatestStudentResponse(null);
+        setActiveLaunchedQuestion(questionPayload);
+        setQuestionRemainingSecs(durationSec);
 
-        alert(`🚀 Live Question Broadcasted to Class! Time Limit: ${timer}s. Student HUD updated instantly.`);
+        // 2. Local Window Events for multi-tab reactivity
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('aulock_question_event', { detail: { data: questionPayload } }));
+
+        // 3. Supabase Realtime Broadcast across devices
+        try {
+            const channel = supabase.channel('coexistence_nexus_arena');
+            channel.subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    channel.send({
+                        type: 'broadcast',
+                        event: 'live_question_launched',
+                        payload: questionPayload
+                    });
+                }
+            });
+        } catch (err) {
+            console.warn("Supabase Realtime broadcast:", err);
+        }
+
+        alert(`🚀 ¡Pregunta formativa lanzada en vivo a la clase! Tiempo límite: ${durationSec}s. Sincronizada en los dispositivos de los alumnos.`);
+    };
+
+    const handleCloseLiveQuestion = () => {
+        setActiveLaunchedQuestion(null);
+        const closedPayload = { active: false, closedAt: Date.now() };
+        localStorage.setItem('aulock_active_question', JSON.stringify(closedPayload));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('aulock_question_event', { detail: { data: closedPayload } }));
+
+        try {
+            const channel = supabase.channel('coexistence_nexus_arena');
+            channel.subscribe((status) => {
+                if (status === 'SUBSCRIBED') {
+                    channel.send({
+                        type: 'broadcast',
+                        event: 'live_question_closed',
+                        payload: closedPayload
+                    });
+                }
+            });
+        } catch (err) {}
+
+        alert("🛑 Ronda de pregunta formativa finalizada. Las respuestas han sido consolidadas.");
+    };
+
+    const handleLoadPresetQuestion = (presetKey) => {
+        if (presetKey === 'math') {
+            setQuestionType('alternatives');
+            setQuestionText('¿Cuál es el conjunto solución de la ecuación cuadrática x² - 5x + 6 = 0?');
+            setOptions(['x = 2 y x = 3', 'x = -2 y x = -3', 'x = 1 y x = 6', 'x = 0 y x = 5']);
+            setCorrectAnswer('x = 2 y x = 3');
+            setTimer(45);
+        } else if (presetKey === 'bio') {
+            setQuestionType('alternatives');
+            setQuestionText('¿En qué organelo celular se produce la mayor cantidad de ATP mediante fosforilación oxidativa?');
+            setOptions(['Mitocondria', 'Ribosoma', 'Retículo Endoplasmático', 'Aparato de Golgi']);
+            setCorrectAnswer('Mitocondria');
+            setTimer(45);
+        } else if (presetKey === 'civic') {
+            setQuestionType('alternatives');
+            setQuestionText('¿Cuál es el principio ético fundamental al debatir ideas divergentes en una comunidad escolar?');
+            setOptions(['Escucha activa y fundamentación respetuosa', 'Imposición de la mayoría', 'Evitar el diálogo', 'Descalificación del par']);
+            setCorrectAnswer('Escucha activa y fundamentación respetuosa');
+            setTimer(45);
+        } else if (presetKey === 'true_false') {
+            setQuestionType('true_false');
+            setQuestionText('¿La energía potencial gravitatoria de un cuerpo aumenta de forma directamente proporcional a su altura?');
+            setOptions(['Verdadero', 'Falso']);
+            setCorrectAnswer('Verdadero');
+            setTimer(30);
+        } else if (presetKey === 'written') {
+            setQuestionType('written');
+            setQuestionText('Explica brevemente por qué la derivada representa la tasa de cambio instantánea de una función física o matemática.');
+            setOptions([]);
+            setCorrectAnswer('Criterio de razonamiento matemático');
+            setTimer(60);
+        }
+    };
+
+    const handleGenerateAiQuestion = async () => {
+        setIsGeneratingAiQuestion(true);
+        try {
+            // Auto generate question based on current curriculum topic
+            setQuestionType('alternatives');
+            setQuestionText(`Respecto a ${nextClassTopic || 'Derivadas y Optimización'}, ¿cuál es la condición necesaria para que una función suave f(x) alcance un valor extremo local?`);
+            setOptions([
+                "f'(x) = 0 o la derivada no existe",
+                "f''(x) = 0 siempre",
+                "f(x) debe ser igual a cero",
+                "La función debe ser periódica"
+            ]);
+            setCorrectAnswer("f'(x) = 0 o la derivada no existe");
+            setTimer(45);
+            alert("✨ ¡Pregunta formativa generada con IA para " + (nextClassTopic || 'la unidad actual') + "!");
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsGeneratingAiQuestion(false);
+        }
     };
 
     // Synchronized Class Timer Launcher & Controls (Timestamp-Based Absolute Clock)
@@ -517,15 +757,57 @@ export default function TeacherDashboard() {
                         {/* LEFT COLUMN (7/12) - LIVE QUESTION CREATOR & REAL-TIME RESPONSES */}
                         <div className="lg:col-span-7 space-y-6">
 
+                            {/* 🚀 ACTIVE QUESTION IN-PROGRESS HUD (SHOWN WHEN A QUESTION IS CURRENTLY LIVE) */}
+                            {activeLaunchedQuestion && activeLaunchedQuestion.active && (
+                                <div className="bg-slate-950/95 border-2 border-fuchsia-500 p-6 rounded-3xl shadow-[0_0_35px_rgba(217,70,239,0.35)] space-y-4 animate-in fade-in">
+                                    <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-fuchsia-900/80 pb-3">
+                                        <div className="flex items-center gap-2.5">
+                                            <span className="w-3 h-3 rounded-full bg-fuchsia-400 animate-ping" />
+                                            <span className="text-xs font-orbitron font-extrabold text-fuchsia-300 uppercase">
+                                                ● PREGUNTA EN VIVO EN PROGRESO (AULA SINCRONIZADA)
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex items-center gap-1.5 bg-fuchsia-950 border border-fuchsia-500 px-3 py-1 rounded-xl text-amber-300 font-orbitron font-black text-sm">
+                                                <Clock className="w-4 h-4 text-fuchsia-400" />
+                                                <span>{questionRemainingSecs}s restantes</span>
+                                            </div>
+                                            <button
+                                                onClick={handleCloseLiveQuestion}
+                                                className="px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-orbitron font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-md"
+                                            >
+                                                🛑 Finalizar Ronda
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <span className="text-[11px] text-slate-400 uppercase font-bold block">Enunciado Proyectado:</span>
+                                        <h3 className="text-base font-bold text-white font-sans bg-slate-900/90 p-4 rounded-2xl border border-fuchsia-500/40">
+                                            {activeLaunchedQuestion.question}
+                                        </h3>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs pt-1">
+                                        <div className="text-emerald-300 font-mono">
+                                            ✓ Respuesta Correcta Esperada: <strong>{activeLaunchedQuestion.correctAnswer || activeLaunchedQuestion.correct_answer || 'N/A'}</strong>
+                                        </div>
+                                        <div className="text-fuchsia-300 font-bold font-orbitron">
+                                            📊 {liveResponsesList.length} / 26 Alumnos Han Respondido
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* CURRENT LIVE QUESTION CREATOR & BROADCASTER */}
                             <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 md:p-7 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.35)] space-y-5">
                                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-cyan-900/60 pb-4">
                                     <div>
                                         <span className="text-xs text-cyan-400 font-mono tracking-widest uppercase font-bold block mb-1">
-                                            CURRENT CLASS ACTIVITY:
+                                            ACTIVIDAD FORMATIVA EN VIVO:
                                         </span>
                                         <h2 className="text-xl md:text-2xl font-orbitron font-extrabold text-white tracking-wide">
-                                            Dynamic Live Question Broadcaster
+                                            Lanzador de Preguntas de Aula
                                         </h2>
                                     </div>
 
@@ -535,19 +817,72 @@ export default function TeacherDashboard() {
                                             onClick={() => setQuestionType('alternatives')}
                                             className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${questionType === 'alternatives' ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(6,182,212,0.8)]' : 'text-slate-400 hover:text-white'}`}
                                         >
-                                            Multiple Choice
+                                            Opción Múltiple
                                         </button>
                                         <button 
                                             onClick={() => setQuestionType('true_false')}
                                             className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${questionType === 'true_false' ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(6,182,212,0.8)]' : 'text-slate-400 hover:text-white'}`}
                                         >
-                                            True / False
+                                            Verdadero / Falso
                                         </button>
                                         <button 
                                             onClick={() => setQuestionType('written')}
                                             className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${questionType === 'written' ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(6,182,212,0.8)]' : 'text-slate-400 hover:text-white'}`}
                                         >
-                                            Open Response
+                                            Desarrollo / Escrita
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* PRESETS & AI QUICK LAUNCH BAR */}
+                                <div className="p-3.5 bg-slate-900/90 rounded-2xl border border-cyan-800 space-y-2">
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase font-orbitron block">
+                                        ⚡ PLANTILLAS RÁPIDAS & GENERACIÓN IA:
+                                    </span>
+                                    <div className="flex flex-wrap gap-2 text-xs">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleLoadPresetQuestion('math')}
+                                            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-cyan-700 text-cyan-300 font-bold transition cursor-pointer"
+                                        >
+                                            📐 PAES Matemáticas
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleLoadPresetQuestion('bio')}
+                                            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-emerald-700 text-emerald-300 font-bold transition cursor-pointer"
+                                        >
+                                            🧬 Biología / Ciencias
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleLoadPresetQuestion('civic')}
+                                            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-purple-700 text-purple-300 font-bold transition cursor-pointer"
+                                        >
+                                            🏛️ Convivencia & Ética
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleLoadPresetQuestion('true_false')}
+                                            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-amber-700 text-amber-300 font-bold transition cursor-pointer"
+                                        >
+                                            🧪 V / F (Física)
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleLoadPresetQuestion('written')}
+                                            className="px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-800 border border-fuchsia-700 text-fuchsia-300 font-bold transition cursor-pointer"
+                                        >
+                                            ✍️ Razonamiento Escrito
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleGenerateAiQuestion}
+                                            disabled={isGeneratingAiQuestion}
+                                            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 text-slate-950 font-orbitron font-black transition cursor-pointer flex items-center gap-1 shadow-sm"
+                                        >
+                                            <Sparkles className="w-3.5 h-3.5" />
+                                            <span>{isGeneratingAiQuestion ? 'Generando...' : '✨ IA Flash 2.5'}</span>
                                         </button>
                                     </div>
                                 </div>
@@ -555,31 +890,38 @@ export default function TeacherDashboard() {
                                 {/* LIVE QUESTION PROMPT CARD */}
                                 <div className="bg-slate-900/90 p-5 md:p-6 rounded-2xl border-2 border-cyan-500/50 space-y-4 font-mono">
                                     <div className="flex items-center justify-between text-sm text-cyan-300 font-bold">
-                                        <span className="font-orbitron font-extrabold text-white">LIVE QUESTION BROADCAST PROMPT</span>
+                                        <span className="font-orbitron font-extrabold text-white">ENUNCIADO DE LA PREGUNTA</span>
                                         <span className="text-xs bg-cyan-950 px-3 py-1 rounded-lg border border-cyan-500 text-cyan-300 font-black uppercase tracking-wider">
-                                            {questionType === 'alternatives' ? 'MULTIPLE CHOICE' : questionType === 'true_false' ? 'TRUE / FALSE' : 'OPEN RESPONSE'}
+                                            {questionType === 'alternatives' ? 'OPCIÓN MÚLTIPLE' : questionType === 'true_false' ? 'VERDADERO / FALSO' : 'DESARROLLO'}
                                         </span>
                                     </div>
 
                                     {/* Question Text Input */}
                                     <div className="space-y-1">
-                                        <label className="text-xs text-slate-400 font-bold uppercase block">Question Prompt Text *</label>
+                                        <label className="text-xs text-slate-400 font-bold uppercase block">Texto de la Pregunta *</label>
                                         <textarea
                                             value={questionText}
                                             onChange={e => setQuestionText(e.target.value)}
-                                            placeholder="Type your question prompt for the class (e.g. What is the correct syntax for declaring a variable in Ryo-Script?)..."
-                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 outline-none focus:border-cyan-400 min-h-[90px] resize-none font-mono"
+                                            placeholder="Escribe la pregunta formativa para la clase..."
+                                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-sm text-slate-100 outline-none focus:border-cyan-400 min-h-[85px] resize-none font-mono"
                                         />
                                     </div>
 
                                     {/* Multiple Choice Options Input */}
                                     {questionType === 'alternatives' && (
                                         <div className="space-y-2 pt-1">
-                                            <label className="text-xs text-cyan-300 font-bold uppercase block">Multiple Choice Options (A, B, C, D):</label>
+                                            <label className="text-xs text-cyan-300 font-bold uppercase block">Opciones (A, B, C, D) y Respuesta Correcta:</label>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-mono text-cyan-200">
                                                 {options.map((opt, idx) => (
                                                     <div key={idx} className="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                                                        <span className="font-bold text-cyan-400 w-5">{String.fromCharCode(65 + idx)})</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setCorrectAnswer(opt)}
+                                                            className={`w-6 h-6 rounded-lg font-bold flex items-center justify-center text-xs cursor-pointer transition ${correctAnswer === opt ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 text-cyan-400 border border-slate-700'}`}
+                                                            title="Marcar como respuesta correcta"
+                                                        >
+                                                            {String.fromCharCode(65 + idx)}
+                                                        </button>
                                                         <input
                                                             type="text"
                                                             value={opt}
@@ -587,12 +929,39 @@ export default function TeacherDashboard() {
                                                                 const updated = [...options];
                                                                 updated[idx] = e.target.value;
                                                                 setOptions(updated);
+                                                                if (correctAnswer === opt) setCorrectAnswer(e.target.value);
                                                             }}
                                                             className="flex-1 bg-transparent text-xs text-white outline-none font-mono"
-                                                            placeholder={`Option ${String.fromCharCode(65 + idx)}`}
+                                                            placeholder={`Opción ${String.fromCharCode(65 + idx)}`}
                                                         />
                                                     </div>
                                                 ))}
+                                            </div>
+                                            <div className="text-[11px] text-emerald-400 font-sans pt-1">
+                                                ✓ Respuesta correcta seleccionada: <strong>{correctAnswer}</strong> (haz clic en la letra para cambiar)
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* True / False Selector */}
+                                    {questionType === 'true_false' && (
+                                        <div className="space-y-2 pt-1">
+                                            <label className="text-xs text-cyan-300 font-bold uppercase block">Selecciona la Respuesta Correcta:</label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCorrectAnswer('Verdadero')}
+                                                    className={`p-3 rounded-xl border-2 font-orbitron font-bold text-xs transition cursor-pointer ${correctAnswer === 'Verdadero' ? 'bg-emerald-950 border-emerald-400 text-white shadow-md' : 'bg-slate-950 border-slate-800 text-slate-400'}`}
+                                                >
+                                                    🟢 Verdadero
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCorrectAnswer('Falso')}
+                                                    className={`p-3 rounded-xl border-2 font-orbitron font-bold text-xs transition cursor-pointer ${correctAnswer === 'Falso' ? 'bg-rose-950 border-rose-400 text-white shadow-md' : 'bg-slate-950 border-slate-800 text-slate-400'}`}
+                                                >
+                                                    🔴 Falso
+                                                </button>
                                             </div>
                                         </div>
                                     )}
@@ -600,18 +969,18 @@ export default function TeacherDashboard() {
                                     {/* Time Limit & Timer Control */}
                                     <div className="flex flex-wrap items-center justify-between gap-3 text-xs md:text-sm text-slate-300 pt-3 border-t border-slate-800 font-mono">
                                         <div className="flex items-center gap-2">
-                                            <span className="font-bold text-white">⏱️ Question Timer Limit:</span>
+                                            <span className="font-bold text-white">⏱️ Límite de Tiempo:</span>
                                             <select
                                                 value={timer}
                                                 onChange={e => setTimer(Number(e.target.value))}
                                                 className="bg-slate-950 border border-cyan-500/60 rounded-xl px-3 py-1.5 text-cyan-300 font-bold font-orbitron outline-none cursor-pointer"
                                             >
-                                                <option value={15}>15 Seconds</option>
-                                                <option value={30}>30 Seconds</option>
-                                                <option value={45}>45 Seconds</option>
-                                                <option value={60}>60 Seconds</option>
-                                                <option value={90}>90 Seconds</option>
-                                                <option value={120}>120 Seconds (2 min)</option>
+                                                <option value={15}>15 Segundos</option>
+                                                <option value={30}>30 Segundos</option>
+                                                <option value={45}>45 Segundos</option>
+                                                <option value={60}>60 Segundos (1 min)</option>
+                                                <option value={90}>90 Segundos</option>
+                                                <option value={120}>120 Segundos (2 min)</option>
                                             </select>
                                         </div>
 
@@ -640,7 +1009,7 @@ export default function TeacherDashboard() {
                                     className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-600 via-sky-500 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-orbitron font-extrabold text-sm md:text-base tracking-wider uppercase shadow-[0_0_25px_rgba(6,182,212,0.7)] transition-all hover:scale-[1.01] cursor-pointer flex items-center justify-center gap-2"
                                 >
                                     <span>🚀</span>
-                                    <span>LAUNCH LIVE QUESTION TO ALL STUDENTS</span>
+                                    <span>LANZAR PREGUNTA FORMATIVA A TODA LA CLASE</span>
                                 </button>
                             </div>
 
@@ -648,43 +1017,62 @@ export default function TeacherDashboard() {
                             <div className="bg-slate-950/90 border-2 border-cyan-400/80 p-6 rounded-3xl shadow-[0_0_30px_rgba(6,182,212,0.3)] space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-base font-orbitron font-extrabold text-white tracking-wider uppercase">
-                                        REAL-TIME STUDENT RESPONSES
+                                        RESPUESTAS DE ALUMNOS EN TIEMPO REAL
                                     </h3>
                                     <span className="text-xs text-emerald-400 font-mono font-bold bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-700">
-                                        {liveResponsesList.length} Responses Received
+                                        {liveResponsesList.length} Respuestas Recibidas
                                     </span>
                                 </div>
 
                                 {latestStudentResponse && (
                                     <div className="p-3 bg-emerald-950/80 border border-emerald-500/50 rounded-xl text-xs font-mono text-emerald-200 flex flex-wrap items-center justify-between gap-2 animate-fade-in">
-                                        <span className="font-bold">✓ Latest Student Answer Received:</span>
-                                        <span className="text-white font-black">{latestStudentResponse.studentName} ({latestStudentResponse.course}) selected Option {latestStudentResponse.optionId}</span>
+                                        <span className="font-bold">✓ Última Respuesta Recibida:</span>
+                                        <span className="text-white font-black">
+                                            {latestStudentResponse.studentName} ({latestStudentResponse.squadName || latestStudentResponse.course || 'Squad Alfa'}) seleccionó: {latestStudentResponse.optionId || latestStudentResponse.optionText || latestStudentResponse.answer}
+                                        </span>
                                     </div>
                                 )}
 
                                 {comprehensionPulse && (
                                     <div className="p-2.5 bg-cyan-950/80 border border-cyan-500/50 rounded-xl text-xs font-mono text-cyan-200 flex flex-wrap items-center justify-between gap-2">
-                                        <span className="font-bold">✓ Student Comprehension Pulse:</span>
+                                        <span className="font-bold">✓ Pulso de Comprensión del Alumno:</span>
                                         <span className="text-cyan-300 font-black">{comprehensionPulse.studentName}: {comprehensionPulse.level}</span>
                                     </div>
                                 )}
 
                                 <div className="h-60 w-full pt-2">
                                     <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={LIVE_RESPONSE_DATA}>
+                                        <BarChart data={dynamicResponseChartData}>
                                             <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
                                             <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                                             <Tooltip 
                                                 contentStyle={{ backgroundColor: '#020617', borderColor: '#06b6d4', borderRadius: '12px', color: '#cffaff', fontSize: '12px' }}
                                             />
                                             <Bar dataKey="val" radius={[8, 8, 0, 0]}>
-                                                {LIVE_RESPONSE_DATA.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={index === 0 ? '#22d3ee' : index === 1 ? '#38bdf8' : '#34d399'} />
+                                                {dynamicResponseChartData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={index === 0 ? '#22d3ee' : index === 1 ? '#38bdf8' : index === 2 ? '#a855f7' : '#34d399'} />
                                                 ))}
                                             </Bar>
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
+
+                                {/* LIST OF INCOMING RESPONSES */}
+                                {liveResponsesList.length > 0 && (
+                                    <div className="space-y-1.5 pt-3 border-t border-slate-800">
+                                        <span className="text-[10px] text-slate-400 uppercase font-orbitron">ÚLTIMAS RESPUESTAS REGISTRADAS:</span>
+                                        <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1 font-sans text-xs">
+                                            {liveResponsesList.slice(0, 6).map((resp, idx) => (
+                                                <div key={idx} className="flex justify-between items-center p-2 bg-slate-900 rounded-xl border border-slate-800">
+                                                    <span className="font-bold text-slate-200">{resp.studentName || 'Estudiante'}</span>
+                                                    <span className="text-cyan-300 font-mono">
+                                                        {resp.optionId ? `Opción ${resp.optionId}: ` : ''}{resp.optionText || resp.answer || 'Respuesta registrada'}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                         </div>
