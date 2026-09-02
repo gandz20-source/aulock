@@ -288,6 +288,49 @@ export default function TeacherDashboard() {
         };
     }, []);
 
+    // Live Question Launcher & Synchronized Event Broadcast (Supabase Realtime + LocalStorage)
+    const [questionType, setQuestionType] = useState('alternatives');
+    const [questionText, setQuestionText] = useState('¿Cuál es el conjunto solución de la ecuación cuadrática x² - 5x + 6 = 0?');
+    const [timer, setTimer] = useState(45);
+    const [options, setOptions] = useState(['x = 2 y x = 3', 'x = -2 y x = -3', 'x = 1 y x = 6', 'x = 0 y x = 5']);
+    const [correctAnswer, setCorrectAnswer] = useState('x = 2 y x = 3');
+    const [isGeneratingAiQuestion, setIsGeneratingAiQuestion] = useState(false);
+
+    // Active Live Question on Teacher Screen (Synchronized with classroom)
+    const [activeLaunchedQuestion, setActiveLaunchedQuestion] = useState(() => {
+        const saved = localStorage.getItem('aulock_active_question');
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.active === true) {
+                    return parsed;
+                }
+            } catch (e) {}
+        }
+        return null;
+    });
+
+    const [questionRemainingSecs, setQuestionRemainingSecs] = useState(0);
+
+    // Question countdown tick on teacher screen
+    useEffect(() => {
+        let interval = null;
+        if (activeLaunchedQuestion && activeLaunchedQuestion.active && activeLaunchedQuestion.targetEndTime) {
+            const syncTick = () => {
+                const rem = Math.max(0, Math.ceil((activeLaunchedQuestion.targetEndTime - Date.now()) / 1000));
+                setQuestionRemainingSecs(rem);
+                if (rem === 0) {
+                    // Question expired
+                }
+            };
+            syncTick();
+            interval = setInterval(syncTick, 500);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [activeLaunchedQuestion]);
+
     // Real-Time Dynamic Chart Data Aggregated from Student Responses
     const dynamicResponseChartData = useMemo(() => {
         if (!activeLaunchedQuestion) {
@@ -361,49 +404,6 @@ export default function TeacherDashboard() {
             alert("⛔ Classwide Focus Mode RELEASED. Mobile devices returned to normal mode.");
         }
     };
-
-    // Live Question Launcher & Synchronized Event Broadcast (Supabase Realtime + LocalStorage)
-    const [questionType, setQuestionType] = useState('alternatives');
-    const [questionText, setQuestionText] = useState('¿Cuál es el conjunto solución de la ecuación cuadrática x² - 5x + 6 = 0?');
-    const [timer, setTimer] = useState(45);
-    const [options, setOptions] = useState(['x = 2 y x = 3', 'x = -2 y x = -3', 'x = 1 y x = 6', 'x = 0 y x = 5']);
-    const [correctAnswer, setCorrectAnswer] = useState('x = 2 y x = 3');
-    const [isGeneratingAiQuestion, setIsGeneratingAiQuestion] = useState(false);
-
-    // Active Live Question on Teacher Screen (Synchronized with classroom)
-    const [activeLaunchedQuestion, setActiveLaunchedQuestion] = useState(() => {
-        const saved = localStorage.getItem('aulock_active_question');
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                if (parsed && parsed.active === true) {
-                    return parsed;
-                }
-            } catch (e) {}
-        }
-        return null;
-    });
-
-    const [questionRemainingSecs, setQuestionRemainingSecs] = useState(0);
-
-    // Question countdown tick on teacher screen
-    useEffect(() => {
-        let interval = null;
-        if (activeLaunchedQuestion && activeLaunchedQuestion.active && activeLaunchedQuestion.targetEndTime) {
-            const syncTick = () => {
-                const rem = Math.max(0, Math.ceil((activeLaunchedQuestion.targetEndTime - Date.now()) / 1000));
-                setQuestionRemainingSecs(rem);
-                if (rem === 0) {
-                    // Question expired
-                }
-            };
-            syncTick();
-            interval = setInterval(syncTick, 500);
-        }
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [activeLaunchedQuestion]);
 
     const handleLaunchLiveQuestion = () => {
         if (!questionText.trim()) return alert("Por favor ingresa primero el enunciado de la pregunta.");
