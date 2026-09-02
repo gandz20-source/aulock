@@ -17,25 +17,32 @@ export const FocusModeProvider = ({ children }) => {
     });
 
     const [isTeacherActive, setIsTeacherActive] = useState(() => {
-        return localStorage.getItem('aulock_session_active') === 'true' || true;
+        return localStorage.getItem('aulock_session_active') === 'true';
     });
 
-    // Persistent session start timestamp (Absolute Time in ms)
+    // Persistent session start timestamp (Absolute Time in ms with stale data sanitization)
     const [sessionStartTime, setSessionStartTime] = useState(() => {
         const saved = localStorage.getItem('aulock_session_start_time');
         if (saved) {
             const parsed = parseInt(saved, 10);
-            if (!isNaN(parsed) && parsed > 0) return parsed;
+            const elapsed = Math.floor((Date.now() - parsed) / 1000);
+            // SANITIZATION: If timer is older than 2 hours (7200s), it is an orphaned timer from previous days!
+            if (!isNaN(parsed) && parsed > 0 && elapsed >= 0 && elapsed < 7200) {
+                return parsed;
+            }
         }
-        const now = Date.now();
-        localStorage.setItem('aulock_session_start_time', String(now));
-        return now;
+        localStorage.removeItem('aulock_session_start_time');
+        return null;
     });
 
     // Dynamic Elapsed Times (Calculated from Absolute Timestamps)
     const [teacherTimer, setTeacherTimer] = useState(() => {
         const savedStart = parseInt(localStorage.getItem('aulock_session_start_time') || '0', 10);
-        return savedStart > 0 ? Math.floor((Date.now() - savedStart) / 1000) : 0;
+        if (savedStart > 0) {
+            const elapsed = Math.floor((Date.now() - savedStart) / 1000);
+            if (elapsed >= 0 && elapsed < 7200) return elapsed;
+        }
+        return 0;
     });
 
     const [studentFocusTime, setStudentFocusTime] = useState(() => {
@@ -66,14 +73,22 @@ export const FocusModeProvider = ({ children }) => {
         active: true
     });
 
-    // 3. Absolute Timestamp-Based Timer Engine (Ticks every second, always computes Date.now() - sessionStartTime)
+    // 3. Absolute Timestamp-Based Timer Engine (Ticks every second ONLY when active, max 2 hours)
     useEffect(() => {
         let interval = null;
 
-        if (isTeacherActive && sessionStartTime > 0) {
+        if (isTeacherActive && sessionStartTime && sessionStartTime > 0) {
             interval = setInterval(() => {
                 const now = Date.now();
                 const absoluteElapsed = Math.floor((now - sessionStartTime) / 1000);
+                
+                // Automatic safety cap: if session exceeds 2 hours, stop to prevent infinite run
+                if (absoluteElapsed > 7200) {
+                    setIsTeacherActive(false);
+                    localStorage.setItem('aulock_session_active', 'false');
+                    return;
+                }
+
                 setTeacherTimer(absoluteElapsed);
 
                 // Accumulate focus time if tab is currently focused
@@ -163,6 +178,9 @@ export const FocusModeProvider = ({ children }) => {
     const endClassAndSyncSupabase = async () => {
         setIsTeacherActive(false);
         localStorage.setItem('aulock_session_active', 'false');
+        localStorage.removeItem('aulock_session_start_time');
+        localStorage.removeItem('aulock_auditor_session_start');
+        setSessionStartTime(null);
 
         const focusEfficiencyRatio = teacherTimer > 0 ? (studentFocusTime / teacherTimer) * 100 : 100;
         const finalScore = Math.round((studentFocusScore * 0.7) + (focusEfficiencyRatio * 0.3));
@@ -178,6 +196,9 @@ export const FocusModeProvider = ({ children }) => {
             synced_at: new Date().toISOString()
         };
 
+        setTeacherTimer(0);
+        setStudentFocusTime(0);
+
         try {
             if (supabase) {
                 await supabase.from('student_session_metrics').insert([sessionPayload]);
@@ -191,13 +212,15 @@ export const FocusModeProvider = ({ children }) => {
     };
 
     const resetSessionTimer = () => {
-        const now = Date.now();
-        setSessionStartTime(now);
+        setSessionStartTime(null);
         setTeacherTimer(0);
         setStudentFocusTime(0);
         setStudentFocusScore(100);
         setTabExitCount(0);
-        localStorage.setItem('aulock_session_start_time', String(now));
+        setIsTeacherActive(false);
+        localStorage.removeItem('aulock_session_start_time');
+        localStorage.removeItem('aulock_auditor_session_start');
+        localStorage.setItem('aulock_session_active', 'false');
         localStorage.setItem('aulock_student_focus_time', '0');
         localStorage.setItem('aulock_student_focus_score', '100');
         localStorage.setItem('aulock_student_tab_exits', '0');

@@ -24,38 +24,82 @@ export default function LiveClassroomStudentHUD() {
   const studentCourse = '4° Medio A';
   const squadName = 'Squad Alfa';
 
-  // 1. Single Absolute Focus Timer State
+  // 1. Focus Session State with Automatic Stale Timestamp Sanitization
+  const [isFocusSessionActive, setIsFocusSessionActive] = useState(() => {
+    const savedActive = localStorage.getItem('aulock_session_active');
+    const classTimerSaved = localStorage.getItem('aulock_class_timer');
+    let timerRunning = false;
+    if (classTimerSaved) {
+      try {
+        const parsed = JSON.parse(classTimerSaved);
+        timerRunning = parsed.isRunning && parsed.targetEndTime && parsed.targetEndTime > Date.now();
+      } catch(e) {}
+    }
+    return isPhoneInCase || savedActive === 'true' || timerRunning;
+  });
+
   const [sessionStartTime, setSessionStartTime] = useState(() => {
     const saved = localStorage.getItem('aulock_session_start_time') || localStorage.getItem('aulock_auditor_session_start');
     if (saved) {
       const parsed = parseInt(saved, 10);
-      if (!isNaN(parsed) && parsed > 0) return parsed;
+      const elapsed = Math.floor((Date.now() - parsed) / 1000);
+      // SANITIZATION: If timer was started > 2 hours ago (7200s), like the 2975 minutes in screenshot,
+      // it is an orphaned legacy timer from previous days! Purge it immediately.
+      if (!isNaN(parsed) && parsed > 0 && elapsed >= 0 && elapsed < 7200) {
+        return parsed;
+      }
     }
-    const now = Date.now();
-    localStorage.setItem('aulock_session_start_time', String(now));
-    return now;
+    // Clean up stale timers
+    localStorage.removeItem('aulock_session_start_time');
+    localStorage.removeItem('aulock_auditor_session_start');
+    return null;
   });
 
   const [focusSeconds, setFocusSeconds] = useState(() => {
-    const savedStart = parseInt(localStorage.getItem('aulock_session_start_time') || '0', 10);
-    return savedStart > 0 ? Math.floor((Date.now() - savedStart) / 1000) : 0;
+    const saved = localStorage.getItem('aulock_session_start_time') || localStorage.getItem('aulock_auditor_session_start');
+    if (saved) {
+      const parsed = parseInt(saved, 10);
+      const elapsed = Math.floor((Date.now() - parsed) / 1000);
+      if (!isNaN(parsed) && parsed > 0 && elapsed >= 0 && elapsed < 7200) {
+        return elapsed;
+      }
+    }
+    return 0;
   });
 
   const [showHelperInfo, setShowHelperInfo] = useState(false);
 
-  // Focus Timer Tick based on Absolute Timestamp
+  // Focus Timer Tick: ONLY ticks when isFocusSessionActive === true and sessionStartTime is valid!
   useEffect(() => {
     let interval = null;
-    if (sessionStartTime) {
+    if (isFocusSessionActive && sessionStartTime && sessionStartTime > 0) {
+      // Immediate initial tick
+      const initialElapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+      if (initialElapsed < 7200) {
+        setFocusSeconds(initialElapsed);
+      }
+
       interval = setInterval(() => {
-        setFocusSeconds(Math.floor((Date.now() - sessionStartTime) / 1000));
+        const now = Date.now();
+        const elapsed = Math.floor((now - sessionStartTime) / 1000);
+        // Automatic safety cap at 120 minutes (7200s) to prevent infinite ticking across days
+        if (elapsed > 7200) {
+          setIsFocusSessionActive(false);
+          setFocusSeconds(7200);
+          localStorage.setItem('aulock_session_active', 'false');
+          return;
+        }
+        setFocusSeconds(elapsed);
       }, 1000);
     }
+
     const handleFocusSync = () => {
-      if (sessionStartTime) {
-        setFocusSeconds(Math.floor((Date.now() - sessionStartTime) / 1000));
+      if (isFocusSessionActive && sessionStartTime && sessionStartTime > 0) {
+        const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+        if (elapsed < 7200) setFocusSeconds(elapsed);
       }
     };
+
     window.addEventListener('focus', handleFocusSync);
     document.addEventListener('visibilitychange', handleFocusSync);
 
@@ -64,7 +108,44 @@ export default function LiveClassroomStudentHUD() {
       window.removeEventListener('focus', handleFocusSync);
       document.removeEventListener('visibilitychange', handleFocusSync);
     };
-  }, [sessionStartTime]);
+  }, [isFocusSessionActive, sessionStartTime]);
+
+  const handleStartFocusSession = () => {
+    const now = Date.now();
+    setSessionStartTime(now);
+    setFocusSeconds(0);
+    setIsFocusSessionActive(true);
+    localStorage.setItem('aulock_session_start_time', String(now));
+    localStorage.setItem('aulock_session_active', 'true');
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleEndFocusSession = () => {
+    if (window.confirm("¿Seguro que deseas finalizar tu sesión de enfoque y reiniciar el contador a 00:00?")) {
+      setIsFocusSessionActive(false);
+      setSessionStartTime(null);
+      setFocusSeconds(0);
+      localStorage.removeItem('aulock_session_start_time');
+      localStorage.removeItem('aulock_auditor_session_start');
+      localStorage.setItem('aulock_session_active', 'false');
+      localStorage.setItem('aulock_student_focus_time', '0');
+      window.dispatchEvent(new Event('storage'));
+      if (endClassAndSyncSupabase) {
+        endClassAndSyncSupabase();
+      }
+    }
+  };
+
+  const handleResetFocusTimer = () => {
+    setIsFocusSessionActive(false);
+    setSessionStartTime(null);
+    setFocusSeconds(0);
+    localStorage.removeItem('aulock_session_start_time');
+    localStorage.removeItem('aulock_auditor_session_start');
+    localStorage.setItem('aulock_session_active', 'false');
+    localStorage.setItem('aulock_student_focus_time', '0');
+    window.dispatchEvent(new Event('storage'));
+  };
 
   // 2. Single Classwide Countdown Timer (Broadcasted by Teacher)
   const [classTimer, setClassTimer] = useState(() => {
@@ -398,9 +479,15 @@ export default function LiveClassroomStudentHUD() {
               <span className="text-[10px] hidden md:inline">Auditoría NFC</span>
             </button>
 
-            <span className="px-3 py-1 bg-cyan-950 text-cyan-300 border border-cyan-500 text-[10px] font-bold rounded-full uppercase flex items-center gap-1.5 shadow-[0_0_10px_rgba(6,182,212,0.4)]">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-              {isPhoneInCase ? '🔒 ESTUCHE NFC ACTIVO' : '● ENFOQUE EN CURSO'}
+            <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase flex items-center gap-1.5 shadow-md ${
+              isPhoneInCase 
+                ? 'bg-cyan-950 text-cyan-300 border border-cyan-500' 
+                : isFocusSessionActive 
+                ? 'bg-emerald-950 text-emerald-300 border border-emerald-500' 
+                : 'bg-slate-900 text-slate-400 border border-slate-700'
+            }`}>
+              <span className={`w-2 h-2 rounded-full ${isFocusSessionActive ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`}></span>
+              {isPhoneInCase ? '🔒 ESTUCHE NFC ACTIVO' : isFocusSessionActive ? '● ENFOQUE EN CURSO' : '○ EN ESPERA DE SESIÓN'}
             </span>
           </div>
         </div>
@@ -409,7 +496,7 @@ export default function LiveClassroomStudentHUD() {
         {showHelperInfo && (
           <div className="p-3 bg-slate-900/90 border border-cyan-500/50 rounded-2xl text-xs text-cyan-200 font-sans leading-relaxed animate-in fade-in duration-200">
             <p>
-              💡 <strong>¿Cómo funciona la telemetría?</strong> El tiempo de atención continua y el reloj global de clase se calculan con marcas de tiempo absolutas. Si cambias de pestaña, el sistema registra una salida de foco sin resetear la sesión.
+              💡 <strong>¿Cómo funciona la telemetría?</strong> El tiempo de atención continua se activa al iniciar la clase o al ingresar el teléfono en el estuche NFC. Al finalizar la clase o presionar reiniciar, el temporizador vuelve a cero de forma segura.
             </p>
           </div>
         )}
@@ -419,20 +506,22 @@ export default function LiveClassroomStudentHUD() {
           
           {/* Main Continuous Focus Timer */}
           <div className="p-4 bg-slate-900/90 rounded-2xl border border-cyan-500/40 text-center flex flex-col justify-center items-center shadow-lg">
-            <span className="text-[10px] text-cyan-400 font-bold uppercase block mb-1">
+            <span className="text-[10px] text-cyan-400 font-bold uppercase block mb-1 font-orbitron">
               TIEMPO DE ATENCIÓN CONTINUA
             </span>
-            <strong className="text-3xl font-orbitron font-black text-white tracking-widest drop-shadow-[0_0_12px_rgba(6,182,212,0.6)]">
+            <strong className={`text-3xl font-orbitron font-black tracking-widest drop-shadow-[0_0_12px_rgba(6,182,212,0.6)] ${
+              isFocusSessionActive ? 'text-white' : 'text-slate-400'
+            }`}>
               {formatClock(focusSeconds)}
             </strong>
             <span className="text-[10px] text-cyan-300/80 mt-1 font-sans">
-              Minutos acumulados en pantalla
+              {isFocusSessionActive ? '● Cronómetro en curso' : '○ Sesión en espera / Pausada'}
             </span>
           </div>
 
           {/* Synchronized Global Class Timer */}
           <div className="p-4 bg-slate-900/90 rounded-2xl border border-amber-500/40 text-center flex flex-col justify-center items-center shadow-lg">
-            <span className="text-[10px] text-amber-400 font-bold uppercase block mb-1">
+            <span className="text-[10px] text-amber-400 font-bold uppercase block mb-1 font-orbitron">
               RELOJ GLOBAL DE CLASE (DOCENTE)
             </span>
             <strong className="text-3xl font-orbitron font-black text-amber-300 tracking-widest drop-shadow-[0_0_12px_rgba(245,158,11,0.5)]">
@@ -461,26 +550,41 @@ export default function LiveClassroomStudentHUD() {
 
           {/* Actions & NFC Case Release */}
           <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 flex flex-col justify-center gap-2">
-            <button
-              onClick={() => {
-                if (window.confirm("¿Seguro que deseas finalizar tu sesión de enfoque y registrar la telemetría?")) {
-                  endClassAndSyncSupabase();
-                }
-              }}
-              className="w-full py-2.5 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 text-white font-orbitron font-extrabold text-[11px] rounded-xl uppercase tracking-wider transition cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.3)]"
-            >
-              🛑 Finalizar Sesión
-            </button>
-
-            {handleNfcEvent && (
+            {isFocusSessionActive ? (
               <button
-                onClick={() => handleNfcEvent({ tagId: 'NFC_LOCK_2026', studentId: 'STU_JUAN' })}
-                className="w-full py-2 bg-slate-950 hover:bg-slate-800 border border-cyan-500/50 text-cyan-300 font-orbitron font-bold text-[10px] rounded-xl uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                onClick={handleEndFocusSession}
+                className="w-full py-2.5 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 text-white font-orbitron font-extrabold text-[11px] rounded-xl uppercase tracking-wider transition cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.3)]"
               >
-                <Lock className="w-3 h-3" />
-                <span>Simular Estuche NFC</span>
+                🛑 Finalizar Sesión
+              </button>
+            ) : (
+              <button
+                onClick={handleStartFocusSession}
+                className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 text-white font-orbitron font-extrabold text-[11px] rounded-xl uppercase tracking-wider transition cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+              >
+                ▶ Iniciar Enfoque
               </button>
             )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleResetFocusTimer}
+                title="Reiniciar contador a 00:00"
+                className="flex-1 py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-orbitron font-bold text-[10px] rounded-xl uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
+              >
+                🔄 Reiniciar (00:00)
+              </button>
+
+              {handleNfcEvent && (
+                <button
+                  onClick={() => handleNfcEvent({ tagId: 'NFC_LOCK_2026', studentId: 'STU_JUAN' })}
+                  className="flex-1 py-1.5 bg-slate-950 hover:bg-slate-800 border border-cyan-500/50 text-cyan-300 font-orbitron font-bold text-[10px] rounded-xl uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
+                >
+                  <Lock className="w-3 h-3" />
+                  <span>Estuche NFC</span>
+                </button>
+              )}
+            </div>
           </div>
 
         </div>
