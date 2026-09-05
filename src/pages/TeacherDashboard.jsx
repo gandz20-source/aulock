@@ -21,6 +21,7 @@ import TeacherHeaderNav from '../components/hud/TeacherHeaderNav';
 import TeacherActionBar from '../components/hud/TeacherActionBar';
 import TeacherSquadManager from '../components/TeacherSquadManager';
 import TeacherReportsHub from '../components/TeacherReportsHub';
+import TeacherAiDataAnalystDrawer from '../components/hud/TeacherAiDataAnalystDrawer';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { 
     BookOpen, Play, Clock, Plus, Trash2, CheckCircle, Users, AlertTriangle, 
@@ -98,6 +99,9 @@ export default function TeacherDashboard() {
         setTeacherNotes(text);
         localStorage.setItem('aulock_teacher_notes', text);
     };
+
+    // Data-Driven Teacher AI Analyst Drawer State
+    const [isAiAnalystDrawerOpen, setIsAiAnalystDrawerOpen] = useState(false);
 
     // MBE MINEDUC AI Advisory State
     const [teacherChallenge, setTeacherChallenge] = useState('¿Cómo diversificar las estrategias didácticas para mejorar la participación activa durante la resolución de ejercicios?');
@@ -1908,30 +1912,111 @@ export default function TeacherDashboard() {
                             <ClassroomArena isTeacher={true} />
                         </section>
 
-                        {/* MBE MINEDUC ADVISORY */}
-                        <div className="bg-slate-950/90 border-2 border-sky-400/80 p-6 rounded-3xl shadow-xl space-y-4">
-                            <h3 className="text-base font-orbitron font-extrabold text-white uppercase">
-                                ASESORÍA PEDAGÓGICA IA (MARCO BUENA ENSEÑANZA MINEDUC)
-                            </h3>
+                        {/* ASESORÍA PEDAGÓGICA IA // ANALISTA DE DATOS DOCENTES */}
+                        <div className="bg-slate-950/90 border-2 border-sky-400/80 p-6 md:p-8 rounded-3xl shadow-[0_0_35px_rgba(56,189,248,0.25)] space-y-5">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-sky-900/60 pb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-sky-950 border border-sky-400 flex items-center justify-center text-sky-300 shadow-[0_0_15px_rgba(56,189,248,0.5)]">
+                                        <BrainCircuit className="w-6 h-6 animate-pulse" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-orbitron font-extrabold text-white uppercase tracking-wider">
+                                            ASESORÍA PEDAGÓGICA IA // ANALISTA DE DATOS DOCENTES
+                                        </h3>
+                                        <p className="text-xs text-sky-300 font-sans">
+                                            Telemetría sin alucinaciones • Google GenAI SDK (Gemini 1.5 Pro) & Function Calling con Supabase
+                                        </p>
+                                    </div>
+                                </div>
 
-                            <textarea
-                                value={teacherChallenge}
-                                onChange={e => setTeacherChallenge(e.target.value)}
-                                rows={2}
-                                className="w-full bg-slate-900 border border-slate-800 rounded-2xl p-3.5 text-xs text-slate-200 outline-none focus:border-sky-400 font-mono"
-                            />
+                                <div className="flex items-center gap-2">
+                                    <span className="px-3 py-1 bg-sky-950 text-emerald-400 border border-emerald-500/80 text-[10px] font-bold rounded-full uppercase flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                        ● Supabase DB Conectado
+                                    </span>
+                                </div>
+                            </div>
 
-                            <button
-                                onClick={handleGenerateMbePlan}
-                                disabled={isGeneratingMbePlan}
-                                className="px-5 py-2.5 bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow transition"
+                            {/* Quick Prompt Pills */}
+                            <div className="space-y-1.5">
+                                <span className="text-[10px] text-slate-400 font-bold uppercase">Consultas Analíticas Inmediatas:</span>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        onClick={() => setIsAiAnalystDrawerOpen(true)}
+                                        className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-sky-950 border border-sky-500/50 hover:border-sky-400 text-xs text-sky-200 transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>🏆</span>
+                                        <span>¿Quién es el mejor en Ciencias en 4° Medio A?</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setIsAiAnalystDrawerOpen(true)}
+                                        className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-sky-950 border border-sky-500/50 hover:border-sky-400 text-xs text-sky-200 transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>⚠️</span>
+                                        <span>Alumnos con caídas de foco y salidas de pestaña</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setIsAiAnalystDrawerOpen(true)}
+                                        className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-sky-950 border border-sky-500/50 hover:border-sky-400 text-xs text-sky-200 transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>📊</span>
+                                        <span>Estadísticas consolidadas del curso</span>
+                                    </button>
+                                    <button
+                                        onClick={() => setIsAiAnalystDrawerOpen(true)}
+                                        className="px-3 py-1.5 rounded-xl bg-purple-950/80 hover:bg-purple-900 border border-purple-500/60 text-xs text-purple-200 transition cursor-pointer flex items-center gap-1.5"
+                                    >
+                                        <span>📥</span>
+                                        <span>1-Click Export: Descargar Reporte (CSV / PDF)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Expandable Input Bar with 1-Click HUD Expansion */}
+                            <div 
+                                onClick={() => setIsAiAnalystDrawerOpen(true)}
+                                className="p-4 bg-slate-900/90 hover:bg-slate-900 border-2 border-sky-500/60 hover:border-sky-400 rounded-2xl cursor-pointer transition shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 group"
                             >
-                                {isGeneratingMbePlan ? 'Generando Asesoría...' : '🧠 Obtener Sugerencia Pedagógica MBE MINEDUC'}
-                            </button>
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                    <div className="w-8 h-8 rounded-xl bg-sky-950 border border-sky-500 flex items-center justify-center text-sky-300 group-hover:scale-110 transition shrink-0">
+                                        💬
+                                    </div>
+                                    <div className="text-left">
+                                        <span className="text-xs text-white font-bold block">
+                                            Haz clic aquí para abrir el Panel Lateral HUD del Analista de Datos IA...
+                                        </span>
+                                        <span className="text-[11px] text-slate-400 font-sans">
+                                            Ejecuta Function Calling en tiempo real sobre la base de datos de telemetría y genera reportes oficiales descargables.
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setIsAiAnalystDrawerOpen(true); }}
+                                    className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-orbitron font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.5)] transition cursor-pointer flex items-center justify-center gap-2 shrink-0"
+                                >
+                                    <span>⚡ Abrir Chat HUD</span>
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {/* Secondary MBE MINEDUC Suggestion Tool */}
+                            <div className="pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+                                <span className="text-slate-400 font-sans">
+                                    ¿Deseas una sugerencia didáctica alineada al Marco de la Buena Enseñanza (MBE)?
+                                </span>
+                                <button
+                                    onClick={handleGenerateMbePlan}
+                                    disabled={isGeneratingMbePlan}
+                                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-sky-300 font-bold rounded-xl transition cursor-pointer"
+                                >
+                                    {isGeneratingMbePlan ? 'Generando Asesoría...' : '🧠 Sugerencia Didáctica MBE'}
+                                </button>
+                            </div>
 
                             {mbePlanResult && (
-                                <div className="bg-slate-900 p-5 rounded-2xl border border-sky-500/40 text-xs text-sky-200 space-y-2">
-                                    <h4 className="font-bold text-sky-300 uppercase">Plan Sugerido MBE:</h4>
+                                <div className="bg-slate-900 p-5 rounded-2xl border border-sky-500/40 text-xs text-sky-200 space-y-2 animate-in fade-in duration-200">
+                                    <h4 className="font-bold text-sky-300 uppercase">Plan Sugerido MBE MINEDUC:</h4>
                                     <p className="whitespace-pre-line leading-relaxed font-sans">{mbePlanResult}</p>
                                 </div>
                             )}
@@ -1994,7 +2079,15 @@ export default function TeacherDashboard() {
             </main>
 
             {/* 🔴 BARRA DE ACCIÓN FIJA INFERIOR DOCENTE */}
-            <TeacherActionBar />
+            <TeacherActionBar onChatClick={() => setIsAiAnalystDrawerOpen(true)} />
+
+            {/* 🤖 FLOATING HUD-STYLE CHAT SIDE-PANEL (DATA-DRIVEN AI ASSISTANT) */}
+            <TeacherAiDataAnalystDrawer
+                isOpen={isAiAnalystDrawerOpen}
+                onClose={() => setIsAiAnalystDrawerOpen(false)}
+                activeCourse="4° Medio A"
+                teacherName={profile?.name || 'Prof. Carlos Rivas'}
+            />
         </div>
     );
 }
