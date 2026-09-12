@@ -11,8 +11,10 @@ import {
     executeAIClusteringEngine, 
     lockSquadsForSemester 
 } from '../services/SquadService';
+import SquadForge from './squad/SquadForge';
 
 export default function TeacherSquadManager() {
+    const [activeSquadView, setActiveSquadView] = useState('forge'); // 'forge' | 'clustering'
     const [roster, setRoster] = useState(COURSE_STUDENT_ROSTER_DATASET);
     const [squads, setSquads] = useState(() => {
         const saved = localStorage.getItem('aulock_teacher_squads_v3');
@@ -260,6 +262,48 @@ export default function TeacherSquadManager() {
                 </div>
             )}
 
+            {/* SUB-TABS: SQUAD FORGE (MATCHMAKING & RETOS IA) vs GESTIÓN SEMESTRAL */}
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900/90 p-2.5 rounded-2xl border border-indigo-500/30">
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setActiveSquadView('forge')}
+                        className={`px-5 py-2.5 rounded-xl font-orbitron font-extrabold text-xs uppercase tracking-wider transition flex items-center gap-2 cursor-pointer ${
+                            activeSquadView === 'forge'
+                                ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)]'
+                                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                        }`}
+                    >
+                        <Zap className="w-4 h-4" />
+                        <span>⚡ The Squad Forge // Retos IA</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveSquadView('clustering')}
+                        className={`px-5 py-2.5 rounded-xl font-orbitron font-extrabold text-xs uppercase tracking-wider transition flex items-center gap-2 cursor-pointer ${
+                            activeSquadView === 'clustering'
+                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_20px_rgba(99,102,241,0.5)]'
+                                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                        }`}
+                    >
+                        <Users className="w-4 h-4" />
+                        <span>👥 Rosters & Clustering Semestral</span>
+                    </button>
+                </div>
+                <div className="text-[11px] font-orbitron text-indigo-300/80 px-3 py-1 bg-indigo-950/50 rounded-lg border border-indigo-800/40 hidden md:block">
+                    {activeSquadView === 'forge' ? '⚡ Matchmaking Asistido por Gemini & Lanzador de Desafíos' : '📁 Gestión Semestral & Agrupación MINEDUC'}
+                </div>
+            </div>
+
+            {activeSquadView === 'forge' ? (
+                <SquadForge 
+                    onSquadCreated={(newSq) => {
+                        saveSquads([...squads, newSq]);
+                        showToast(`¡Escuadrón "${newSq.name}" incorporado a la cohorte!`);
+                    }}
+                />
+            ) : (
+                <>
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 border-b border-indigo-900/60 pb-5">
                 <div className="flex items-center space-x-3">
                     <div className="p-3.5 bg-indigo-600/30 border-2 border-indigo-400 rounded-2xl shadow-[0_0_15px_rgba(99,102,241,0.4)]">
@@ -578,6 +622,8 @@ export default function TeacherSquadManager() {
                         </form>
                     </div>
                 </div>
+            )}
+            </>
             )}
         </div>
     );

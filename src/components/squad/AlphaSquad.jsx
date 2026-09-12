@@ -6,6 +6,7 @@ import {
     Share2, Compass
 } from 'lucide-react';
 import { getActiveSquadForStudent } from '../../services/SquadService';
+import ActiveChallengeWidget from './ActiveChallengeWidget';
 
 export default function AlphaSquad({ profile, onSendMessage }) {
     const studentName = profile?.full_name || profile?.name || 'Juan Carlos Pérez';
@@ -210,6 +211,11 @@ export default function AlphaSquad({ profile, onSendMessage }) {
                     </div>
                 )}
             </section>
+
+            {/* =========================================================================
+                ACTIVE SQUAD CHALLENGE HUD (SQUAD FORGE & MOTOR DE DESAFÍOS IA)
+               ========================================================================= */}
+            <ActiveChallengeWidget studentName={studentName} />
 
             {/* =========================================================================
                 2. MAIN INTERACTIVE GRID: HUD CHAT (LEFT 65%) & VISUAL ROSTER (RIGHT 35%)
