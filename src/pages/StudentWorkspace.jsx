@@ -8,6 +8,7 @@ import { MINEDUC_CONVIVENCIA_RESOURCES, WEEKLY_CLASSROOM_AGREEMENTS } from '../d
 import { useFocusMode } from '../context/FocusModeProvider';
 import { SchoolCoexistenceCapsule } from '../components/SchoolCoexistenceCapsule';
 import AfterIALoreCard from '../components/AfterIALoreCard';
+import AfterAILoreBanner from '../components/AfterAILoreBanner';
 import AfterIAWorld from '../components/afteria/AfterIAWorld';
 import AfterIAPortal from '../components/afteria/AfterIAPortal';
 import LiveClassroomStudentHUD from '../components/live/LiveClassroomStudentHUD';
@@ -676,26 +677,10 @@ const StudentWorkspace = () => {
                         {/* LAYOUT 3 COLUMNAS: SEAMOS COMUNIDAD | MARCO CIBERNÉTICO CENTRAL | ANALÍTICA ACADÉMICA */}
                         <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto,1fr] gap-6 items-center">
                             
-                            {/* COLUMNA IZQUIERDA: TARJETA SEAMOS COMUNIDAD MINEDUC */}
-                            {/* LEFT COLUMN: WE ARE COMMUNITY CARD */}
+                            {/* COLUMNA IZQUIERDA: TRANSMISIÓN AFTER IA // BIENESTAR DIGITAL Y COMUNIDAD */}
+                            {/* LEFT COLUMN: AFTER IA LORE TRANSMISSION BANNER */}
                             <div className="col-span-1">
-                                <DataCard title="We Are Community" colorBorder="cyan" icon="🌱">
-                                    <p className="text-xs md:text-sm text-cyan-200 leading-relaxed italic">
-                                        "{bannerContent?.cuerpo_mensaje || 'How do you show empathy today with a classmate who was alone? We invite you to: Invite someone new to join your group during recess.'}"
-                                    </p>
-                                    <button
-                                        onClick={() => setShowDeepReflection(!showDeepReflection)}
-                                        className="mt-4 text-xs text-cyan-300 hover:text-white underline underline-offset-4 decoration-dotted font-mono flex items-center gap-1.5 cursor-pointer"
-                                    >
-                                        {showDeepReflection ? 'Hide reflection capsule' : '✨ View daily reflection capsule ▼'}
-                                    </button>
-                                    {showDeepReflection && (
-                                        <div className="mt-3 p-4 bg-slate-900/90 rounded-2xl border border-cyan-500/40 text-xs text-cyan-100 font-sans shadow-inner">
-                                            <p className="font-bold text-cyan-300 uppercase mb-1">Civic Reflection:</p>
-                                            <p>{bannerContent?.reflexion_profunda || "Daily dialogue and respectful interaction among peers build resilient and inclusive school communities."}</p>
-                                        </div>
-                                    )}
-                                </DataCard>
+                                <AfterAILoreBanner studentName={profile?.full_name || 'Juan Carlos Pérez'} />
                             </div>
 
                             {/* CENTER COLUMN: CYBERPUNK PORTRAIT FRAME WITH PCB LINES */}

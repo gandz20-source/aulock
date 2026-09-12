@@ -3,6 +3,7 @@ import HeaderNav from '../components/hud/HeaderNav';
 import ProfileFrame from '../components/hud/ProfileFrame';
 import DataCard from '../components/hud/DataCard';
 import ActionButton from '../components/hud/ActionButton';
+import AfterAILoreBanner from '../components/AfterAILoreBanner';
 
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -32,22 +33,8 @@ const StudentDashboard = () => {
       {/* 🟢 2. CONTENIDO PRINCIPAL (Layout 3 Columnas) */}
       <main className="grid grid-cols-1 lg:grid-cols-[1fr,minmax(400px,auto),1fr] gap-8 items-center mt-8 lg:mt-12">
         
-        {/* COLUMNA IZQUIERDA: Tarjeta "SEAMOS COMUNIDAD" */}
-        <DataCard 
-          title="SEAMOS COMUNIDAD" 
-          colorBorder="cyan" 
-          icon="🌱"
-        >
-          <p className="text-xs md:text-sm text-cyan-300/80 leading-relaxed italic">
-            "¿Cómo demuestras empatía hoy con un compañero que estaba solo? Te invitamos a: Invita a alguien nuevo a tu grupo en el recreo."
-          </p>
-          <button 
-            onClick={() => alert("✨ Abriendo cápsula pedagógica de reflexión MINEDUC...")}
-            className="mt-4 text-xs text-cyan-400 hover:text-white underline underline-offset-4 decoration-dotted font-mono"
-          >
-            Ver cápsula de reflexión del día ▼
-          </button>
-        </DataCard>
+        {/* COLUMNA IZQUIERDA: TRANSMISIÓN AFTER IA // BIENESTAR DIGITAL Y COMUNIDAD */}
+        <AfterAILoreBanner studentName={studentData.nombre} />
 
         {/* COLUMNA CENTRAL: Marco de Perfil y Datos Personales */}
         <div className="flex flex-col items-center col-span-1 relative">
