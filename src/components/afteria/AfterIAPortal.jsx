@@ -3,22 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import ActiveGameModal from './ActiveGameModal';
 import AfterIAPresentationSlider from './AfterIAPresentationSlider';
 
-export default function AfterIAPortal({ activeTab: externalActiveTab, setActiveTab: externalSetActiveTab }) {
+export default function AfterIAPortal() {
   const navigate = useNavigate();
-  const [internalActiveTab, setInternalActiveTab] = useState('afteria');
-
-  const activeTab = externalActiveTab || internalActiveTab;
-  const setActiveTab = externalSetActiveTab || setInternalActiveTab;
-
-  const navModules = [
-    { id: 1, key: 'profile', name: '1. MI PERFIL' },
-    { id: 2, key: 'afteria', name: '2. AFTER IA', active: true },
-    { id: 3, key: 'live_classroom', name: '3. AULA EN VIVO' },
-    { id: 4, key: 'tutors', name: '4. TUTORES IA' },
-    { id: 5, key: 'squad', name: '5. M. ESCUADRÓN ALFA' },
-    { id: 6, key: 'academic', name: '6. DESEMPEÑO' },
-    { id: 7, key: 'passport', name: '7. PASAPORTE AULOCK' },
-  ];
 
   // Interactive Game & PS State
   const [psPoints, setPsPoints] = useState(120);
@@ -68,27 +54,6 @@ export default function AfterIAPortal({ activeTab: externalActiveTab, setActiveT
     { id: 'r3', name: 'Avatar Cibernético Edición Limitada RYO', cost: 350, icon: '🤖' },
   ];
 
-  const handleModuleClick = (mod) => {
-    const targetKey = mod.key || (
-      mod.id === 1 ? 'profile' :
-      mod.id === 2 ? 'afteria' :
-      mod.id === 3 ? 'live_classroom' :
-      mod.id === 4 ? 'tutors' :
-      mod.id === 5 ? 'squad' :
-      mod.id === 6 ? 'academic' : 'passport'
-    );
-
-    if (externalSetActiveTab) {
-      externalSetActiveTab(targetKey);
-    } else {
-      setInternalActiveTab(targetKey);
-    }
-
-    if (targetKey !== 'afteria' && window.location.pathname.includes('/after-ia')) {
-      navigate('/student-dashboard', { state: { activeTab: targetKey } });
-    }
-  };
-
   const handleOpenGame = (node) => {
     setActiveGame(node);
   };
@@ -125,53 +90,7 @@ export default function AfterIAPortal({ activeTab: externalActiveTab, setActiveT
 
       <div className="relative z-10 max-w-7xl mx-auto space-y-5">
 
-        {/* 🔴 LÍNEA DE ENCABEZADO SUPERIOR RBAC (Sin duplicación) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-950/90 border border-cyan-900/80 p-2.5 px-4 rounded-2xl shadow-xl">
-          <div className="flex items-center space-x-2 text-cyan-300">
-            <strong className="text-white">Arquitectura móvil AuLock RBAC</strong>
-            <span>|</span>
-            <span>Usuario: <strong className="text-cyan-200">Juan Carlos Pérez</strong></span>
-            <span>|</span>
-            <span>Rol Activo: <strong className="text-cyan-400 font-bold bg-cyan-950 px-2 py-0.5 rounded border border-cyan-700">[ ALUMNO ]</strong></span>
-          </div>
-
-          <div className="flex items-center space-x-2 text-[11px] font-bold">
-            <span className="text-slate-400">CONMUTADOR DE PERFIL:</span>
-            <span className="px-2.5 py-0.5 rounded-xl bg-cyan-950 border border-cyan-400 text-cyan-300 font-bold shadow-[0_0_10px_rgba(6,182,212,0.5)]">
-              Rol Alumno ✓
-            </span>
-            <button onClick={() => navigate('/teacher-dashboard')} className="px-2.5 py-0.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white">
-              Rol Profesor
-            </button>
-            <button onClick={() => navigate('/school-dashboard')} className="px-2.5 py-0.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-400 hover:text-white">
-              Rol Colegio 360°
-            </button>
-          </div>
-        </div>
-
-        {/* 🔴 1. 7 PESTAÑAS HUD CALLOUT CON BORDE NEÓN FUCSIA EN TAB 2 (Exacto a la Imagen 6) */}
-        <header className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          {navModules.map((mod) => {
-            const isSelected = mod.key === 'afteria' || mod.id === 2;
-            return (
-              <div
-                key={mod.id}
-                onClick={() => handleModuleClick(mod)}
-                className={`p-2.5 rounded-2xl border-2 text-center cursor-pointer transition-all duration-300 select-none ${
-                  isSelected
-                    ? 'border-fuchsia-500 bg-fuchsia-950/80 text-white font-black shadow-[0_0_25px_rgba(217,70,239,0.8)] scale-[1.03] z-10'
-                    : 'border-cyan-950 bg-slate-950/80 text-cyan-400 hover:border-cyan-700 hover:bg-slate-900'
-                }`}
-              >
-                <span className="text-[11px] font-orbitron font-extrabold tracking-wider block uppercase">
-                  {mod.name}
-                </span>
-              </div>
-            );
-          })}
-        </header>
-
-        {/* 🔴 2. BARRA DE TÍTULO CAJA NEÓN FUCSIA DOBLE MARCO (Exacto a la Imagen 6) */}
+        {/* 🔴 BARRA DE TÍTULO CAJA NEÓN FUCSIA DOBLE MARCO */}
         <div className="p-4 bg-slate-950/90 border-2 border-fuchsia-500 rounded-3xl shadow-[0_0_30px_rgba(217,70,239,0.4)] flex flex-col md:flex-row justify-between items-center gap-3">
           <h1 className="text-sm md:text-base font-orbitron font-black text-fuchsia-300 tracking-widest uppercase">
             PÓRTICO: AFTER IA - EL DESPERTAR DEL CONOCIMIENTO & LIBERTAD SOBERANA
