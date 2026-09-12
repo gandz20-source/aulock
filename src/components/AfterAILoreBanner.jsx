@@ -212,8 +212,9 @@ export default function AfterAILoreBanner({ studentName = 'Cadete', className = 
                             <span className="absolute w-3.5 h-3.5 rounded-full bg-emerald-400 animate-ping opacity-75 pointer-events-none" />
                         </div>
                     </div>
-                    <span className="text-[9px] font-orbitron font-black text-emerald-400/90 uppercase tracking-widest mt-2">
-                        RIU // GUÍA
+                    <span className="text-[9px] font-orbitron font-black text-cyan-400/90 uppercase tracking-widest mt-2 flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                        <span>AULI // GUÍA</span>
                     </span>
                 </div>
 
