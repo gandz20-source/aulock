@@ -88,30 +88,42 @@ export default function AfterAILoreBanner({ studentName = 'Cadete', className = 
         return () => clearInterval(interval);
     }, []);
 
-    // 2. Lore tip rotation logic (random on mount, rotates periodically or on button click)
+    // 2. Safe lore tip rotation logic (guarded with try/catch)
     const [currentTipIndex, setCurrentTipIndex] = useState(() => {
-        const savedIndex = localStorage.getItem('aulock_afteria_tip_idx');
-        if (savedIndex !== null) {
-            const next = (parseInt(savedIndex, 10) + 1) % LORE_TIPS_DATASET.length;
-            localStorage.setItem('aulock_afteria_tip_idx', next.toString());
-            return next;
+        try {
+            const saved = localStorage.getItem('aulock_afteria_tip_idx');
+            if (saved !== null) {
+                const parsed = parseInt(saved, 10);
+                if (!Number.isNaN(parsed) && parsed >= 0 && parsed < LORE_TIPS_DATASET.length) {
+                    const next = (parsed + 1) % LORE_TIPS_DATASET.length;
+                    try { localStorage.setItem('aulock_afteria_tip_idx', String(next)); } catch (e) {}
+                    return next;
+                }
+            }
+            const initial = Math.floor(Math.random() * LORE_TIPS_DATASET.length);
+            try { localStorage.setItem('aulock_afteria_tip_idx', String(initial)); } catch (e) {}
+            return initial;
+        } catch (e) {
+            return 0;
         }
-        const initial = Math.floor(Math.random() * LORE_TIPS_DATASET.length);
-        localStorage.setItem('aulock_afteria_tip_idx', initial.toString());
-        return initial;
     });
 
     const [isRotating, setIsRotating] = useState(false);
     const [showReflection, setShowReflection] = useState(false);
     const [imageError, setImageError] = useState(false);
 
-    const activeTip = LORE_TIPS_DATASET[currentTipIndex] || LORE_TIPS_DATASET[0];
+    const safeIndex = (typeof currentTipIndex === 'number' && currentTipIndex >= 0 && currentTipIndex < LORE_TIPS_DATASET.length)
+        ? currentTipIndex 
+        : 0;
+
+    const activeTip = LORE_TIPS_DATASET[safeIndex] || LORE_TIPS_DATASET[0];
 
     // 3. Typewriter effect for transmission text
     const [displayedText, setDisplayedText] = useState('');
     const [isTyping, setIsTyping] = useState(true);
 
     useEffect(() => {
+        if (!activeTip || !activeTip.text) return;
         setIsTyping(true);
         setDisplayedText('');
         const fullText = activeTip.text;
@@ -129,25 +141,29 @@ export default function AfterAILoreBanner({ studentName = 'Cadete', className = 
         }, typingSpeed);
 
         return () => clearInterval(timer);
-    }, [currentTipIndex]);
+    }, [safeIndex]);
 
     // Handle manual next tip
     const handleNextTip = () => {
         setIsRotating(true);
-        const nextIndex = (currentTipIndex + 1) % LORE_TIPS_DATASET.length;
+        const nextIndex = (safeIndex + 1) % LORE_TIPS_DATASET.length;
         setCurrentTipIndex(nextIndex);
-        localStorage.setItem('aulock_afteria_tip_idx', nextIndex.toString());
+        try {
+            localStorage.setItem('aulock_afteria_tip_idx', String(nextIndex));
+        } catch (e) {}
         setTimeout(() => setIsRotating(false), 400);
     };
 
-    // Clean student first name for intimate greeting
+    // Clean student first name for intimate greeting safely
     const studentFirstName = useMemo(() => {
-        if (!studentName) return 'Cadete';
-        const parts = studentName.trim().split(' ');
+        if (!studentName || typeof studentName !== 'string') return 'Cadete';
+        const trimmed = studentName.trim();
+        if (!trimmed) return 'Cadete';
+        const parts = trimmed.split(/\s+/);
         return parts[0] || 'Cadete';
     }, [studentName]);
 
-    const TipIcon = activeTip.icon;
+    const TipIcon = (activeTip && typeof activeTip.icon === 'function') ? activeTip.icon : Sparkles;
 
     return (
         <div className={`relative p-5 md:p-6 rounded-3xl bg-slate-950/95 border-2 border-emerald-500/80 shadow-[0_0_25px_rgba(16,185,129,0.25)] hover:shadow-[0_0_35px_rgba(16,185,129,0.35)] transition-all duration-300 font-mono text-emerald-100 ${className}`}>
