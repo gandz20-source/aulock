@@ -248,7 +248,8 @@ export async function fetchLocalAI(promptOrConfig, maybeOptions = {}) {
 
     const safeUserPrompt = prompt.trim() || 'Hola, necesito orientación en mi desafío escolar.';
 
-    const geminiKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) 
+    const geminiKey = (typeof window !== 'undefined' && (localStorage.getItem('VITE_GEMINI_API_KEY') || localStorage.getItem('gemini_api_key')))
+        || (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) 
         || (typeof process !== 'undefined' && process?.env?.VITE_GEMINI_API_KEY) 
         || '';
 
