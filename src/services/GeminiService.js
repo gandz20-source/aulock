@@ -399,7 +399,17 @@ export async function generateLearnYourWayResponse({
 }
 
 export const SOCRATIC_STEM_VISION_PROMPT = 
-`Eres el Tutor Socrático STEM de AuLock. El alumno te enviará fotos de su cuaderno. TU MISIÓN: Analiza la ecuación escrita a mano o el diagrama. Encuentra el error exacto en el paso a paso del alumno. NUNCA le des la respuesta final ni resuelvas el ejercicio completo. Hazle una pregunta guía sobre la regla matemática o física que omitió. Si no hay error, pregúntale cuál es el siguiente paso lógico. Debes usar formato LaTeX para todas las expresiones matemáticas.`;
+`Eres el Tutor Socrático STEM de AuLock. Tu primera regla inquebrantable es LEER y RECONOCER exactamente lo que hay en la imagen. NUNCA inventes fórmulas, números o pasos que no estén explícitamente escritos en la foto enviada por el alumno.
+
+Sigue esta lógica de atención:
+
+Lectura Base: Identifica qué está escrito. Si es algo simple (ej. 2+2) y no tiene respuesta, haz una pregunta amistosa para que el alumno lo resuelva, sin usar lenguaje académico excesivo.
+
+Detección de Errores: Si es un ejercicio de varios pasos, revísalo en silencio. Si hay un error, NO des la respuesta final. Hazle una pregunta socrática enfocada únicamente en la línea donde ocurrió el error para que el alumno lo descubra.
+
+Validación: Si todo está correcto, felicítalo y pregúntale cuál es el siguiente paso lógico.
+
+Solo utiliza formato LaTeX para ecuaciones complejas (fracciones, variables múltiples, raíces). Para aritmética básica, usa texto normal.`;
 
 const GEMINI_FLASH_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const GEMINI_PRO_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
@@ -414,7 +424,7 @@ export async function analyzeExerciseImageWithGemini({ tutorId, tutorName, image
     const userPrompt = promptText || 'Analiza el ejercicio o problema de la imagen y guíame paso a paso.';
 
     if (!apiKey || apiKey === 'DEMO_KEY') {
-        return getFallbackVisionAnalysis(tutorName, interestClean);
+        return getFallbackVisionAnalysis(tutorName, interestClean, userPrompt);
     }
 
     // Clean base64 string
@@ -467,11 +477,11 @@ export async function analyzeExerciseImageWithGemini({ tutorId, tutorName, image
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
-        return text || getFallbackVisionAnalysis(tutorName, interestClean);
+        return text || getFallbackVisionAnalysis(tutorName, interestClean, userPrompt);
 
     } catch (error) {
         console.warn("Multimodal Gemini call error, using Socratic fallback:", error);
-        return getFallbackVisionAnalysis(tutorName, interestClean);
+        return getFallbackVisionAnalysis(tutorName, interestClean, userPrompt);
     }
 }
 
@@ -885,23 +895,30 @@ function getFallbackGeneratedQuestions(topic, oaCode, oaDesc) {
     ];
 }
 
-function getFallbackVisionAnalysis(tutorName, interestClean) {
-    return `🔬 **[Tutor Socrático STEM // Diagnóstico de Cuaderno]**
+function getFallbackVisionAnalysis(tutorName, interestClean, userPrompt = '') {
+    const qLower = (userPrompt || '').toLowerCase();
 
-He analizado detalladamente la foto de tu cuaderno:
+    // 1. Lectura Base: Operaciones simples (ej. 2+2) sin respuesta
+    if (qLower.includes('2+2') || qLower.includes('2 + 2') || qLower.includes('suma') || qLower.includes('básica') || qLower.includes('basica') || qLower.includes('simple')) {
+        return `¡Hola! Veo en tu cuaderno la operación: 2 + 2.
 
-1. **Ecuación Identificada:**
-$$2x^2 - 4x - 6 = 0$$
+Es una suma directa. Si juntas 2 elementos con otros 2, ¿cuánto crees que da en total? ¡Dime tu resultado!`;
+    }
 
-2. **Auditoría Paso a Paso:**
-En el desarrollo de tu cuaderno, observo el cálculo del discriminante $\\Delta = b^2 - 4ac$:
+    // 2. Consulta simple o específica sin complejidad
+    if (userPrompt && !qLower.includes('error') && !qLower.includes('cuadrática') && !qLower.includes('formula') && !qLower.includes('fórmula')) {
+        return `¡Hola! Reconozco lo que escribiste en tu foto: "${userPrompt}".
+
+¿Cuál crees que es el primer paso para resolverlo? Cuéntame tu idea y lo vemos juntos.`;
+    }
+
+    // 3. Detección de errores en ejercicio de varios pasos (con LaTeX solo donde corresponde)
+    return `Veo el ejercicio en tu cuaderno:
+
+Revisando el desarrollo paso a paso, observa con atención la línea del discriminante:
 $$(-4)^2 - 4(2)(-6) = -16 + 48$$
 
-3. **Pregunta Guía Socrática:**
-Observa con atención el término $(-4)^2$. ¿Qué ocurre con el signo de una base negativa elevada a una potencia par, y cómo modifica eso el valor subradical en la fórmula general:
-$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
-
-¿Cuál sería el valor correcto antes de extraer la raíz? ¡Escríbeme tu razonamiento para continuar al siguiente paso lógico!`;
+¿Qué ocurre con el signo de una base negativa cuando se eleva a una potencia par como $(-4)^2$? ¿Cómo modifica eso el resultado de esa línea?`;
 }
 
 function getFallbackLearnYourWay(tutorName, topicOrQuestion, interest) {

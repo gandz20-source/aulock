@@ -93,19 +93,19 @@ export default function EliteSocraticWhiteboardFixed() {
           tutorName: selectedSpecialist.name,
           imageBase64: imageCopy,
           mimeType: 'image/jpeg',
-          promptText: userText || 'Analiza el ejercicio escrito a mano en mi cuaderno, detecta el error en el paso a paso y guíame socráticamente con LaTeX.'
+          promptText: userText || 'Lee exactamente lo que escribí en la foto de mi cuaderno y guíame socráticamente.'
         });
 
         setChatHistory(prev => [...prev, { sender: 'ai', text: responseText }]);
 
-        // Sincronizar pizarra con modelo general de la fórmula
+        // Sincronizar pizarra con la lectura real
         setBoardContent({
-          topic: `Auditoría Cuaderno: ${selectedSpecialist.subject}`,
-          coreFormula: 'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}',
+          topic: `Lectura de Cuaderno // ${selectedSpecialist.subject}`,
+          coreFormula: userText || 'Operación / Expresión Identificada',
           steps: [
-            { num: '01', title: 'Identificación de Constantes', desc: 'Verificación de coeficientes y signos subradicales en el desarrollo del alumno.' },
-            { num: '02', title: 'Auditoría del Error', desc: 'Identificación de omisión o inconsistencia aritmética en el discriminante.' },
-            { num: '03', title: 'Resolución Guiada', desc: 'Responde a la pregunta del tutor en el chat para avanzar al siguiente paso lógico.' }
+            { num: '01', title: 'Lectura Base', desc: 'Identificación exacta de los números, signos y variables escritos en la foto sin inventar datos.' },
+            { num: '02', title: 'Revisión Socrática', desc: 'Análisis del procedimiento para formular una pregunta guía si existe un paso por completar o corregir.' },
+            { num: '03', title: 'Siguiente Paso Lógico', desc: 'Responde la pregunta del tutor para avanzar hacia la resolución paso a paso.' }
           ]
         });
       } else {

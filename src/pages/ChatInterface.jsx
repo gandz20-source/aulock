@@ -96,7 +96,7 @@ const ChatInterface = () => {
                     tutorName: assistant.name,
                     imageBase64: imageToSend,
                     mimeType: 'image/jpeg',
-                    promptText: promptToSend || 'Analiza el ejercicio escrito a mano en mi cuaderno, detecta el error en el paso a paso y guíame socráticamente usando formato LaTeX.'
+                    promptText: promptToSend || 'Lee exactamente lo que escribí en la foto de mi cuaderno y guíame socráticamente.'
                 });
                 setMessages(prev => [...prev, { role: 'assistant', content: finalContent }]);
             } else {
