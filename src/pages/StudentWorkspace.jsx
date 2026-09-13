@@ -1076,7 +1076,7 @@ const StudentWorkspace = () => {
             )}
 
             {/* --- ÁREA DE SIMULACIÓN NFC (SOLO PARA DESARROLLO PC) --- */}
-            <div className="fixed bottom-6 right-6 p-4 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-sky-200 z-50 text-xs text-slate-900 w-64 space-y-2 animate-in fade-in">
+            <div className="hidden lg:block fixed bottom-6 right-6 p-4 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border-2 border-sky-200 z-30 text-xs text-slate-900 w-64 space-y-2 animate-in fade-in">
                 <div className="flex items-center justify-between font-black text-sky-900 border-b border-slate-100 pb-1.5">
                     <span className="flex items-center space-x-1.5">
                         <Zap className="w-4 h-4 text-amber-500" />

@@ -36,12 +36,12 @@ export default function SocraticLiveCameraModal({
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
   const recognitionRef = useRef(null);
+  const chatScrollRef = useRef(null);
 
   // Iniciar Stream de Cámara de forma estable sin re-renders en bucle
   const startCamera = async (mode = 'environment') => {
     try {
       setCameraError(null);
-      // Detener stream previo si existe
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
         streamRef.current = null;
@@ -71,7 +71,7 @@ export default function SocraticLiveCameraModal({
       }
     } catch (err) {
       console.error("Error al iniciar cámara:", err);
-      setCameraError("No se pudo iniciar la cámara. Verifica los permisos del navegador o cierra otras aplicaciones que usen la cámara.");
+      setCameraError("No se pudo iniciar la cámara. Verifica los permisos del navegador.");
     }
   };
 
@@ -114,7 +114,6 @@ export default function SocraticLiveCameraModal({
     if (isMutedTTS || !window.speechSynthesis || !text) return;
     try {
       window.speechSynthesis.cancel();
-      // Quitar fórmulas LaTeX para que no suenen raras por voz
       const cleanSpokenText = text
         .replace(/\\\[[\s\S]*?\\\]/g, '')
         .replace(/\\\([\s\S]*?\\\)/g, '')
@@ -140,7 +139,7 @@ export default function SocraticLiveCameraModal({
 
   // Procesar consulta multimodal en vivo (Frame + Voz/Texto)
   const processLiveInquiry = async (userQuery) => {
-    const queryText = userQuery || manualText || 'Observa atentamente lo que estoy apuntando en mi cuaderno y guíame socráticamente.';
+    const queryText = userQuery || manualText.trim() || 'Observa atentamente lo que estoy apuntando en mi cuaderno y guíame socráticamente.';
     const frameBase64 = captureFrame();
 
     setIsProcessing(true);
@@ -157,6 +156,13 @@ export default function SocraticLiveCameraModal({
 
       setTutorSpeechResponse(response);
       speakTutorResponse(response);
+
+      // Auto scroll transcript into view
+      if (chatScrollRef.current) {
+        setTimeout(() => {
+          chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+        }, 50);
+      }
 
       // Sincronizar con el chat general
       if (onAddChatMessage) {
@@ -203,12 +209,18 @@ export default function SocraticLiveCameraModal({
     }
   };
 
+  const handleManualSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (!manualText.trim() && !isProcessing) return;
+    processLiveInquiry(manualText.trim());
+  };
+
   // Inicializar Speech Recognition
   const toggleListening = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Tu navegador no soporta reconocimiento de voz por micrófono. Puedes usar el botón OBSERVAR APUNTE o escribir tu duda.");
+      alert("Tu navegador móvil no soporta reconocimiento continuo de voz. Puedes usar el botón OBSERVAR APUNTE o escribir tu duda.");
       return;
     }
 
@@ -277,70 +289,79 @@ export default function SocraticLiveCameraModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col justify-between font-mono animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[99999] bg-black flex flex-col justify-between font-mono h-[100dvh] w-full overflow-hidden select-none">
       
-      {/* 🟢 TOP BAR: Estado en vivo y controles */}
-      <div className="p-4 bg-slate-950/80 border-b border-cyan-500/30 flex items-center justify-between z-20">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-red-950/80 border border-red-500 rounded-full">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-            <span className="text-[11px] font-bold text-red-300 font-orbitron uppercase tracking-wider">
-              LIVE SOCRATIC LENS
+      {/* 🟢 TOP BAR: Compacta y de alto contraste */}
+      <header className="px-3 py-2.5 bg-slate-950/95 border-b border-cyan-500/40 flex items-center justify-between shrink-0 z-30 shadow-lg">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <div className="flex items-center gap-1 px-2.5 py-0.5 bg-red-950/90 border border-red-500 rounded-full shrink-0">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+            <span className="text-[10px] font-bold text-red-200 font-orbitron tracking-wider">
+              LIVE
             </span>
           </div>
 
-          <div className="hidden sm:flex items-center gap-2 text-xs text-cyan-300 bg-cyan-950/60 px-3 py-1 rounded-xl border border-cyan-800/60">
-            <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{specialist?.name || 'Tutor STEM'}</span>
-            <span className="text-cyan-500">|</span>
-            <span className="text-cyan-400 font-bold">{specialist?.subject}</span>
+          <div className="flex items-center gap-1 text-[11px] text-cyan-300 truncate">
+            <span className="font-bold text-white truncate">{specialist?.name}</span>
+            <span className="text-cyan-600">|</span>
+            <span className="text-cyan-400 truncate text-[10px]">{specialist?.subject}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
+          {!hasApiKey && (
+            <span className="hidden sm:inline-block px-2 py-0.5 text-[9px] bg-amber-950/80 border border-amber-500 text-amber-300 rounded-md">
+              Modo Local
+            </span>
+          )}
+
           {/* Alternar Cámara */}
           <button
+            type="button"
             onClick={toggleCameraFacing}
             title="Cambiar Cámara"
-            className="p-2 rounded-xl bg-slate-900 border border-cyan-700/60 text-cyan-300 hover:text-white hover:border-cyan-400 transition cursor-pointer"
+            className="p-2 rounded-xl bg-slate-900 border border-cyan-700/60 text-cyan-300 hover:text-white hover:border-cyan-400 active:scale-95 transition"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
 
           {/* Mute/Unmute Audio TTS */}
           <button
+            type="button"
             onClick={() => {
               if (!isMutedTTS && window.speechSynthesis) window.speechSynthesis.cancel();
               setIsMutedTTS(!isMutedTTS);
             }}
             title={isMutedTTS ? "Activar Voz del Tutor" : "Silenciar Voz del Tutor"}
-            className={`p-2 rounded-xl border transition cursor-pointer ${
+            className={`p-2 rounded-xl border active:scale-95 transition ${
               isMutedTTS 
                 ? 'bg-red-950/60 border-red-500 text-red-300' 
-                : 'bg-slate-900 border-cyan-700/60 text-cyan-300 hover:text-white hover:border-cyan-400'
+                : 'bg-slate-900 border-cyan-700/60 text-cyan-300 hover:text-white'
             }`}
           >
             {isMutedTTS ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </button>
 
-          {/* Cerrar */}
+          {/* Cerrar Modal */}
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:bg-red-950/60 hover:border-red-500 transition cursor-pointer"
+            className="p-2 rounded-xl bg-red-950/60 border border-red-500 text-red-200 hover:bg-red-900 active:scale-95 transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* 🟢 VIEWPORT DE VIDEO (FEED EN VIVO ESTABLE SIN PARPADEO) */}
-      <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
+      {/* 🟢 VIEWPORT DE VIDEO (OCUPA TODO EL ESPACIO DISPONIBLE) */}
+      <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden min-h-0">
         {cameraError ? (
-          <div className="p-6 text-center max-w-sm bg-slate-950 border border-red-500/50 rounded-2xl">
+          <div className="p-6 text-center max-w-sm bg-slate-950 border border-red-500/50 rounded-2xl mx-4">
             <p className="text-xs text-red-400 mb-4 leading-relaxed">{cameraError}</p>
             <button
+              type="button"
               onClick={() => startCamera(facingMode)}
-              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold font-orbitron uppercase cursor-pointer"
+              className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold font-orbitron uppercase"
             >
               Reintentar Conexión
             </button>
@@ -351,7 +372,7 @@ export default function SocraticLiveCameraModal({
             autoPlay
             playsInline
             muted
-            className="w-full h-full object-cover sm:object-contain"
+            className="w-full h-full object-cover"
           />
         )}
 
@@ -359,115 +380,107 @@ export default function SocraticLiveCameraModal({
         <canvas ref={canvasRef} className="hidden" />
 
         {/* Retícula de Enfoque Socrático (Glow Brackets) */}
-        <div className="absolute inset-8 sm:inset-16 pointer-events-none border border-cyan-500/20 rounded-3xl flex flex-col justify-between p-4">
+        <div className="absolute inset-4 sm:inset-10 pointer-events-none border border-cyan-500/20 rounded-3xl flex flex-col justify-between p-3">
           <div className="flex justify-between">
-            <div className="w-8 h-8 border-t-2 border-l-2 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
-            <div className="w-8 h-8 border-t-2 border-r-2 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
+            <div className="w-6 h-6 border-t-2 border-l-2 border-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"></div>
+            <div className="w-6 h-6 border-t-2 border-r-2 border-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"></div>
           </div>
 
-          {/* Indicador de Estado Central */}
+          {/* Estado de Análisis Central */}
           <div className="flex flex-col items-center justify-center text-center">
             {isProcessing ? (
-              <div className="px-4 py-2 rounded-2xl bg-cyan-950/90 border border-cyan-400 flex items-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.4)] animate-pulse">
+              <div className="px-3.5 py-1.5 rounded-xl bg-slate-950/90 border border-cyan-400 flex items-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.5)] animate-pulse">
                 <Sparkles className="w-4 h-4 text-cyan-300 animate-spin" />
-                <span className="text-xs text-white font-bold font-orbitron tracking-wider">
-                  TUTOR ANALIZANDO TU APUNTE...
+                <span className="text-[11px] text-white font-bold font-orbitron tracking-wider">
+                  ANALIZANDO CUADERNO...
                 </span>
               </div>
             ) : (
-              <div className="px-3 py-1 rounded-xl bg-black/70 border border-cyan-500/30 text-[10px] text-cyan-300 backdrop-blur-xs">
-                Apunta al renglón de tu ejercicio en el cuaderno
-              </div>
-            )}
-
-            {!hasApiKey && (
-              <div className="mt-2 px-2.5 py-1 rounded-lg bg-amber-950/70 border border-amber-500/50 text-[9px] text-amber-300 flex items-center gap-1.5">
-                <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" />
-                <span>Modo local activo. Conecta tu API Key en la pantalla principal para visión en vivo con Gemini 1.5.</span>
+              <div className="px-3 py-1 rounded-xl bg-black/60 border border-cyan-500/30 text-[10px] text-cyan-300 backdrop-blur-xs">
+                Enfoca las líneas de tu cuaderno
               </div>
             )}
           </div>
 
           <div className="flex justify-between">
-            <div className="w-8 h-8 border-b-2 border-l-2 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
-            <div className="w-8 h-8 border-b-2 border-r-2 border-cyan-400 shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
+            <div className="w-6 h-6 border-b-2 border-l-2 border-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"></div>
+            <div className="w-6 h-6 border-b-2 border-r-2 border-cyan-400 shadow-[0_0_8px_rgba(56,189,248,0.6)]"></div>
           </div>
         </div>
-
-        {/* Subtítulos en Vivo Flotantes (Pregunta y Respuesta) */}
-        {(studentTranscript || tutorSpeechResponse) && (
-          <div className="absolute bottom-4 left-4 right-4 max-w-xl mx-auto space-y-2 pointer-events-none z-10">
-            {studentTranscript && (
-              <div className="p-3 bg-slate-950/90 border border-purple-500/50 rounded-2xl text-xs text-purple-200 shadow-lg">
-                <span className="text-[10px] text-purple-400 font-bold block mb-0.5">TÚ (VOZ):</span>
-                "{studentTranscript}"
-              </div>
-            )}
-            {tutorSpeechResponse && (
-              <div className="p-3 bg-slate-950/95 border-2 border-cyan-400 rounded-2xl text-xs text-cyan-100 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-                <span className="text-[10px] text-cyan-400 font-bold block mb-0.5">
-                  {specialist?.name?.toUpperCase()} (EN VIVO):
-                </span>
-                {tutorSpeechResponse}
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* 🟢 BOTTOM CONTROLS: Voz Manos Libres y Botón de Consulta Inmediata */}
-      <div className="p-4 bg-slate-950/95 border-t border-cyan-500/30 z-20">
-        <div className="max-w-xl mx-auto flex flex-col gap-3">
+      {/* 🟢 TIRA DEDICADA DE SUBTÍTULOS / HISTORIAL EN VIVO (NO TAPA LA CÁMARA) */}
+      {(studentTranscript || tutorSpeechResponse) && (
+        <div 
+          ref={chatScrollRef}
+          className="px-4 py-2 bg-slate-950/95 border-t border-cyan-900/60 max-h-24 overflow-y-auto shrink-0 space-y-1.5 z-30"
+        >
+          {studentTranscript && (
+            <div className="text-[11px] text-purple-200 leading-tight">
+              <span className="font-bold text-purple-400">TÚ:</span> {studentTranscript}
+            </div>
+          )}
+          {tutorSpeechResponse && (
+            <div className="text-[11px] text-cyan-200 leading-tight font-sans">
+              <span className="font-bold text-cyan-400 font-mono">{specialist?.name?.toUpperCase()}:</span> {tutorSpeechResponse}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 🟢 BARRA DE CONTROL INFERIOR ERGONÓMICA PARA MÓVILES */}
+      <div className="p-3 bg-slate-950 border-t border-cyan-500/30 shrink-0 z-30 space-y-2.5">
+        
+        {/* Fila 1: Campo de texto con botón ENVIAR grande y despejado */}
+        <form onSubmit={handleManualSubmit} className="flex items-center gap-2">
+          <input
+            type="text"
+            value={manualText}
+            onChange={(e) => setManualText(e.target.value)}
+            placeholder="Escribe tu duda o respuesta..."
+            className="flex-1 min-w-0 bg-slate-900 border-2 border-cyan-700/80 focus:border-cyan-400 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none font-sans"
+          />
+          <button
+            type="submit"
+            disabled={isProcessing || !manualText.trim()}
+            className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-black font-orbitron font-extrabold text-xs rounded-xl flex items-center gap-1.5 transition active:scale-95 disabled:opacity-40 shrink-0 shadow-md"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>ENVIAR</span>
+          </button>
+        </form>
+
+        {/* Fila 2: Botones primarios de captura y voz con área táctil amplia */}
+        <div className="grid grid-cols-2 gap-2">
           
-          {/* Barra de Entrada Rápida de Texto (opcional para entornos ruidosos) */}
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={manualText}
-              onChange={(e) => setManualText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && processLiveInquiry()}
-              placeholder="¿Tienes una duda específica? Escríbela o pulsa Hablar..."
-              className="flex-1 bg-slate-900 border border-cyan-800/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
-            />
-            <button
-              onClick={() => processLiveInquiry()}
-              disabled={isProcessing}
-              className="p-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-          </div>
+          {/* Botón Hablar (STT) */}
+          <button
+            type="button"
+            onClick={toggleListening}
+            disabled={isProcessing}
+            className={`py-2.5 px-3 rounded-xl border flex items-center justify-center gap-1.5 font-orbitron font-bold text-[11px] transition active:scale-95 shadow-md ${
+              isListening
+                ? 'bg-red-600 border-red-400 text-white animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.7)]'
+                : 'bg-slate-900 border-cyan-700 text-cyan-300 hover:bg-slate-800'
+            }`}
+          >
+            {isListening ? <Mic className="w-4 h-4 text-white" /> : <MicOff className="w-4 h-4 text-cyan-400" />}
+            <span className="truncate">{isListening ? 'ESCUCHANDO...' : 'HABLAR'}</span>
+          </button>
 
-          {/* Botones Principales de Interacción */}
-          <div className="flex items-center justify-center gap-4">
-            
-            {/* Botón de Micrófono (Hablar en Vivo) */}
-            <button
-              onClick={toggleListening}
-              disabled={isProcessing}
-              className={`flex-1 py-3 px-4 rounded-2xl border flex items-center justify-center gap-2 font-orbitron font-bold text-xs transition-all shadow-lg cursor-pointer ${
-                isListening
-                  ? 'bg-red-600 border-red-400 text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.6)]'
-                  : 'bg-slate-900 border-cyan-600 text-cyan-300 hover:bg-cyan-950/60 hover:border-cyan-400'
-              }`}
-            >
-              {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
-              <span>{isListening ? 'ESCUCHANDO TU VOZ...' : 'HABLAR CON TUTOR'}</span>
-            </button>
-
-            {/* Botón Instantáneo "Observar lo que apunto" */}
-            <button
-              onClick={() => processLiveInquiry()}
-              disabled={isProcessing}
-              className="flex-1 py-3 px-4 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-orbitron font-extrabold text-xs flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] disabled:opacity-50 cursor-pointer"
-            >
-              <Eye className="w-4 h-4" />
-              <span>{isProcessing ? 'ANALIZANDO...' : 'OBSERVAR APUNTE'}</span>
-            </button>
-
-          </div>
+          {/* Botón Observar Apunte (Snap & Ask) */}
+          <button
+            type="button"
+            onClick={() => processLiveInquiry()}
+            disabled={isProcessing}
+            className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-orbitron font-extrabold text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.4)] disabled:opacity-40"
+          >
+            <Eye className="w-4 h-4 text-cyan-200" />
+            <span className="truncate">{isProcessing ? 'ANALIZANDO...' : 'OBSERVAR APUNTE'}</span>
+          </button>
 
         </div>
+
       </div>
 
     </div>
