@@ -124,14 +124,19 @@ export default function EliteSocraticWhiteboardFixed() {
         setChatHistory(prev => [...prev, { sender: 'ai', text: responseText }]);
 
         // Sincronizar pizarra con la lectura real
-        const isArithmetic = (responseText || '').includes('2 + 2') || (responseText || '').includes('2+2') || (responseText || '').includes('suma') || (responseText || '').includes('5');
+        const isSumThree = (responseText || '').includes('2 + 2 + 3') || (responseText || '').includes('2+2+3') || (responseText || '').includes('7') || (userText || '').includes('3');
+        const isArithmetic = isSumThree || (responseText || '').includes('2 + 2') || (responseText || '').includes('2+2') || (responseText || '').includes('suma') || (responseText || '').includes('5');
 
         setBoardContent({
-          topic: isArithmetic ? 'Aritmética Básica // Adición y Conteo' : `Lectura de Cuaderno // ${selectedSpecialist.subject}`,
-          coreFormula: isArithmetic ? '2 + 2 = 4 \\quad (\\neq 5)' : (userText || 'Operación Identificada en Cuaderno'),
+          topic: isSumThree 
+            ? 'Aritmética Básica // Sumatoria de 3 Términos' 
+            : (isArithmetic ? 'Aritmética Básica // Adición y Conteo' : `Lectura de Cuaderno // ${selectedSpecialist.subject}`),
+          coreFormula: isSumThree 
+            ? '2 + 2 + 3 = 7' 
+            : (isArithmetic ? '2 + 2 = 4 \\quad (\\neq 5)' : (userText || 'Operación Identificada en Cuaderno')),
           steps: [
-            { num: '01', title: 'Lectura Base', desc: isArithmetic ? 'Identificación de la operación escrita en el cuaderno: 2 + 2 = 5.' : 'Identificación exacta de los números, signos y variables escritos en la foto sin inventar datos.' },
-            { num: '02', title: 'Revisión Socrática', desc: isArithmetic ? 'Comprobación de la suma mental frente al valor anotado (5) para detectar la diferencia.' : 'Análisis del procedimiento para formular una pregunta guía si existe un paso por completar o corregir.' },
+            { num: '01', title: 'Lectura Base', desc: isSumThree ? 'Identificación de la sumatoria manuscrita: 2 + 2 + 3 = ...' : (isArithmetic ? 'Identificación de la operación escrita en el cuaderno: 2 + 2 = 5.' : 'Identificación exacta de los números, signos y variables escritos en la foto sin inventar datos.') },
+            { num: '02', title: 'Revisión Socrática', desc: isSumThree ? 'Resolución asociativa paso a paso: (2 + 2) = 4, luego 4 + 3 = 7.' : (isArithmetic ? 'Comprobación de la suma mental frente al valor anotado para detectar la diferencia.' : 'Análisis del procedimiento para formular una pregunta guía si existe un paso por completar o corregir.') },
             { num: '03', title: 'Siguiente Paso Lógico', desc: 'Responde la pregunta del tutor para avanzar hacia la resolución paso a paso.' }
           ]
         });

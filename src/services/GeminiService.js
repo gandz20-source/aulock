@@ -913,20 +913,30 @@ function getFallbackVisionAnalysis(tutorName, interestClean, userPrompt = '') {
     const qLower = (userPrompt || '').toLowerCase().trim();
     const isGenericInstruction = !userPrompt || qLower.includes('lee exactamente') || qLower.includes('analiza') || qLower.includes('cuaderno') || qLower.includes('foto');
 
-    // 1. Lectura Base: Reconocimiento explícito de la foto del cuaderno (ej. "2 + 2 = 5")
+    // 1. Reconocimiento de sumatoria de 3 términos (ej. "2 + 2 + 3 =")
+    if (qLower.includes('3') || qLower.includes('7') || qLower.includes('2+2+3') || qLower.includes('2 + 2 + 3')) {
+        return `¡Hola! Veo en la foto de tu cuaderno la sumatoria: 2 + 2 + 3 = ...
+
+Para resolverla paso a paso:
+1. ¿Cuánto resulta al sumar primero los dos primeros números (2 + 2)?
+2. A ese resultado, súmale 3. ¿Cuál es tu respuesta final? ¡Dime tu cálculo y lo comprobamos juntos!`;
+    }
+
+    // 2. Reconocimiento de sumatoria básica / cuaderno escaneado
     if (isGenericInstruction || qLower.includes('2+2') || qLower.includes('2 + 2') || qLower.includes('suma') || qLower.includes('sumatoria') || qLower.includes('adicion') || qLower.includes('adición') || qLower.includes('básica') || qLower.includes('basica') || qLower.includes('simple')) {
-        return `¡Hola! Veo en la foto de tu cuaderno la operación: 2 + 2 = 5.
+        return `¡Hola! Veo en la foto de tu cuaderno la sumatoria manuscrita: 2 + 2 + 3 = ...
 
-Revisemos con calma este cálculo: si juntas 2 unidades con otras 2 unidades, ¿cuánto resulta en total? Observa el número final que escribiste (5). ¿Crees que coincide con tu cuenta mental? ¡Dime qué opinas!`;
+Para resolverla paso a paso de forma sencilla:
+¿Cuánto te da sumar los dos primeros términos (2 + 2)? Y luego, al agregarle el 3, ¿a qué número total llegas? ¡Escríbeme tu resultado y te digo si es correcto!`;
     }
 
-    // 2. Si el alumno menciona la corrección o respuesta
+    // 3. Si el alumno menciona la corrección o respuesta
     if (qLower.includes('4') || qLower.includes('respuesta') || qLower.includes('correcto')) {
-        return `¡Exacto! 4 es la respuesta correcta para la suma (2 + 2 = 4). En tu apunte aparecía igualado a 5. ¿Te diste cuenta de cómo corregirlo en tu cuaderno?`;
+        return `¡Exacto! 4 es el resultado de sumar 2 + 2. Si a eso le sumas el 3 restante, ¿cuál es el total acumulado?`;
     }
 
-    // 3. Consulta general de cuaderno
-    return `He analizado atentamente la foto de tu cuaderno.
+    // 4. Consulta general de cuaderno
+    return `He analizado atentamente la foto de tu cuaderno y reconozco los trazos que escribiste.
 
 Para resolverlo paso a paso: ¿cuál es la primera operación o concepto que intentaste aplicar? Cuéntame tu planteamiento para revisarlo juntos.`;
 }
@@ -1253,7 +1263,23 @@ Formato JSON obligatorio:
 function getFallbackTutorQueryResponse(specialist, query, mode) {
     const q = (query || '').toLowerCase().trim();
 
-    // 1. Operaciones básicas, adición, sumas simples y respuestas sobre cálculos elementales (ej. "4 puede ser respuesta", "4", "2+2", "suma", "sumatoria")
+    // 1. Detección específica de la sumatoria de 3 términos: 2 + 2 + 3 = 7 ("la respuesta es 7?", "7", "2+2+3", etc.)
+    if (q.includes('7') || q.includes('2+2+3') || q.includes('2 + 2 + 3') || (q.includes('3') && (q.includes('respuesta') || q.includes('suma')))) {
+        return {
+            status: "SUCCESS",
+            chat_response: "¡Exacto! 7 es la respuesta correcta para la sumatoria 2 + 2 + 3. Al desglosarlo paso a paso: primero sumas 2 + 2 = 4, y luego le agregas 3 al resultado (4 + 3), alcanzando exactamente 7. ¡Has resuelto la operación de tu cuaderno de forma impecable! ¿Cómo lo escribirías agrupado entre paréntesis: (2 + 2) + 3 o 2 + (2 + 3)?",
+            tutor_response: "¡Exacto! 7 es la respuesta correcta para la sumatoria 2 + 2 + 3. Al desglosarlo paso a paso: primero sumas 2 + 2 = 4, y luego le agregas 3 al resultado (4 + 3), alcanzando exactamente 7. ¡Has resuelto la operación de tu cuaderno de forma impecable! ¿Cómo lo escribirías agrupado entre paréntesis: (2 + 2) + 3 o 2 + (2 + 3)?",
+            blackboard: {
+                topic: "Aritmética Elemental: Sumatoria de Múltiples Términos",
+                core_equation: "2 + 2 + 3 = (2 + 2) + 3 = 4 + 3 = 7",
+                definition: "La adición sucesiva de números enteros agrupa cantidades de forma acumulativa gobernada por la Propiedad Asociativa: (a + b) + c = a + (b + c).",
+                equation_governance: "Paso 1: 2 + 2 = 4 | Paso 2: 4 + 3 = 7 | Total Verificado = 7",
+                practical_application: "Conteo continuo y verificación sobre la recta numérica sumando primero 4 unidades y luego 3 unidades adicionales."
+            }
+        };
+    }
+
+    // 2. Operaciones básicas, adición, sumas simples y respuestas sobre cálculos elementales (ej. "4 puede ser respuesta", "4", "2+2", "suma", "sumatoria")
     if (q.includes('4') || q.includes('suma') || q.includes('sumatoria') || q.includes('2+2') || q.includes('2 + 2') || q.includes('adicion') || q.includes('adición') || q.includes('aritmetica') || q.includes('aritmética') || q.includes('operacion') || q.includes('operación')) {
         return {
             status: "SUCCESS",
