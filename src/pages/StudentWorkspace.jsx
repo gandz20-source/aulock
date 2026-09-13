@@ -456,7 +456,7 @@ const StudentWorkspace = () => {
         try {
             let responseText = '';
             if (imageCopy) {
-                responseText = await analyzeExerciseImageWithGemini({
+                const imgRes = await analyzeExerciseImageWithGemini({
                     tutorId: selectedTutor.id,
                     tutorName: selectedTutor.name,
                     imageBase64: imageCopy,
@@ -464,6 +464,7 @@ const StudentWorkspace = () => {
                     interest: studentInterest,
                     promptText: promptCopy
                 });
+                responseText = typeof imgRes === 'object' ? (imgRes.chat_response || imgRes.tutor_response || '') : (imgRes || '');
             } else {
                 responseText = await generateLearnYourWayResponse({
                     studentId: profile?.id || 'STUDENT_123',

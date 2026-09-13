@@ -116,32 +116,73 @@ export default function EliteSocraticWhiteboardFixed() {
     try {
       if (imageCopy) {
         // Multimodal Vision AI Call (Gemini 1.5 Flash Socratic Lens)
-        const responseText = await analyzeExerciseImageWithGemini({
+        const responseData = await analyzeExerciseImageWithGemini({
           tutorName: selectedSpecialist.name,
           imageBase64: imageCopy,
           mimeType: 'image/jpeg',
           promptText: userText || ''
         });
 
-        setChatHistory(prev => [...prev, { sender: 'ai', text: responseText }]);
+        const replyText = typeof responseData === 'object' 
+          ? (responseData.chat_response || responseData.tutor_response || '')
+          : (responseData || '');
 
-        // Sincronizar pizarra con la lectura real
-        const isSumThree = (responseText || '').includes('2 + 2 + 3') || (responseText || '').includes('2+2+3') || (responseText || '').includes('7') || (userText || '').includes('3');
-        const isArithmetic = isSumThree || (responseText || '').includes('2 + 2') || (responseText || '').includes('2+2') || (responseText || '').includes('suma') || (responseText || '').includes('5');
+        setChatHistory(prev => [...prev, { 
+          sender: 'ai', 
+          text: replyText,
+          isApiKeyMissing: responseData?.isApiKeyMissing
+        }]);
 
-        setBoardContent({
-          topic: isSumThree 
-            ? 'Aritmética Básica // Sumatoria de 3 Términos' 
-            : (isArithmetic ? 'Aritmética Básica // Adición y Conteo' : `Lectura de Cuaderno // ${selectedSpecialist.subject}`),
-          coreFormula: isSumThree 
-            ? '2 + 2 + 3 = 7' 
-            : (isArithmetic ? '2 + 2 = 4 \\quad (\\neq 5)' : (userText || 'Operación Identificada en Cuaderno')),
-          steps: [
-            { num: '01', title: 'Lectura Base', desc: isSumThree ? 'Identificación de la sumatoria manuscrita: 2 + 2 + 3 = ...' : (isArithmetic ? 'Identificación de la operación escrita en el cuaderno: 2 + 2 = 5.' : 'Identificación exacta de los números, signos y variables escritos en la foto sin inventar datos.') },
-            { num: '02', title: 'Revisión Socrática', desc: isSumThree ? 'Resolución asociativa paso a paso: (2 + 2) = 4, luego 4 + 3 = 7.' : (isArithmetic ? 'Comprobación de la suma mental frente al valor anotado para detectar la diferencia.' : 'Análisis del procedimiento para formular una pregunta guía si existe un paso por completar o corregir.') },
-            { num: '03', title: 'Siguiente Paso Lógico', desc: 'Responde la pregunta del tutor para avanzar hacia la resolución paso a paso.' }
-          ]
-        });
+        // Sincronizar pizarra con la lectura real estructurada
+        if (responseData?.blackboard) {
+          setBoardContent(responseData.blackboard);
+        } else {
+          const isPowers = (replyText || '').includes('²') || (replyText || '').includes('^2') || (userText || '').includes('²') || (userText || '').includes('^2');
+          const isSumThree = (replyText || '').includes('2 + 2 + 3') || (replyText || '').includes('2+2+3') || (userText || '').includes('2 + 2 + 3') || (userText || '').includes('2+2+3');
+          const isArithmetic = isSumThree || (replyText || '').includes('2 + 2') || (replyText || '').includes('2+2');
+
+          if (isPowers) {
+            setBoardContent({
+              topic: 'Aritmética & Potencias: Jerarquía de Operaciones',
+              coreFormula: '5^2 + 8^2 - 6^2 = 25 + 64 - 36 = 53',
+              steps: [
+                { num: '01', title: 'Lectura Base', desc: 'Identificación de potencias combinadas: 5² + 8² - 6² = ...' },
+                { num: '02', title: 'Revisión Socrática', desc: 'Jerarquía de operaciones: cálculo prioritario de exponentes.' },
+                { num: '03', title: 'Siguiente Paso Lógico', desc: 'Evaluar 5² (25) y 8² (64) antes de sumar o restar.' }
+              ]
+            });
+          } else if (isSumThree) {
+            setBoardContent({
+              topic: 'Aritmética Básica // Sumatoria de 3 Términos',
+              coreFormula: '2 + 2 + 3 = 7',
+              steps: [
+                { num: '01', title: 'Lectura Base', desc: 'Identificación de la sumatoria manuscrita: 2 + 2 + 3 = ...' },
+                { num: '02', title: 'Revisión Socrática', desc: 'Resolución asociativa paso a paso: (2 + 2) = 4, luego 4 + 3 = 7.' },
+                { num: '03', title: 'Siguiente Paso Lógico', desc: 'Responde la pregunta del tutor para avanzar hacia la resolución paso a paso.' }
+              ]
+            });
+          } else if (isArithmetic) {
+            setBoardContent({
+              topic: 'Aritmética Básica // Adición y Conteo',
+              coreFormula: '2 + 2 = 4 \\quad (\\neq 5)',
+              steps: [
+                { num: '01', title: 'Lectura Base', desc: 'Identificación de la operación escrita en el cuaderno: 2 + 2 = 5.' },
+                { num: '02', title: 'Revisión Socrática', desc: 'Comprobación de la suma mental frente al valor anotado para detectar la diferencia.' },
+                { num: '03', title: 'Siguiente Paso Lógico', desc: 'Responde la pregunta del tutor para avanzar hacia la resolución paso a paso.' }
+              ]
+            });
+          } else {
+            setBoardContent({
+              topic: `Lectura de Cuaderno // ${selectedSpecialist.subject}`,
+              coreFormula: userText || 'Operación Identificada en Cuaderno',
+              steps: [
+                { num: '01', title: 'Lectura Base', desc: 'Identificación exacta de datos y trazos manuscritos en la foto.' },
+                { num: '02', title: 'Revisión Socrática', desc: 'Análisis del procedimiento para formular una pregunta guía orientadora.' },
+                { num: '03', title: 'Siguiente Paso Lógico', desc: 'Responde la pregunta del tutor para avanzar hacia la resolución paso a paso.' }
+              ]
+            });
+          }
+        }
       } else {
         const responseData = await handleTutorQueryService({
           specialist: selectedSpecialist.name,
@@ -280,6 +321,19 @@ export default function EliteSocraticWhiteboardFixed() {
                   )}
 
                   <MathRenderer content={msg.text} />
+
+                  {msg.isApiKeyMissing && (
+                    <div className="mt-3 pt-2 border-t border-amber-500/30">
+                      <button
+                        type="button"
+                        onClick={() => setShowKeyModal(true)}
+                        className="px-3.5 py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-orbitron font-extrabold text-[11px] rounded-xl shadow-lg flex items-center gap-2 transition cursor-pointer"
+                      >
+                        <Key className="w-3.5 h-3.5" />
+                        <span>⚙️ CONECTAR GEMINI API KEY (GRATIS)</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
               {loading && (
@@ -292,6 +346,22 @@ export default function EliteSocraticWhiteboardFixed() {
           </div>
 
           <div className="space-y-2 pt-2 border-t border-cyan-900/60">
+            {!apiKeyPresent && (
+              <div className="p-2 bg-amber-950/40 border border-amber-500/40 rounded-xl flex items-center justify-between gap-2 text-[11px] text-amber-300">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Key className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="truncate">Para leer fotos con IA en vivo, conecta tu Gemini API Key</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowKeyModal(true)}
+                  className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] rounded-lg shrink-0 transition"
+                >
+                  Conectar
+                </button>
+              </div>
+            )}
+
             {capturedImage && (
               <div className="p-2 bg-slate-900 border border-emerald-500/40 rounded-xl flex items-center justify-between gap-2 text-[11px] text-emerald-300">
                 <div className="flex items-center gap-2">

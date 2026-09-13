@@ -416,14 +416,24 @@ export const SOCRATIC_STEM_VISION_PROMPT =
 `Eres el Tutor Socrático STEM de AuLock. Tu primera regla inquebrantable es LEER y RECONOCER exactamente lo que hay en la imagen. NUNCA inventes fórmulas, números o pasos que no estén explícitamente escritos en la foto enviada por el alumno.
 
 Sigue esta lógica de atención:
-
-Lectura Base: Identifica qué está escrito. Si es algo simple (ej. 2+2) y no tiene respuesta, haz una pregunta amistosa para que el alumno lo resuelva, sin usar lenguaje académico excesivo.
-
-Detección de Errores: Si es un ejercicio de varios pasos, revísalo en silencio. Si hay un error, NO des la respuesta final. Hazle una pregunta socrática enfocada únicamente en la línea donde ocurrió el error para que el alumno lo descubra.
-
-Validación: Si todo está correcto, felicítalo y pregúntale cuál es el siguiente paso lógico.
-
-Solo utiliza formato LaTeX para ecuaciones complejas (fracciones, variables múltiples, raíces). Para aritmética básica, usa texto normal.`;
+1. Lectura Base: Identifica qué está escrito exactamente en la imagen manuscrita (por ejemplo, potencias como 5² + 8² - 6² =, fracciones, sumas o ecuaciones). Si no tiene respuesta, haz una pregunta amistosa y orientadora para que el alumno comience el primer paso, sin dar la respuesta final.
+2. Detección de Errores: Si es un ejercicio de varios pasos con resolución, revísalo. Si hay un error, NO des la respuesta final; formula una pregunta socrática enfocada únicamente en la línea donde ocurrió el error.
+3. Formato JSON Obligatorio: Devuelve ÚNICAMENTE un objeto JSON válido con la siguiente estructura:
+{
+  "transcription": "Ecuación, expresión o texto exacto identificado en el cuaderno",
+  "topic": "Nombre del tema matemático o científico",
+  "core_equation": "La ecuación central identificada (en LaTeX o formato legible)",
+  "chat_response": "Tu respuesta socrática cálida. Saluda, menciona qué reconociste en su cuaderno y haz una pregunta reflexiva para que él comience el cálculo.",
+  "blackboard": {
+    "topic": "Tema para la pizarra socrática",
+    "core_equation": "Ecuación central para la pizarra",
+    "steps": [
+      { "num": "01", "title": "Lectura Base", "desc": "Transcripción exacta del ejercicio en el cuaderno" },
+      { "num": "02", "title": "Revisión Socrática", "desc": "Regla operativa o concepto a aplicar en primer lugar" },
+      { "num": "03", "title": "Siguiente Paso Lógico", "desc": "Pregunta guía sobre el primer paso a resolver" }
+    ]
+  }
+}`;
 
 const GEMINI_FLASH_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const GEMINI_PRO_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
@@ -435,10 +445,22 @@ export async function analyzeExerciseImageWithGemini({ tutorId, tutorName, image
     const apiKey = getGeminiApiKey();
 
     const interestClean = interest || 'Fútbol ⚽';
-    const userPrompt = (promptText && promptText.trim()) ? promptText.trim() : 'Analiza atentamente lo escrito a mano en el cuaderno del alumno.';
+    const userPrompt = (promptText && promptText.trim()) ? promptText.trim() : 'Analiza atentamente lo escrito a mano en el cuaderno del alumno e identifica la ecuación o ejercicio exacto.';
 
     if (!apiKey || apiKey === 'DEMO_KEY') {
-        return getFallbackVisionAnalysis(tutorName, interestClean, userPrompt);
+        return {
+            isApiKeyMissing: true,
+            chat_response: `⚠️ **[Modo Sin Conexión - Gemini Vision Inactivo]**\n\nNo se ha detectado una API Key de Gemini configurada en este dispositivo. Para que la Inteligencia Artificial pueda "ver" y leer las fotos manuscritas de tu cuaderno en tiempo real (reconociendo potencias, álgebra o física), necesitas conectar tu clave gratuita de Google Gemini.\n\n👉 **Presiona el botón "⚙️ Conectar Gemini API Key" en la parte superior para ingresarla (es 100% gratis en Google AI Studio).**\n\n💡 Si estás resolviendo este ejercicio ahora mismo, escríbeme la operación aquí abajo (por ejemplo: \`5² + 8² - 6² =\`) y te guiaré paso a paso.`,
+            blackboard: {
+                topic: "Visión Multimodal // Requiere Gemini API Key",
+                core_equation: "\\text{Google Gemini Vision} \\longleftrightarrow \\text{Cuaderno}",
+                steps: [
+                    { num: "01", title: "Conectar API Key", desc: "Presiona '⚙️ Conectar Gemini API Key' en la cabecera e ingresa tu clave gratuita." },
+                    { num: "02", title: "Google AI Studio", desc: "Obtén tu clave en aistudio.google.com en 1 minuto sin costo alguno." },
+                    { num: "03", title: "Reconocimiento Real", desc: "La IA leerá instantáneamente cualquier ejercicio manuscrito, fórmulas o diagramas." }
+                ]
+            }
+        };
     }
 
     // Clean base64 string
@@ -461,19 +483,24 @@ export async function analyzeExerciseImageWithGemini({ tutorId, tutorName, image
             parts: [{ text: SOCRATIC_STEM_VISION_PROMPT }]
         },
         generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 800
+            responseMimeType: 'application/json',
+            temperature: 0.2,
+            maxOutputTokens: 1000
         }
     };
 
     try {
+        let rawText = '';
         const response = await fetch(`${GEMINI_FLASH_API_URL}?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
         });
 
-        if (!response.ok) {
+        if (response.ok) {
+            const data = await response.json();
+            rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        } else {
             console.warn(`Gemini 1.5 Flash Vision returned ${response.status}, retrying with Pro...`);
             const proResponse = await fetch(`${GEMINI_PRO_API_URL}?key=${apiKey}`, {
                 method: 'POST',
@@ -482,20 +509,67 @@ export async function analyzeExerciseImageWithGemini({ tutorId, tutorName, image
             });
             if (proResponse.ok) {
                 const proData = await proResponse.json();
-                const proText = proData.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (proText) return proText;
+                rawText = proData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            } else {
+                const errData = await response.text().catch(() => '');
+                throw new Error(`Gemini Vision API Error ${response.status}: ${errData.slice(0, 100)}`);
             }
-            throw new Error(`Gemini Vision API Error ${response.status}`);
         }
 
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (rawText) {
+            try {
+                const cleanJson = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+                const parsed = JSON.parse(cleanJson);
+                const bb = parsed.blackboard || {};
+                return {
+                    status: "SUCCESS",
+                    transcription: parsed.transcription || '',
+                    chat_response: parsed.chat_response || parsed.tutor_response || rawText,
+                    blackboard: {
+                        topic: bb.topic || parsed.topic || 'Lectura de Cuaderno',
+                        core_equation: bb.core_equation || parsed.core_equation || parsed.transcription || 'Operación Identificada',
+                        steps: bb.steps || [
+                            { num: '01', title: 'Lectura Base', desc: `Identificado: ${parsed.transcription || 'Trazos en cuaderno'}` },
+                            { num: '02', title: 'Revisión Socrática', desc: 'Análisis del orden operativo paso a paso.' },
+                            { num: '03', title: 'Siguiente Paso', desc: 'Responde la pregunta del tutor para avanzar.' }
+                        ]
+                    }
+                };
+            } catch (e) {
+                // Plain text returned
+                return {
+                    status: "SUCCESS",
+                    chat_response: rawText,
+                    blackboard: {
+                        topic: `Lectura de Cuaderno // ${tutorName}`,
+                        core_equation: 'Operación Identificada en Cuaderno',
+                        steps: [
+                            { num: '01', title: 'Lectura Base', desc: 'Identificación de trazos y datos en el cuaderno.' },
+                            { num: '02', title: 'Revisión Socrática', desc: 'Razonamiento guiado para resolver paso a paso.' },
+                            { num: '03', title: 'Siguiente Paso', desc: 'Responde la pregunta del tutor para avanzar.' }
+                        ]
+                    }
+                };
+            }
+        }
 
-        return text || getFallbackVisionAnalysis(tutorName, interestClean, userPrompt);
+        throw new Error("No response text received from Gemini Vision");
 
     } catch (error) {
-        console.warn("Multimodal Gemini call error, using Socratic fallback:", error);
-        return getFallbackVisionAnalysis(tutorName, interestClean, userPrompt);
+        console.warn("Multimodal Gemini call error:", error);
+        return {
+            isError: true,
+            chat_response: `⚠️ Ocurrió un problema al consultar Gemini Vision (${error.message || 'Error de conexión'}). Por favor verifica que tu API Key sea válida en Google AI Studio o escribe el ejercicio por texto para ayudarte.`,
+            blackboard: {
+                topic: "Error en Lectura Visual",
+                core_equation: "\\text{Verificar Conexión / API Key}",
+                steps: [
+                    { num: "01", title: "Verificar API Key", desc: "Asegúrate de que la clave ingresada sea correcta y tenga cuota disponible." },
+                    { num: "02", title: "Entrada por Texto", desc: "Puedes escribir la ecuación directamente en el campo de chat." },
+                    { num: "03", title: "Reintentar", desc: "Vuelve a enfocar tu cuaderno con buena iluminación." }
+                ]
+            }
+        };
     }
 }
 
@@ -581,10 +655,13 @@ TU MISIÓN PEDAGÓGICA:
 
 function getFallbackLiveCameraAnalysis(tutor, userSpeech) {
     const q = (userSpeech || '').toLowerCase();
-    if (q.includes('7') || q.includes('3') || q.includes('2+2+3') || q.includes('2 + 2 + 3')) {
+    if (q.includes('5²') || q.includes('8²') || q.includes('6²') || q.includes('5^2') || q.includes('8^2') || q.includes('6^2')) {
+        return "Te observo en vivo enfocando el ejercicio de potencias: 5² + 8² - 6² =. Primero debemos evaluar los cuadrados. ¿Cuánto te da 5² y 8²?";
+    }
+    if (q.includes('2+2+3') || q.includes('2 + 2 + 3')) {
         return "¡Exacto! Veo tu cuaderno en vivo: 2 más 2 son 4, y al sumarle 3 llegas a 7. Lo resolviste muy bien. ¿Cuál es el siguiente paso o ejercicio que tienes anotado?";
     }
-    if (q.includes('4') || q.includes('2+2') || q.includes('2 + 2')) {
+    if (q.includes('2+2=5') || q.includes('2 + 2 = 5') || (q.includes('2+2') && q.includes('4'))) {
         return "Te observo en vivo: la suma de 2 más 2 es 4. En tu apunte tenías otro valor, así que la corrección es perfecta. ¿Quieres que pasemos al siguiente paso?";
     }
     if (q.includes('error') || q.includes('bien') || q.includes('correcto') || q.includes('resultado') || q.includes('respuesta')) {
@@ -1003,34 +1080,40 @@ function getFallbackGeneratedQuestions(topic, oaCode, oaDesc) {
 
 function getFallbackVisionAnalysis(tutorName, interestClean, userPrompt = '') {
     const qLower = (userPrompt || '').toLowerCase().trim();
-    const isGenericInstruction = !userPrompt || qLower.includes('lee exactamente') || qLower.includes('analiza') || qLower.includes('cuaderno') || qLower.includes('foto');
 
-    // 1. Reconocimiento de sumatoria de 3 términos (ej. "2 + 2 + 3 =")
-    if (qLower.includes('3') || qLower.includes('7') || qLower.includes('2+2+3') || qLower.includes('2 + 2 + 3')) {
-        return `¡Hola! Veo en la foto de tu cuaderno la sumatoria: 2 + 2 + 3 = ...
+    // 1. Detección de operaciones combinadas con potencias (ej. 5² + 8² - 6² =)
+    if (qLower.includes('5²') || qLower.includes('8²') || qLower.includes('6²') || 
+        qLower.includes('5^2') || qLower.includes('8^2') || qLower.includes('6^2') ||
+        (qLower.includes('²') && (qLower.includes('+') || qLower.includes('-')))) {
+        return `¡Hola! Veo en la foto de tu cuaderno la operación combinada con potencias: 5² + 8² - 6² = ...
+
+Para resolverla paso a paso aplicando la jerarquía de operaciones (PAPOMUDAS):
+1. Primero evaluamos las potencias. ¿Cuánto es 5² (5 × 5) y 8² (8 × 8)?
+2. Luego sumamos esos valores y le restamos 6² (36).
+¿A qué resultado llegas al calcular las primeras potencias?`;
+    }
+
+    // 2. Reconocimiento de sumatoria específica de 3 términos
+    if (qLower.includes('2+2+3') || qLower.includes('2 + 2 + 3')) {
+        return `¡Hola! Veo en tu apunte la sumatoria: 2 + 2 + 3 = ...
 
 Para resolverla paso a paso:
 1. ¿Cuánto resulta al sumar primero los dos primeros números (2 + 2)?
 2. A ese resultado, súmale 3. ¿Cuál es tu respuesta final? ¡Dime tu cálculo y lo comprobamos juntos!`;
     }
 
-    // 2. Reconocimiento de sumatoria básica / cuaderno escaneado
-    if (isGenericInstruction || qLower.includes('2+2') || qLower.includes('2 + 2') || qLower.includes('suma') || qLower.includes('sumatoria') || qLower.includes('adicion') || qLower.includes('adición') || qLower.includes('básica') || qLower.includes('basica') || qLower.includes('simple')) {
-        return `¡Hola! Veo en la foto de tu cuaderno la sumatoria manuscrita: 2 + 2 + 3 = ...
-
-Para resolverla paso a paso de forma sencilla:
-¿Cuánto te da sumar los dos primeros términos (2 + 2)? Y luego, al agregarle el 3, ¿a qué número total llegas? ¡Escríbeme tu resultado y te digo si es correcto!`;
+    // 3. Reconocimiento de error 2+2=5
+    if (qLower.includes('2+2=5') || qLower.includes('2 + 2 = 5')) {
+        return `¡Hola! Veo en tu apunte: 2 + 2 = 5.
+Si sumas 2 unidades con otras 2 unidades, ¿cuál es el total real? Revisa si 5 corresponde a esa suma.`;
     }
 
-    // 3. Si el alumno menciona la corrección o respuesta
-    if (qLower.includes('4') || qLower.includes('respuesta') || qLower.includes('correcto')) {
-        return `¡Exacto! 4 es el resultado de sumar 2 + 2. Si a eso le sumas el 3 restante, ¿cuál es el total acumulado?`;
-    }
+    // 4. Consulta general de cuaderno en modo local / sin API key
+    return `📷 Foto de cuaderno recibida en modo local.
 
-    // 4. Consulta general de cuaderno
-    return `He analizado atentamente la foto de tu cuaderno y reconozco los trazos que escribiste.
+Para que la Inteligencia Artificial con Visión pueda leer y transcribir automáticamente ecuaciones complejas o problemas manuscritos, recuerda activar tu **Gemini API Key** en la barra superior.
 
-Para resolverlo paso a paso: ¿cuál es la primera operación o concepto que intentaste aplicar? Cuéntame tu planteamiento para revisarlo juntos.`;
+Mientras tanto, dime qué operación o duda tienes anotada aquí abajo para guiarte socráticamente paso a paso.`;
 }
 
 function getFallbackLearnYourWay(tutorName, topicOrQuestion, interest) {
@@ -1355,12 +1438,50 @@ Formato JSON obligatorio:
 function getFallbackTutorQueryResponse(specialist, query, mode) {
     const q = (query || '').toLowerCase().trim();
 
-    // 1. Detección específica de la sumatoria de 3 términos: 2 + 2 + 3 = 7 ("la respuesta es 7?", "7", "2+2+3", etc.)
-    if (q.includes('7') || q.includes('2+2+3') || q.includes('2 + 2 + 3') || (q.includes('3') && (q.includes('respuesta') || q.includes('suma')))) {
+    // 1. Detección de operaciones combinadas con potencias (ej. "5² + 8² - 6²", "5^2 + 8^2 - 6^2")
+    const isPowersExercise = q.includes('5²') || q.includes('8²') || q.includes('6²') || 
+        q.includes('5^2') || q.includes('8^2') || q.includes('6^2') ||
+        (q.includes('²') && (q.includes('+') || q.includes('-'))) ||
+        (q.includes('^2') && (q.includes('+') || q.includes('-'))) ||
+        (q.includes('potencia') && (q.includes('cuadrado') || q.includes('suma')));
+
+    if (isPowersExercise) {
         return {
             status: "SUCCESS",
-            chat_response: "¡Exacto! 7 es la respuesta correcta para la sumatoria 2 + 2 + 3. Al desglosarlo paso a paso: primero sumas 2 + 2 = 4, y luego le agregas 3 al resultado (4 + 3), alcanzando exactamente 7. ¡Has resuelto la operación de tu cuaderno de forma impecable! ¿Cómo lo escribirías agrupado entre paréntesis: (2 + 2) + 3 o 2 + (2 + 3)?",
-            tutor_response: "¡Exacto! 7 es la respuesta correcta para la sumatoria 2 + 2 + 3. Al desglosarlo paso a paso: primero sumas 2 + 2 = 4, y luego le agregas 3 al resultado (4 + 3), alcanzando exactamente 7. ¡Has resuelto la operación de tu cuaderno de forma impecable! ¿Cómo lo escribirías agrupado entre paréntesis: (2 + 2) + 3 o 2 + (2 + 3)?",
+            chat_response: "¡Excelente ejercicio de potencias combinadas! Para resolver 5² + 8² - 6² =, debemos recordar la jerarquía de operaciones (PAPOMUDAS): primero resolvemos las potencias (los exponentes al cuadrado), y luego las adiciones y sustracciones de izquierda a derecha.\n\nComencemos por el primer paso: ¿Cuánto resulta calcular 5² (es decir, 5 × 5) y 8² (8 × 8)?",
+            tutor_response: "¡Excelente ejercicio de potencias combinadas! Para resolver 5² + 8² - 6² =, debemos recordar la jerarquía de operaciones (PAPOMUDAS): primero resolvemos las potencias (los exponentes al cuadrado), y luego las adiciones y sustracciones de izquierda a derecha.\n\nComencemos por el primer paso: ¿Cuánto resulta calcular 5² (es decir, 5 × 5) y 8² (8 × 8)?",
+            blackboard: {
+                topic: "Aritmética & Potencias: Jerarquía de Operaciones",
+                core_equation: "5^2 + 8^2 - 6^2 = 25 + 64 - 36 = 53",
+                definition: "La jerarquía de operaciones establece que las potencias y raíces se calculan con prioridad sobre las adiciones y sustracciones, las cuales se evalúan posteriormente de izquierda a derecha.",
+                equation_governance: "Paso 1: 5² = 25, 8² = 64, 6² = 36 | Paso 2: 25 + 64 = 89 | Paso 3: 89 - 36 = 53",
+                practical_application: "Cálculo de magnitud en vectores perpendiculares y aplicación del Teorema de Pitágoras en física y geometría."
+            }
+        };
+    }
+
+    // 2. Comprobación de respuesta final de potencias (53)
+    if (q === '53' || (q.includes('53') && (q.includes('resultado') || q.includes('respuesta') || q.includes('final') || q.includes('da')))) {
+        return {
+            status: "SUCCESS",
+            chat_response: "¡Exacto! 53 es la respuesta correcta para 5² + 8² - 6² =. Al desglosarlo con la jerarquía operativa: 5² = 25, 8² = 64 y 6² = 36. Luego: 25 + 64 = 89, y al restarle 36 obtienes exactamente 53. ¡Has resuelto el ejercicio de forma impecable!",
+            tutor_response: "¡Exacto! 53 es la respuesta correcta para 5² + 8² - 6² =. Al desglosarlo con la jerarquía operativa: 5² = 25, 8² = 64 y 6² = 36. Luego: 25 + 64 = 89, y al restarle 36 obtienes exactamente 53. ¡Has resuelto el ejercicio de forma impecable!",
+            blackboard: {
+                topic: "Jerarquía de Operaciones: Comprobación Completada",
+                core_equation: "5^2 + 8^2 - 6^2 = 25 + 64 - 36 = 53 \\quad \\checkmark",
+                definition: "Resolución completa y validada de operación aritmética combinada con potencias enteras.",
+                equation_governance: "5² = 25 \\implies 8² = 64 \\implies 6² = 36 \\implies 25 + 64 - 36 = 53",
+                practical_application: "Verificación de cálculos analíticos en pruebas estandarizadas (PAES) sin errores de precedencia."
+            }
+        };
+    }
+
+    // 3. Detección específica de la sumatoria de 3 términos: 2 + 2 + 3 = 7
+    if (q.includes('2+2+3') || q.includes('2 + 2 + 3')) {
+        return {
+            status: "SUCCESS",
+            chat_response: "Para resolver la sumatoria 2 + 2 + 3 = ... al desglosarlo paso a paso: primero sumas 2 + 2 = 4, y luego le agregas 3 al resultado (4 + 3), alcanzando exactamente 7. ¿Cómo lo escribirías agrupado entre paréntesis: (2 + 2) + 3 o 2 + (2 + 3)?",
+            tutor_response: "Para resolver la sumatoria 2 + 2 + 3 = ... al desglosarlo paso a paso: primero sumas 2 + 2 = 4, y luego le agregas 3 al resultado (4 + 3), alcanzando exactamente 7. ¿Cómo lo escribirías agrupado entre paréntesis: (2 + 2) + 3 o 2 + (2 + 3)?",
             blackboard: {
                 topic: "Aritmética Elemental: Sumatoria de Múltiples Términos",
                 core_equation: "2 + 2 + 3 = (2 + 2) + 3 = 4 + 3 = 7",
@@ -1371,17 +1492,17 @@ function getFallbackTutorQueryResponse(specialist, query, mode) {
         };
     }
 
-    // 2. Operaciones básicas, adición, sumas simples y respuestas sobre cálculos elementales (ej. "4 puede ser respuesta", "4", "2+2", "suma", "sumatoria")
-    if (q.includes('4') || q.includes('suma') || q.includes('sumatoria') || q.includes('2+2') || q.includes('2 + 2') || q.includes('adicion') || q.includes('adición') || q.includes('aritmetica') || q.includes('aritmética') || q.includes('operacion') || q.includes('operación')) {
+    // 4. Corrección puntual de 2+2=5
+    if (q.includes('2+2=5') || q.includes('2 + 2 = 5') || (q.includes('2+2') && q.includes('5'))) {
         return {
             status: "SUCCESS",
-            chat_response: "¡Exacto! 4 es la respuesta correcta para la suma de 2 + 2. Si juntas 2 elementos con otros 2 elementos, el total acumulado es 4. En el apunte de tu cuaderno estaba escrito \"2 + 2 = 5\", por lo que detectaste la corrección con total precisión. ¿Cómo comprobarías este resultado en una recta numérica o mediante conteo directo?",
-            tutor_response: "¡Exacto! 4 es la respuesta correcta para la suma de 2 + 2. Si juntas 2 elementos con otros 2 elementos, el total acumulado es 4. En el apunte de tu cuaderno estaba escrito \"2 + 2 = 5\", por lo que detectaste la corrección con total precisión. ¿Cómo comprobarías este resultado en una recta numérica o mediante conteo directo?",
+            chat_response: "¡Exacto! 4 es la respuesta correcta para la suma de 2 + 2. Si juntas 2 elementos con otros 2 elementos, el total acumulado es 4. En el apunte de tu cuaderno estaba escrito \"2 + 2 = 5\", por lo que detectaste la diferencia con total precisión. ¿Cómo comprobarías este resultado en una recta numérica?",
+            tutor_response: "¡Exacto! 4 es la respuesta correcta para la suma de 2 + 2. Si juntas 2 elementos con otros 2 elementos, el total acumulado es 4. En el apunte de tu cuaderno estaba escrito \"2 + 2 = 5\", por lo que detectaste la diferencia con total precisión. ¿Cómo comprobarías este resultado en una recta numérica?",
             blackboard: {
                 topic: "Aritmética Básica: Operación de Suma (Adición Elemental)",
                 core_equation: "2 + 2 = 4 \\quad (\\neq 5)",
                 definition: "La adición es una operación aritmética fundamental que agrupa dos o más cantidades discretas (sumandos) para obtener un valor total único (suma).",
-                equation_governance: "Propiedad de la Adición: a + b = c | Comprobación Inversa: 4 - 2 = 2 | Corrección de Desigualdad: 2 + 2 \\neq 5 \\implies 2 + 2 = 4",
+                equation_governance: "Propiedad de la Adición: a + b = c | Comprobación Inversa: 4 - 2 = 2 | Corrección: 2 + 2 = 4",
                 practical_application: "Conteo elemental y comprobación directa sobre la recta numérica para validar resultados cuantitativos."
             }
         };

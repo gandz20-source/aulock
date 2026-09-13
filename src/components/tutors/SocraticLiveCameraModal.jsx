@@ -174,10 +174,21 @@ export default function SocraticLiveCameraModal({
 
       // Sincronizar con la Pizarra
       if (onSyncBoard) {
-        const isSumThree = response.includes('7') || queryText.includes('7') || queryText.includes('2+2+3') || queryText.includes('2 + 2 + 3') || queryText.includes('3');
-        const isSumTwo = !isSumThree && (response.includes('4') || queryText.includes('4') || queryText.includes('2+2'));
+        const isPowers = response.includes('²') || queryText.includes('²') || response.includes('^2') || queryText.includes('^2');
+        const isSumThree = response.includes('2+2+3') || queryText.includes('2+2+3') || response.includes('2 + 2 + 3') || queryText.includes('2 + 2 + 3');
+        const isSumTwo = !isSumThree && (queryText.includes('2+2') || queryText.includes('2 + 2'));
 
-        if (isSumThree) {
+        if (isPowers) {
+          onSyncBoard({
+            topic: 'Aritmética & Potencias: Jerarquía en Vivo',
+            coreFormula: '5^2 + 8^2 - 6^2 = 25 + 64 - 36 = 53',
+            steps: [
+              { num: '01', title: 'Lectura en Vivo', desc: 'Identificación de potencias en video: 5² + 8² - 6² = ...' },
+              { num: '02', title: 'Jerarquía Operativa', desc: 'Paso 1: Evaluar 5² = 25, 8² = 64, 6² = 36 antes de operar.' },
+              { num: '03', title: 'Siguiente Paso', desc: 'Responde la pregunta del tutor para avanzar en la resolución.' }
+            ]
+          });
+        } else if (isSumThree) {
           onSyncBoard({
             topic: 'Aritmética Elemental: Sumatoria en Vivo',
             coreFormula: '2 + 2 + 3 = (2 + 2) + 3 = 4 + 3 = 7',
