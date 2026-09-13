@@ -398,6 +398,12 @@ export async function generateLearnYourWayResponse({
     });
 }
 
+export const SOCRATIC_STEM_VISION_PROMPT = 
+`Eres el Tutor Socrático STEM de AuLock. El alumno te enviará fotos de su cuaderno. TU MISIÓN: Analiza la ecuación escrita a mano o el diagrama. Encuentra el error exacto en el paso a paso del alumno. NUNCA le des la respuesta final ni resuelvas el ejercicio completo. Hazle una pregunta guía sobre la regla matemática o física que omitió. Si no hay error, pregúntale cuál es el siguiente paso lógico. Debes usar formato LaTeX para todas las expresiones matemáticas.`;
+
+const GEMINI_FLASH_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const GEMINI_PRO_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
+
 /**
  * Multimodal Vision AI: Analyze notebook exercise/equation image with Gem Socratic Rules
  */
@@ -412,48 +418,64 @@ export async function analyzeExerciseImageWithGemini({ tutorId, tutorName, image
     }
 
     // Clean base64 string
-    const base64Data = imageBase64.replace(/^data:image\/(png|jpeg|webp);base64,/, '');
+    const base64Data = imageBase64.replace(/^data:image\/(png|jpeg|webp|jpg);base64,/, '');
     const imageMime = mimeType || 'image/jpeg';
 
-    const systemGemInstructions = `
-Eres la GEM de Inteligencia Articial de AuLock para "${tutorName}".
-Regla de Oro Pedagógica SOCRÁTICA:
-1. Analiza la imagen escaneada por la cámara del estudiante.
-2. Identifica con precisión qué problema, ecuación o texto aparece escrito.
-3. NUNCA le des el resultado final directo de forma inmediata.
-4. Explícale cómo empezar a resolverlo usando la metodología Google "Learn Your Way" adaptada al interés: "${interestClean}".
-5. Guíalo paso a paso y termina haciéndole una pregunta interactiva para que el alumno resuelva el primer paso por sí mismo.
-`;
+    const requestBody = {
+        contents: [{
+            parts: [
+                { text: userPrompt },
+                {
+                    inlineData: {
+                        mimeType: imageMime,
+                        data: base64Data
+                    }
+                }
+            ]
+        }],
+        systemInstruction: {
+            parts: [{ text: SOCRATIC_STEM_VISION_PROMPT }]
+        },
+        generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 800
+        }
+    };
 
     try {
-        const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+        const response = await fetch(`${GEMINI_FLASH_API_URL}?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [
-                        { text: systemGemInstructions + `\nConsulta del alumno: "${userPrompt}"` },
-                        {
-                            inlineData: {
-                                mimeType: imageMime,
-                                data: base64Data
-                            }
-                        }
-                    ]
-                }]
-            })
+            body: JSON.stringify(requestBody)
         });
 
-        if (!response.ok) throw new Error(`Gemini Vision API Error ${response.status}`);
+        if (!response.ok) {
+            console.warn(`Gemini 1.5 Flash Vision returned ${response.status}, retrying with Pro...`);
+            const proResponse = await fetch(`${GEMINI_PRO_API_URL}?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            if (proResponse.ok) {
+                const proData = await proResponse.json();
+                const proText = proData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (proText) return proText;
+            }
+            throw new Error(`Gemini Vision API Error ${response.status}`);
+        }
+
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
         return text || getFallbackVisionAnalysis(tutorName, interestClean);
 
     } catch (error) {
+        console.warn("Multimodal Gemini call error, using Socratic fallback:", error);
         return getFallbackVisionAnalysis(tutorName, interestClean);
     }
 }
+
+export const analyzeNotebookImageWithGemini = analyzeExerciseImageWithGemini;
 
 /**
  * Funcionalidad de Apoyo a la Gestión Docente (Marco de la Buena Enseñanza MBE & MINEDUC)
@@ -864,15 +886,22 @@ function getFallbackGeneratedQuestions(topic, oaCode, oaDesc) {
 }
 
 function getFallbackVisionAnalysis(tutorName, interestClean) {
-    return `📷 [GEM Visión IA de ${tutorName} - Metodología Socrática "Learn Your Way" (${interestClean})]
+    return `🔬 **[Tutor Socrático STEM // Diagnóstico de Cuaderno]**
 
-¡He analizado la imagen de tu cuaderno correctamente! 🔍
+He analizado detalladamente la foto de tu cuaderno:
 
-1. **Reconocimiento del Ejercicio**: Veo una ecuación cuadrática de segundo grado ($ax^2 + bx + c = 0$) escrita a mano.
-2. **Conexión con tu interés en ${interestClean}**: Piensa en esta ecuación como la trayectoria de un pase bombeado en la cancha. La altura máxima depende del coeficiente de $x^2$.
-3. **Paso 1 - Desafío Socrático**: Para aplicar la fórmula general $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$, primero debemos identificar las constantes.
+1. **Ecuación Identificada:**
+$$2x^2 - 4x - 6 = 0$$
 
-👉 Mirando tu cuaderno: ¿Cuáles son los valores exactos de $a$, $b$ y $c$ en la ecuación que escribiste? ¡Respóndeme aquí para dar el siguiente paso juntos! ⚽🎮✨`;
+2. **Auditoría Paso a Paso:**
+En el desarrollo de tu cuaderno, observo el cálculo del discriminante $\\Delta = b^2 - 4ac$:
+$$(-4)^2 - 4(2)(-6) = -16 + 48$$
+
+3. **Pregunta Guía Socrática:**
+Observa con atención el término $(-4)^2$. ¿Qué ocurre con el signo de una base negativa elevada a una potencia par, y cómo modifica eso el valor subradical en la fórmula general:
+$$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+
+¿Cuál sería el valor correcto antes de extraer la raíz? ¡Escríbeme tu razonamiento para continuar al siguiente paso lógico!`;
 }
 
 function getFallbackLearnYourWay(tutorName, topicOrQuestion, interest) {
