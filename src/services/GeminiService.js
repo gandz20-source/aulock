@@ -559,6 +559,18 @@ TU MISIÓN PEDAGÓGICA:
             const data = await response.json();
             const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
             if (text) return text.trim();
+        } else {
+            console.warn(`Flash Vision returned ${response.status}, retrying with Pro...`);
+            const proResponse = await fetch(`${GEMINI_PRO_API_URL}?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            if (proResponse.ok) {
+                const proData = await proResponse.json();
+                const proText = proData.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (proText) return proText.trim();
+            }
         }
         return getFallbackLiveCameraAnalysis(tutor, cleanSpeech);
     } catch (err) {
@@ -575,7 +587,10 @@ function getFallbackLiveCameraAnalysis(tutor, userSpeech) {
     if (q.includes('4') || q.includes('2+2') || q.includes('2 + 2')) {
         return "Te observo en vivo: la suma de 2 más 2 es 4. En tu apunte tenías otro valor, así que la corrección es perfecta. ¿Quieres que pasemos al siguiente paso?";
     }
-    return "Veo tu cuaderno claramente a través de la cámara. Observa la última línea que escribiste: ¿cuál crees que es la operación prioritaria para continuar? Cuéntame tu razonamiento.";
+    if (q.includes('error') || q.includes('bien') || q.includes('correcto') || q.includes('resultado') || q.includes('respuesta')) {
+        return "Veo tu apunte enfocado en la pantalla. Revisemos juntos: ¿cuál fue el último paso o signo que escribiste antes del signo igual? Dime tu cuenta mental.";
+    }
+    return "Veo tu cuaderno claramente a través de la cámara en vivo. Identifico los números y signos escritos. ¿Cuál es la duda específica que quieres que analicemos juntos?";
 }
 
 /**

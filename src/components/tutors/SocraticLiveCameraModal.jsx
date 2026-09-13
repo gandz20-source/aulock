@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   X, 
   Camera, 
@@ -10,9 +10,10 @@ import {
   Sparkles, 
   Eye, 
   BookOpen, 
-  Send 
+  Send,
+  AlertCircle
 } from 'lucide-react';
-import { consultSocraticLiveCamera } from '../../services/GeminiService';
+import { consultSocraticLiveCamera, getGeminiApiKey } from '../../services/GeminiService';
 
 export default function SocraticLiveCameraModal({ 
   isOpen, 
@@ -21,7 +22,6 @@ export default function SocraticLiveCameraModal({
   onSyncBoard, 
   onAddChatMessage 
 }) {
-  const [stream, setStream] = useState(null);
   const [facingMode, setFacingMode] = useState('environment'); // environment = rear, user = front
   const [isListening, setIsListening] = useState(false);
   const [isMutedTTS, setIsMutedTTS] = useState(false);
@@ -30,18 +30,21 @@ export default function SocraticLiveCameraModal({
   const [tutorSpeechResponse, setTutorSpeechResponse] = useState('');
   const [manualText, setManualText] = useState('');
   const [cameraError, setCameraError] = useState(null);
+  const [hasApiKey, setHasApiKey] = useState(true);
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const streamRef = useRef(null);
   const recognitionRef = useRef(null);
-  const isComponentMounted = useRef(true);
 
-  // Iniciar Stream de Cámara
-  const startCamera = useCallback(async (mode = facingMode) => {
+  // Iniciar Stream de Cámara de forma estable sin re-renders en bucle
+  const startCamera = async (mode = 'environment') => {
     try {
       setCameraError(null);
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      // Detener stream previo si existe
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
       }
 
       const constraints = {
@@ -50,34 +53,36 @@ export default function SocraticLiveCameraModal({
           width: { ideal: 1280 },
           height: { ideal: 720 }
         },
-        audio: false // El audio se maneja con SpeechRecognition
+        audio: false
       };
 
-      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
-      setStream(newStream);
+      let newStream;
+      try {
+        newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (idealErr) {
+        console.warn("Fallo con facingMode ideal, probando cualquier cámara:", idealErr);
+        newStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
+
+      streamRef.current = newStream;
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
+        videoRef.current.play().catch(e => console.warn("Video play error:", e));
       }
     } catch (err) {
-      console.warn("Error accediendo a cámara trasera, intentando cualquier cámara disponible:", err);
-      try {
-        const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setStream(fallbackStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = fallbackStream;
-        }
-      } catch (fallbackErr) {
-        console.error("No se pudo iniciar ninguna cámara:", fallbackErr);
-        setCameraError("No se pudo acceder a la cámara. Revisa los permisos en tu navegador.");
-      }
+      console.error("Error al iniciar cámara:", err);
+      setCameraError("No se pudo iniciar la cámara. Verifica los permisos del navegador o cierra otras aplicaciones que usen la cámara.");
     }
-  }, [facingMode]);
+  };
 
   // Detener Cámara
-  const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
@@ -85,19 +90,22 @@ export default function SocraticLiveCameraModal({
     if (recognitionRef.current) {
       try { recognitionRef.current.stop(); } catch (e) { /* ignore */ }
     }
-  }, [stream]);
+  };
 
-  // Capturar snapshot actual del video
+  // Capturar snapshot actual del video con verificación de dimensiones
   const captureFrame = () => {
     if (!videoRef.current || !canvasRef.current) return null;
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
+    const width = video.videoWidth || 640;
+    const height = video.videoHeight || 480;
+
+    canvas.width = width;
+    canvas.height = height;
 
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0, width, height);
     return canvas.toDataURL('image/jpeg', 0.85);
   };
 
@@ -112,7 +120,7 @@ export default function SocraticLiveCameraModal({
         .replace(/\\\([\s\S]*?\\\)/g, '')
         .replace(/\$\$[\s\S]*?\$\$/g, '')
         .replace(/\$[^$]*\$/g, '')
-        .replace(/[\\_{}^#]/g, ' ')
+        .replace(/[\\_{}^#*]/g, ' ')
         .trim();
 
       const utterance = new SpeechSynthesisUtterance(cleanSpokenText);
@@ -132,13 +140,8 @@ export default function SocraticLiveCameraModal({
 
   // Procesar consulta multimodal en vivo (Frame + Voz/Texto)
   const processLiveInquiry = async (userQuery) => {
-    const queryText = userQuery || manualText || 'Observa mi cuaderno y guíame.';
+    const queryText = userQuery || manualText || 'Observa atentamente lo que estoy apuntando en mi cuaderno y guíame socráticamente.';
     const frameBase64 = captureFrame();
-
-    if (!frameBase64) {
-      setTutorSpeechResponse("Alinea la cámara hacia tu cuaderno para poder ver tus ejercicios.");
-      return;
-    }
 
     setIsProcessing(true);
     setStudentTranscript(queryText);
@@ -147,7 +150,7 @@ export default function SocraticLiveCameraModal({
     try {
       const response = await consultSocraticLiveCamera({
         tutorName: specialist?.name,
-        frameBase64,
+        frameBase64: frameBase64 || '',
         userSpeech: queryText,
         subject: specialist?.subject
       });
@@ -163,9 +166,9 @@ export default function SocraticLiveCameraModal({
         ]);
       }
 
-      // Sincronizar con la Pizarra si se detecta aritmética o paso clave
+      // Sincronizar con la Pizarra
       if (onSyncBoard) {
-        const isSumThree = response.includes('7') || queryText.includes('7') || queryText.includes('2+2+3') || queryText.includes('2 + 2 + 3');
+        const isSumThree = response.includes('7') || queryText.includes('7') || queryText.includes('2+2+3') || queryText.includes('2 + 2 + 3') || queryText.includes('3');
         const isSumTwo = !isSumThree && (response.includes('4') || queryText.includes('4') || queryText.includes('2+2'));
 
         if (isSumThree) {
@@ -205,13 +208,13 @@ export default function SocraticLiveCameraModal({
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Tu navegador no soporta reconocimiento de voz continuo. Puedes usar el botón de captura rápida o escribir tu consulta.");
+      alert("Tu navegador no soporta reconocimiento de voz por micrófono. Puedes usar el botón OBSERVAR APUNTE o escribir tu duda.");
       return;
     }
 
     if (isListening) {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try { recognitionRef.current.stop(); } catch (e) { /* ignore */ }
       }
       setIsListening(false);
     } else {
@@ -257,19 +260,19 @@ export default function SocraticLiveCameraModal({
     startCamera(newMode);
   };
 
-  // Ciclo de vida cuando se abre/cierra el modal
+  // Control de apertura y cierre
   useEffect(() => {
-    isComponentMounted.current = true;
     if (isOpen) {
-      startCamera('environment');
+      const key = getGeminiApiKey();
+      setHasApiKey(!!key && key !== 'DEMO_KEY');
+      startCamera(facingMode);
     } else {
       stopCamera();
     }
     return () => {
-      isComponentMounted.current = false;
       stopCamera();
     };
-  }, [isOpen, startCamera, stopCamera]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -330,11 +333,11 @@ export default function SocraticLiveCameraModal({
         </div>
       </div>
 
-      {/* 🟢 VIEWPORT DE VIDEO (FEED EN VIVO CON RETÍCULA HUD) */}
+      {/* 🟢 VIEWPORT DE VIDEO (FEED EN VIVO ESTABLE SIN PARPADEO) */}
       <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
         {cameraError ? (
-          <div className="p-6 text-center max-w-sm">
-            <p className="text-sm text-red-400 mb-4">{cameraError}</p>
+          <div className="p-6 text-center max-w-sm bg-slate-950 border border-red-500/50 rounded-2xl">
+            <p className="text-xs text-red-400 mb-4 leading-relaxed">{cameraError}</p>
             <button
               onClick={() => startCamera(facingMode)}
               className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold font-orbitron uppercase cursor-pointer"
@@ -372,8 +375,15 @@ export default function SocraticLiveCameraModal({
                 </span>
               </div>
             ) : (
-              <div className="px-3 py-1 rounded-xl bg-black/60 border border-cyan-500/30 text-[10px] text-cyan-400">
+              <div className="px-3 py-1 rounded-xl bg-black/70 border border-cyan-500/30 text-[10px] text-cyan-300 backdrop-blur-xs">
                 Apunta al renglón de tu ejercicio en el cuaderno
+              </div>
+            )}
+
+            {!hasApiKey && (
+              <div className="mt-2 px-2.5 py-1 rounded-lg bg-amber-950/70 border border-amber-500/50 text-[9px] text-amber-300 flex items-center gap-1.5">
+                <AlertCircle className="w-3 h-3 text-amber-400 shrink-0" />
+                <span>Modo local activo. Conecta tu API Key en la pantalla principal para visión en vivo con Gemini 1.5.</span>
               </div>
             )}
           </div>
@@ -416,7 +426,7 @@ export default function SocraticLiveCameraModal({
               value={manualText}
               onChange={(e) => setManualText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && processLiveInquiry()}
-              placeholder="¿Tienes una duda específica? Escríbela o habla al micrófono..."
+              placeholder="¿Tienes una duda específica? Escríbela o pulsa Hablar..."
               className="flex-1 bg-slate-900 border border-cyan-800/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
             />
             <button
