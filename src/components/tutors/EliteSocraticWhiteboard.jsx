@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { handleTutorQueryService, analyzeExerciseImageWithGemini, getGeminiApiKey } from '../../services/GeminiService';
 import MathRenderer from '../common/MathRenderer';
-import { Camera, X, Sparkles, Key, Check } from 'lucide-react';
+import { Camera, X, Sparkles, Key, Check, Radio } from 'lucide-react';
+import SocraticLiveCameraModal from './SocraticLiveCameraModal';
 
 export default function EliteSocraticWhiteboardFixed() {
   const [apiKeyPresent, setApiKeyPresent] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [customKeyInput, setCustomKeyInput] = useState('');
+  const [showLiveCameraModal, setShowLiveCameraModal] = useState(false);
 
   useEffect(() => {
     const key = getGeminiApiKey();
@@ -314,9 +316,19 @@ export default function EliteSocraticWhiteboardFixed() {
 
               <button
                 type="button"
+                onClick={() => setShowLiveCameraModal(true)}
+                className="px-2.5 py-2 bg-gradient-to-r from-rose-700 via-pink-700 to-purple-700 hover:from-rose-600 hover:to-pink-600 border border-rose-400 text-white font-orbitron font-bold text-[10px] rounded-xl flex items-center gap-1.5 transition shrink-0 cursor-pointer shadow-[0_0_12px_rgba(244,63,94,0.4)] animate-pulse"
+                title="Modo Cámara en Vivo y Tutoría por Voz (Live Socratic Lens)"
+              >
+                <Radio className="w-3.5 h-3.5 text-rose-200" />
+                <span>🔴 En Vivo</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => cameraInputRef.current?.click()}
                 className="px-2.5 py-2 bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 border border-emerald-400 text-white font-orbitron font-bold text-[10px] rounded-xl flex items-center gap-1 transition shrink-0 cursor-pointer shadow-md"
-                title="Escanear cuaderno con cámara (The Socratic Lens)"
+                title="Escanear cuaderno con foto fija (The Socratic Lens)"
               >
                 <Camera className="w-3.5 h-3.5 text-emerald-200" />
                 <span>📷 Escanear</span>
@@ -469,6 +481,15 @@ export default function EliteSocraticWhiteboardFixed() {
           </div>
         </div>
       )}
+
+      {/* 🔴 MODAL DE CÁMARA EN VIVO & VOZ */}
+      <SocraticLiveCameraModal
+        isOpen={showLiveCameraModal}
+        onClose={() => setShowLiveCameraModal(false)}
+        specialist={selectedSpecialist}
+        onSyncBoard={(newBoard) => setBoardContent(newBoard)}
+        onAddChatMessage={(newMessages) => setChatHistory(prev => [...prev, ...newMessages])}
+      />
 
     </div>
   );
