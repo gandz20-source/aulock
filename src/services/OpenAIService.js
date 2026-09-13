@@ -1,5 +1,22 @@
 import OpenAI from 'openai';
 import { supabase } from '../config/supabase';
+import { 
+    fetchLocalAI, 
+    buildContextPayload, 
+    buildMasterPrompt, 
+    resolveStudentContext, 
+    resolveTeacherContext, 
+    STRICT_BOUNDARY_RULES 
+} from './LocalAIService';
+
+export { 
+    fetchLocalAI, 
+    buildContextPayload, 
+    buildMasterPrompt, 
+    resolveStudentContext, 
+    resolveTeacherContext, 
+    STRICT_BOUNDARY_RULES 
+};
 
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
@@ -130,9 +147,15 @@ export const sendMessageToAI = async (assistantKey, messages, userId, image = nu
 
     // ... (Existing Safety Check) ...
 
-    // 2. Prepare Messages for OpenAI
+    // 2. Prepare Messages with Dynamic Context Injection & Strict Boundary Rules
+    const masterSystemPrompt = buildMasterPrompt({
+        role: 'student',
+        baseSystemPrompt: assistant.systemPrompt,
+        studentData: { studentId: userId }
+    });
+
     let apiMessages = [
-        { role: "system", content: assistant.systemPrompt },
+        { role: "system", content: masterSystemPrompt },
         ...messages.slice(0, -1) // History
     ];
 
@@ -161,6 +184,17 @@ export const sendMessageToAI = async (assistantKey, messages, userId, image = nu
         content: image ? latestMessageContent : lastUserMessage
     });
 
+    if (!apiKey || apiKey === 'DEMO_KEY') {
+        const localResult = await fetchLocalAI({
+            prompt: lastUserMessage,
+            systemPrompt: assistant.systemPrompt,
+            role: 'student',
+            studentData: { studentId: userId },
+            history: messages.slice(0, -1)
+        });
+        return { role: 'assistant', content: localResult.content };
+    }
+
     try {
         const response = await openai.chat.completions.create({
             model: image ? "gpt-4o" : "gpt-4o-mini",
@@ -170,8 +204,15 @@ export const sendMessageToAI = async (assistantKey, messages, userId, image = nu
 
         return response.choices[0].message;
     } catch (error) {
-        console.error("OpenAI API Error:", error);
-        throw error;
+        console.warn("OpenAI API call failed, falling back to centralized fetchLocalAI:", error);
+        const fallbackResult = await fetchLocalAI({
+            prompt: lastUserMessage,
+            systemPrompt: assistant.systemPrompt,
+            role: 'student',
+            studentData: { studentId: userId },
+            history: messages.slice(0, -1)
+        });
+        return { role: 'assistant', content: fallbackResult.content };
     }
 };
 

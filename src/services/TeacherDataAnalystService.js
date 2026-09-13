@@ -6,6 +6,21 @@
 
 import { supabase } from '../config/supabase';
 import { INITIAL_PILOT_STUDENTS, INITIAL_PILOT_ALERTS } from './AuLockDataEngine';
+import { 
+    fetchLocalAI, 
+    buildContextPayload, 
+    buildMasterPrompt, 
+    resolveTeacherContext, 
+    STRICT_BOUNDARY_RULES 
+} from './LocalAIService';
+
+export { 
+    fetchLocalAI, 
+    buildContextPayload, 
+    buildMasterPrompt, 
+    resolveTeacherContext, 
+    STRICT_BOUNDARY_RULES 
+};
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const GEMINI_PRO_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
@@ -288,6 +303,13 @@ export async function askDataAnalystAI({ query, conversationHistory = [], teache
     }
 
     try {
+        // Build Dynamic Context Injection for Teacher
+        const teacherContextBlock = buildContextPayload('teacher', {
+            teacherName,
+            activeCourse
+        });
+        const enrichedTeacherSystemPrompt = `${teacherContextBlock}\n\n${STRICT_BOUNDARY_RULES}\n\n${DATA_ANALYST_SYSTEM_PROMPT}`;
+
         // Build initial request payload with Tools & System Instruction
         const messages = [
             ...conversationHistory.map(m => ({
@@ -303,7 +325,7 @@ export async function askDataAnalystAI({ query, conversationHistory = [], teache
         const requestBody = {
             contents: messages,
             systemInstruction: {
-                parts: [{ text: DATA_ANALYST_SYSTEM_PROMPT }]
+                parts: [{ text: enrichedTeacherSystemPrompt }]
             },
             tools: TEACHER_DATA_TOOLS
         };
@@ -322,10 +344,10 @@ export async function askDataAnalystAI({ query, conversationHistory = [], teache
                 body: JSON.stringify(requestBody)
             });
             if (!retryResp.ok) throw new Error(`Gemini HTTP Error ${retryResp.status}`);
-            return await handleGeminiApiResponse(retryResp, messages, apiKey);
+            return await handleGeminiApiResponse(retryResp, messages, apiKey, enrichedTeacherSystemPrompt);
         }
 
-        return await handleGeminiApiResponse(response, messages, apiKey);
+        return await handleGeminiApiResponse(response, messages, apiKey, enrichedTeacherSystemPrompt);
 
     } catch (err) {
         console.warn("Falling back to local Data Engine execution:", err);
@@ -336,7 +358,7 @@ export async function askDataAnalystAI({ query, conversationHistory = [], teache
 /**
  * Handles the multi-turn function calling roundtrip
  */
-async function handleGeminiApiResponse(response, initialMessages, apiKey) {
+async function handleGeminiApiResponse(response, initialMessages, apiKey, customSystemInstruction = DATA_ANALYST_SYSTEM_PROMPT) {
     const data = await response.json();
     const candidate = data.candidates?.[0];
     const modelParts = candidate?.content?.parts || [];
@@ -377,7 +399,7 @@ async function handleGeminiApiResponse(response, initialMessages, apiKey) {
             body: JSON.stringify({
                 contents: followUpMessages,
                 systemInstruction: {
-                    parts: [{ text: DATA_ANALYST_SYSTEM_PROMPT }]
+                    parts: [{ text: customSystemInstruction }]
                 },
                 tools: TEACHER_DATA_TOOLS
             })

@@ -8,6 +8,23 @@ import { MINEDUC_QUALITY_STANDARDS } from '../data/AuLockMineducStandards';
 import { MineducStandardsRegistry } from '../data/EstandaresMinEducMock';
 import { MINEDUC_EVALUATION_DATASET } from '../data/AuLockMineducEvaluationDataset';
 import { MINEDUC_CONVIVENCIA_RESOURCES } from '../data/AuLockMineducConvivenciaDataset';
+import { 
+    fetchLocalAI, 
+    buildContextPayload, 
+    buildMasterPrompt, 
+    resolveStudentContext, 
+    resolveTeacherContext, 
+    STRICT_BOUNDARY_RULES 
+} from './LocalAIService';
+
+export { 
+    fetchLocalAI, 
+    buildContextPayload, 
+    buildMasterPrompt, 
+    resolveStudentContext, 
+    resolveTeacherContext, 
+    STRICT_BOUNDARY_RULES 
+};
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
@@ -345,8 +362,18 @@ export async function generateLearnYourWayResponse({
         return getFallbackLearnYourWay(matchedTutor.name, questionText, interest);
     }
 
-    // 3. CONSTRUCCIÓN DEL SYSTEM PROMPT DINÁMICO MULTINIVEL CON RÚBRICA MINEDUC
+    // Dynamic Context Injection for Student
+    const studentContextBlock = buildContextPayload('student', {
+        studentId,
+        className: levelName
+    });
+
+    // 3. CONSTRUCCIÓN DEL SYSTEM PROMPT DINÁMICO MULTINIVEL CON RÚBRICA MINEDUC & CONTEXT INJECTION
     const systemPrompt = `
+        ${studentContextBlock}
+
+        ${STRICT_BOUNDARY_RULES}
+
         Eres ${matchedTutor.name}, experto pedagógico en ${matchedTutor.eje_mineduc} para el nivel de **${levelName}** del Currículum Nacional de Chile.
         Asignatura: ${matchedTutor.specialty || 'Ciencias / Matemáticas'}.
         Objetivo de Aprendizaje (OA): **"(${oaEspecifico.oa_id}) - ${oaEspecifico.descripcion_completa || oaEspecifico.descripcion_corta}"**.
