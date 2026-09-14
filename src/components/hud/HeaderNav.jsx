@@ -1,15 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const tabs = [
     {
       id: 1,
       key: 'profile',
-      title: '1. MY PROFILE',
-      subtitle: '& Welcome',
+      title: t('nav.tabs.profile.title'),
+      subtitle: t('nav.tabs.profile.subtitle'),
       color: 'cyan',
       borderClass: 'border-cyan-400 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.35)]',
       bgActive: 'bg-slate-900/90 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.5)]',
@@ -18,8 +21,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 2,
       key: 'afteria',
-      title: '2. AFTER AI',
-      subtitle: 'Missions',
+      title: t('nav.tabs.afteria.title'),
+      subtitle: t('nav.tabs.afteria.subtitle'),
       color: 'magenta',
       borderClass: 'border-fuchsia-500 text-fuchsia-400 shadow-[0_0_20px_rgba(217,70,239,0.35)]',
       bgActive: 'bg-slate-900/90 border-fuchsia-500 shadow-[0_0_25px_rgba(217,70,239,0.5)]',
@@ -28,8 +31,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 3,
       key: 'live_classroom',
-      title: '3. LIVE CLASSROOM',
-      subtitle: 'Focus & Live',
+      title: t('nav.tabs.live_classroom.title'),
+      subtitle: t('nav.tabs.live_classroom.subtitle'),
       color: 'green',
       borderClass: 'border-lime-400 text-lime-400 shadow-[0_0_20px_rgba(163,230,53,0.35)]',
       bgActive: 'bg-slate-900/90 border-lime-400 shadow-[0_0_25px_rgba(163,230,53,0.5)]',
@@ -38,8 +41,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 4,
       key: 'tutors',
-      title: '4. AI TUTORS',
-      subtitle: 'by Subject',
+      title: t('nav.tabs.tutors.title'),
+      subtitle: t('nav.tabs.tutors.subtitle'),
       color: 'blue',
       borderClass: 'border-sky-400 text-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.35)]',
       bgActive: 'bg-slate-900/90 border-sky-400 shadow-[0_0_25px_rgba(56,189,248,0.5)]',
@@ -48,8 +51,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 5,
       key: 'squad',
-      title: '5. ALPHA SQUAD',
-      subtitle: 'Peer Guides',
+      title: t('nav.tabs.squad.title'),
+      subtitle: t('nav.tabs.squad.subtitle'),
       color: 'orange',
       borderClass: 'border-orange-500 text-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.35)]',
       bgActive: 'bg-slate-900/90 border-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.5)]',
@@ -58,8 +61,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 6,
       key: 'nexus',
-      title: '6. ÁGORA JUEGOS',
-      subtitle: 'Convivencia & Arena',
+      title: t('nav.tabs.nexus.title'),
+      subtitle: t('nav.tabs.nexus.subtitle'),
       color: 'emerald',
       borderClass: 'border-emerald-400 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.35)]',
       bgActive: 'bg-slate-900/90 border-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.5)]',
@@ -68,8 +71,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 7,
       key: 'academic',
-      title: '7. PERFORMANCE',
-      subtitle: 'Analytics',
+      title: t('nav.tabs.academic.title'),
+      subtitle: t('nav.tabs.academic.subtitle'),
       color: 'amber',
       borderClass: 'border-amber-500 text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.35)]',
       bgActive: 'bg-slate-900/90 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.5)]',
@@ -78,8 +81,8 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
     {
       id: 8,
       key: 'passport',
-      title: '8. AuLock PASSPORT',
-      subtitle: 'AuLock NFC',
+      title: t('nav.tabs.passport.title'),
+      subtitle: t('nav.tabs.passport.subtitle'),
       color: 'purple',
       borderClass: 'border-purple-500 text-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.35)]',
       bgActive: 'bg-slate-900/90 border-purple-500 shadow-[0_0_25px_rgba(168,85,247,0.5)]',
@@ -89,47 +92,45 @@ export default function HeaderNav({ activeTab = 'profile', setActiveTab }) {
 
   return (
     <div className="w-full font-mono select-none space-y-4 mb-6">
-      {/* 🔴 LÍNEA DE ESTADO RBAC SUPERIOR */}
+      {/* 🔴 LÍNEA DE ESTADO RBAC SUPERIOR & SELECTOR DE IDIOMA */}
       <div className="flex flex-wrap items-center justify-between text-[11px] text-cyan-400 border-b border-cyan-900/80 pb-2 px-1 font-mono gap-2">
         <div className="flex items-center space-x-2">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
           <span>
-            AuLock Mobile RBAC Architecture | User: <strong className="text-white font-semibold">Juan Carlos Pérez</strong> | Active Role: <strong className="text-cyan-300">[ STUDENT ]</strong>
+            {t('nav.student_header')} | {t('nav.user_label')}: <strong className="text-white font-semibold">Juan Carlos Pérez</strong> | {t('nav.active_role')}: <strong className="text-cyan-300">{t('nav.role_student')}</strong>
           </span>
         </div>
 
-        {/* Role Links */}
+        {/* Role Links & Language Switcher */}
         <div className="flex flex-wrap items-center gap-2 text-[9.5px] font-bold">
           <button 
             onClick={() => navigate('/student-dashboard')}
             className="px-2 py-0.5 rounded bg-cyan-950/90 border border-cyan-400 text-cyan-300 hover:bg-cyan-900 transition flex items-center gap-1 cursor-pointer"
           >
-            🎓 Student Role ✓
+            🎓 {t('common.student_role')} ✓
           </button>
           <button 
             onClick={() => navigate('/teacher-dashboard')}
             className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 cursor-pointer"
           >
-            👨‍🏫 Teacher Role
-          </button>
-          <button 
-            onClick={() => navigate('/teacher-dashboard')}
-            className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 cursor-pointer"
-          >
-            🧠 Teacher Role (AI Sec.)
+            👨‍🏫 {t('common.teacher_role')}
           </button>
           <button 
             onClick={() => navigate('/school-dashboard')}
             className="px-2 py-0.5 rounded bg-slate-900/80 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 cursor-pointer"
           >
-            🏫 School 360° Role
+            🏫 {t('common.school_role')}
           </button>
+          
+          <div className="ml-1">
+            <LanguageSwitcher />
+          </div>
         </div>
       </div>
 
       {/* SYSTEM MICRO-CODE */}
       <div className="text-[10px] text-cyan-500 font-mono tracking-widest uppercase flex items-center justify-between px-1">
-        <span>HUD.SYS // 8 SOCRATIC LEARNING & COEXISTENCE MODULES</span>
+        <span>{t('nav.hud_microcode')}</span>
         <span className="hidden sm:inline text-slate-500">• • • MATRIX HUD v2.6</span>
       </div>
 

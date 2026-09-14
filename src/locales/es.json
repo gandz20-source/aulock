@@ -1,36 +1,260 @@
 {
-    "nexus": {
-        "title": "AuLock Nexus",
-        "subtitle": "Tu centro de control educativo",
-        "cards": {
-            "edu": {
-                "title": "Bienestar y Foco Académico",
-                "description": "Herramientas para potenciar tu aprendizaje y concentración.",
-                "action": "Explorar"
-            },
-            "lab": {
-                "title": "Laboratorio de Vibe Coding",
-                "description": "Crea, experimenta y programa con la ayuda de Ada.",
-                "action": "Entrar al Lab"
-            },
-            "family": {
-                "title": "Salud Mental y Hogar",
-                "description": "Recursos para el equilibrio y bienestar familiar.",
-                "action": "Ver Recursos"
-            }
-        }
+  "common": {
+    "send": "Enviar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "loading": "Cargando...",
+    "confirm": "Confirmar",
+    "connect": "Conectar",
+    "disconnect": "Desconectar",
+    "search": "Buscar...",
+    "all": "Todos",
+    "status": "Estado",
+    "online": "En Línea",
+    "offline": "Desconectado",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "success": "Éxito",
+    "error": "Error",
+    "warning": "Atención",
+    "yes": "Sí",
+    "no": "No",
+    "switch_role": "Cambiar Rol",
+    "student_role": "Rol Estudiante",
+    "teacher_role": "Rol Docente",
+    "school_role": "Rol Colegio 360°",
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "Inglés"
+  },
+  "nav": {
+    "student_header": "Arquitectura AuLock RBAC Móvil",
+    "user_label": "Usuario",
+    "active_role": "Rol Activo",
+    "role_student": "[ ESTUDIANTE ]",
+    "role_teacher": "[ DOCENTE ]",
+    "hud_microcode": "HUD.SYS // 8 MÓDULOS DE APRENDIZAJE SOCRÁTICO Y CONVIVENCIA",
+    "tabs": {
+      "profile": { "title": "1. MI PERFIL", "subtitle": "& Bienvenida" },
+      "afteria": { "title": "2. AFTER IA", "subtitle": "Misiones" },
+      "live_classroom": { "title": "3. AULA EN VIVO", "subtitle": "Enfoque & Vivo" },
+      "tutors": { "title": "4. TUTORES IA", "subtitle": "Por Materia" },
+      "squad": { "title": "5. ESCUADRÓN ALFA", "subtitle": "Guías Pares" },
+      "nexus": { "title": "6. ÁGORA JUEGOS", "subtitle": "Convivencia & Arena" },
+      "academic": { "title": "7. RENDIMIENTO", "subtitle": "Analítica" },
+      "passport": { "title": "8. PASAPORTE AuLock", "subtitle": "AuLock NFC" }
     },
-    "lab": {
-        "title": "AuLock Vibe-Studio",
-        "xp_label": "XP Tech",
-        "ada": {
-            "name": "Ada",
-            "role": "Vibe Copilot",
-            "intro": "¡Hola! Soy Ada, tu copiloto de Vibe Coding. Dime qué quieres crear y yo escribiré el código por ti. ¡Toca los límites de la tecnología!"
-        },
-        "preview": {
-            "title": "Vista Previa",
-            "placeholder": "Tu creación aparecerá aquí..."
-        }
+    "teacher_tabs": {
+      "live": "1. AULA EN VIVO",
+      "evaluations": "2. EVALUACIONES",
+      "squads": "3. ESCUADRONES",
+      "reports": "4. REPORTES",
+      "nexo": "5. NEXO CONVIVENCIA",
+      "settings": "6. AJUSTES"
+    },
+    "teacher_header": {
+      "role_badge": "DOC",
+      "subjects_label": "Asignaturas: Matemática Avanzada y Cálculo • 4° Medio A y 3° Medio B",
+      "switch_to_student": "🎓 Cambiar a Rol Estudiante",
+      "school_360": "🏫 Rol Colegio 360°"
     }
+  },
+  "landing": {
+    "nav": {
+      "features": "Funcionalidades",
+      "impact": "Impacto",
+      "story": "Historia",
+      "access": "Acceso Institucional",
+      "enter_app": "Entrar a la Plataforma"
+    },
+    "hero": {
+      "badge": "Sistema Operativo Escolar de Nueva Generación",
+      "title_main": "El Futuro de la Educación Escolar",
+      "title_highlight": "Sin Distracciones y con IA Socrática",
+      "subtitle": "AuLock combina fundas NFC inteligentes con tutoría multimodal en tiempo real para transformar la convivencia, asegurar el foco en el aula y potenciar los resultados de aprendizaje.",
+      "cta_primary": "Explorar Portales",
+      "cta_secondary": "Solicitar Demostración",
+      "stats_focus": "Enfoque en Aula",
+      "stats_focus_val": "100%",
+      "stats_students": "Estudiantes Conectados",
+      "stats_students_val": "+15,000",
+      "stats_gpa": "Aumento en Rendimiento",
+      "stats_gpa_val": "+28%"
+    },
+    "features": {
+      "title": "Pilares de la Tecnología AuLock",
+      "subtitle": "Diseñado para estudiantes, docentes y equipos directivos bajo estándares MINEDUC.",
+      "card1_title": "Modo Enfoque NFC Físico",
+      "card1_desc": "Al ingresar el teléfono en la funda inteligente, se registra la asistencia y se eliminan las interrupciones digitales.",
+      "card2_title": "Tutores Socráticos STEM",
+      "card2_desc": "Visión multimodal con Google Gemini para inspeccionar cuadernos, detectar errores y guiar paso a paso sin dar la respuesta.",
+      "card3_title": "Escuadrones y Convivencia",
+      "card3_desc": "Misiones cooperativas interactivas y dinámicas de gamificación comunitaria que fortalecen el clima escolar."
+    },
+    "modal": {
+      "title": "Solicitar Demostración Institucional",
+      "subtitle": "Déjanos tus datos para coordinar una reunión personalizada para tu colegio.",
+      "name": "Nombre completo",
+      "institution": "Colegio o Institución",
+      "email": "Correo electrónico",
+      "phone": "Teléfono de contacto",
+      "city": "Ciudad",
+      "type": "Tipo de institución",
+      "message": "Comentario o requerimiento",
+      "submit": "Enviar Solicitud",
+      "success": "Gracias por tu interés. Nuestro equipo institucional te contactará a la brevedad."
+    },
+    "footer": {
+      "copyright": "© 2026 AuLock Technologies. Todos los derechos reservados.",
+      "privacy": "Privacidad",
+      "terms": "Términos del Servicio",
+      "contact": "Contacto"
+    }
+  },
+  "portal": {
+    "header_title": "Ecosistema Educativo AuLock",
+    "header_subtitle": "Selecciona el portal de acceso institucional según tu perfil de usuario",
+    "back_to_home": "Volver al Inicio",
+    "cards": {
+      "school": {
+        "title": "Colegios",
+        "subtitle": "Gestión Escolar Integral",
+        "description": "Plataforma institucional para colegios, administración docente, asistencia y seguimiento curricular.",
+        "badge": "Modo Institucional"
+      },
+      "tutor": {
+        "title": "Tutoría Pro",
+        "subtitle": "Mentoría IA 24/7",
+        "description": "Acompañamiento académico personalizado, resolución instantánea de dudas y tutores virtuales especialistas.",
+        "badge": "IA Personalizada"
+      },
+      "preu": {
+        "title": "Pre-Universitario",
+        "subtitle": "Preparación de Alto Nivel",
+        "description": "Entrenamiento intensivo para examen PAES / Selección universitaria con ensayos y analítica predictiva.",
+        "badge": "Rendimiento PAES"
+      },
+      "homeschool": {
+        "title": "Educación en Casa",
+        "subtitle": "Homeschooling Autónomo",
+        "description": "Herramientas avanzadas para familias, tutores particulares y aprendizaje autorregulado en el hogar.",
+        "badge": "Modo Familia"
+      }
+    },
+    "enter_button": "Ingresar al Portal"
+  },
+  "login": {
+    "title": "Iniciar Sesión en AuLock",
+    "subtitle": "Ingresa tus credenciales o accede mediante escaneo QR",
+    "email_label": "Correo Institucional",
+    "email_placeholder": "nombre@colegio.cl",
+    "password_label": "Contraseña",
+    "password_placeholder": "••••••••",
+    "btn_login": "Iniciar Sesión",
+    "btn_qr": "Escanear Código QR",
+    "demo_badge": "Accesos Rápidos de Demostración",
+    "as_student": "Ingresar como Alumno",
+    "as_teacher": "Ingresar como Docente",
+    "as_admin": "Ingresar como Director"
+  },
+  "student": {
+    "focus_mode": {
+      "active": "MODO ENFOQUE ACTIVADO (Funda AuLock NFC)",
+      "session_info": "Sesión en Vivo: 4° Medio A - Ciencias MINEDUC • Asistencia Registrada",
+      "tap_out": "Retirar Estuche (TAP OUT)"
+    },
+    "timer_banner": {
+      "title": "TEMPORIZADOR DE AULA DEL DOCENTE EN CURSO",
+      "active_session": "Prof. Carlos Rivas / María González - Sesión Activa",
+      "synced": "● EN VIVO SINCRONIZADO"
+    },
+    "official_notice": {
+      "badge": "🚨 COMUNICADO INSTITUCIONAL OFICIAL",
+      "confirm_button": "Confirmar Lectura y Entendido"
+    },
+    "profile": {
+      "career": "4° MEDIO // COLEGIO SAN AGUSTÍN, ESPECIALIDAD STEM / ALFA STEM",
+      "badge_logic": "★ 7.0 Lógica & STEM",
+      "badge_squad": "🌟 Escuadrón Tutor Par",
+      "badge_civic": "🛡️ Formación Ciudadana",
+      "analytics_title": "Analítica Académica",
+      "gpa_label": "GPA / Promedio General:",
+      "attendance_label": "Asistencia NFC:",
+      "attendance_val": "100% REGISTRADA",
+      "missions_label": "Misiones Socráticas:",
+      "missions_val": "5/5 COMPLETADAS"
+    },
+    "action_buttons": {
+      "feel_today": "¿Cómo te sientes hoy?",
+      "safe_report": "Reporte Seguro",
+      "evaluate_class": "Evaluar Clase",
+      "sos": "Botón SOS de Ayuda"
+    }
+  },
+  "tutors": {
+    "header_title": "CENTRO DE TUTORÍA SOCRÁTICA // ESPECIALISTAS DE MATERIA",
+    "header_subtitle": "Asistencia conversacional multimodal profunda y pizarra digital de desarrollo analítico con LaTeX.",
+    "api_key_active": "● Gemini API Activa",
+    "api_key_connect": "⚙️ Conectar Gemini API Key",
+    "live_camera_button": "🔴 En Vivo",
+    "scan_button": "📷 Escanear",
+    "input_placeholder": "Pregunta o consulta matemática...",
+    "btn_send": "ENVIAR",
+    "whiteboard_title": "PIZARRA SOCRÁTICA DE",
+    "formula_label": "// FÓRMULA / MODELO CENTRAL:",
+    "step1_title": "Lectura Base",
+    "step2_title": "Revisión Socrática",
+    "step3_title": "Siguiente Paso Lógico",
+    "key_banner_text": "Para leer fotos con IA en vivo, conecta tu Gemini API Key",
+    "key_banner_btn": "Conectar",
+    "key_modal_title": "Configurar Google Gemini API Key",
+    "key_modal_desc": "Ingresa tu Google Gemini API Key para habilitar el reconocimiento visual multimodal real con Gemini 1.5 Flash Vision y razonamiento socrático en vivo.",
+    "key_modal_secure": "La clave se almacena de forma segura en el almacenamiento local de tu navegador (localStorage).",
+    "key_modal_save": "Guardar Clave"
+  },
+  "modals": {
+    "emoji_title": "¿Cómo te sientes en este momento?",
+    "emoji_desc": "Tu respuesta ayuda a los docentes y al equipo psicosocial a brindarte el mejor apoyo.",
+    "emoji_saved": "¡Check-in registrado! Gracias por compartir tu estado de ánimo.",
+    "report_title": "Canal Seguro de Convivencia Escolar",
+    "report_desc": "Envía una notificación confidencial al equipo de orientación del colegio.",
+    "rating_title": "Evaluación Formativa de la Clase",
+    "rating_desc": "¿Qué te pareció el ritmo y la claridad de la clase de hoy?"
+  },
+  "nexus": {
+    "title": "AuLock Nexus",
+    "subtitle": "Tu centro de control educativo",
+    "cards": {
+      "edu": {
+        "title": "Bienestar y Foco Académico",
+        "description": "Herramientas para potenciar tu aprendizaje y concentración.",
+        "action": "Explorar"
+      },
+      "lab": {
+        "title": "Laboratorio de Vibe Coding",
+        "description": "Crea, experimenta y programa con la ayuda de Ada.",
+        "action": "Entrar al Lab"
+      },
+      "family": {
+        "title": "Salud Mental y Hogar",
+        "description": "Recursos para el equilibrio y bienestar familiar.",
+        "action": "Ver Recursos"
+      }
+    }
+  },
+  "lab": {
+    "title": "AuLock Vibe-Studio",
+    "xp_label": "XP Tech",
+    "ada": {
+      "name": "Ada",
+      "role": "Vibe Copilot",
+      "intro": "¡Hola! Soy Ada, tu copiloto de Vibe Coding. Dime qué quieres crear y yo escribiré el código por ti. ¡Toca los límites de la tecnología!"
+    },
+    "preview": {
+      "title": "Vista Previa",
+      "placeholder": "Tu creación aparecerá aquí..."
+    }
+  }
 }

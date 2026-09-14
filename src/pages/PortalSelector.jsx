@@ -1,55 +1,58 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUI } from '../context/UIContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import { School, GraduationCap, BookOpen, Home, Sparkles, ArrowRight, ShieldCheck, Award } from 'lucide-react';
 
 const PortalSelector = () => {
     const navigate = useNavigate();
     const { dispatch } = useUI();
+    const { t } = useLanguage();
 
     const portals = [
         {
             id: 'school',
-            title: 'Colegios',
-            subtitle: 'Gestión Escolar Integral',
-            description: 'Plataforma institucional para colegios, administración docente, asistencia y seguimiento curricular.',
+            title: t('portal.cards.school.title'),
+            subtitle: t('portal.cards.school.subtitle'),
+            description: t('portal.cards.school.description'),
             icon: School,
             gradient: 'from-blue-600 via-indigo-600 to-cyan-500',
             glowColor: 'group-hover:shadow-blue-500/25',
-            badge: 'Modo Institucional',
+            badge: t('portal.cards.school.badge'),
             badgeBg: 'bg-blue-500/10 text-blue-400 border-blue-500/20'
         },
         {
             id: 'tutor',
-            title: 'Tutoría Pro',
-            subtitle: 'Mentoría IA 24/7',
-            description: 'Acompañamiento académico personalizado, resolución instantánea de dudas y tutores virtuales especialistas.',
+            title: t('portal.cards.tutor.title'),
+            subtitle: t('portal.cards.tutor.subtitle'),
+            description: t('portal.cards.tutor.description'),
             icon: BookOpen,
             gradient: 'from-emerald-500 via-teal-600 to-cyan-600',
             glowColor: 'group-hover:shadow-emerald-500/25',
-            badge: 'IA Personalizada',
+            badge: t('portal.cards.tutor.badge'),
             badgeBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
         },
         {
             id: 'preu',
-            title: 'Pre-Universitario',
-            subtitle: 'Preparación de Alto Nivel',
-            description: 'Entrenamiento intensivo para exámen PAES / Selección universitaria con ensayos y analítica predictiva.',
+            title: t('portal.cards.preu.title'),
+            subtitle: t('portal.cards.preu.subtitle'),
+            description: t('portal.cards.preu.description'),
             icon: GraduationCap,
             gradient: 'from-purple-600 via-violet-600 to-fuchsia-500',
             glowColor: 'group-hover:shadow-purple-500/25',
-            badge: 'Rendimiento PAES',
+            badge: t('portal.cards.preu.badge'),
             badgeBg: 'bg-purple-500/10 text-purple-400 border-purple-500/20'
         },
         {
             id: 'homeschool',
-            title: 'Educación en Casa',
-            subtitle: 'Homeschooling Autónomo',
-            description: 'Herramientas avanzadas para familias, tutores particulares y aprendizaje autorregulado en el hogar.',
+            title: t('portal.cards.homeschool.title'),
+            subtitle: t('portal.cards.homeschool.subtitle'),
+            description: t('portal.cards.homeschool.description'),
             icon: Home,
             gradient: 'from-amber-500 via-orange-500 to-rose-500',
             glowColor: 'group-hover:shadow-amber-500/25',
-            badge: 'Modo Familia',
+            badge: t('portal.cards.homeschool.badge'),
             badgeBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20'
         }
     ];
@@ -75,9 +78,13 @@ const PortalSelector = () => {
                     <span className="text-2xl font-black tracking-tight text-white">AuLock <span className="text-indigo-400 font-medium text-sm">Nexus</span></span>
                 </div>
 
-                <div className="flex items-center space-x-2 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800 text-xs font-semibold text-slate-300">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Plataforma Multimodal Activa</span>
+                <div className="flex items-center gap-3">
+                    <LanguageSwitcher />
+
+                    <div className="hidden sm:flex items-center space-x-2 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-800 text-xs font-semibold text-slate-300">
+                        <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                        <span>Plataforma Multimodal</span>
+                    </div>
                 </div>
             </header>
 
@@ -86,15 +93,12 @@ const PortalSelector = () => {
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4">
                         <Award className="w-3.5 h-3.5" />
-                        <span>Selecciona tu Entorno Educativo</span>
+                        <span>{t('portal.header_subtitle')}</span>
                     </div>
 
                     <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4 text-white">
-                        Bienvenido al ecosistema <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">AuLock</span>
+                        {t('portal.header_title')}
                     </h1>
-                    <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                        Elige tu portal de ingreso para acceder a dashboards personalizados, analítica vocacional y tutoría inteligente adaptada a tu modalidad.
-                    </p>
                 </div>
 
                 {/* 4 Portal Cards Grid */}

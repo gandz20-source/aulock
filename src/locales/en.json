@@ -1,0 +1,260 @@
+{
+  "common": {
+    "send": "Send",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "search": "Search...",
+    "all": "All",
+    "status": "Status",
+    "online": "Online",
+    "offline": "Offline",
+    "active": "Active",
+    "inactive": "Inactive",
+    "success": "Success",
+    "error": "Error",
+    "warning": "Warning",
+    "yes": "Yes",
+    "no": "No",
+    "switch_role": "Switch Role",
+    "student_role": "Student Role",
+    "teacher_role": "Teacher Role",
+    "school_role": "School 360° Role",
+    "language": "Language",
+    "spanish": "Spanish",
+    "english": "English"
+  },
+  "nav": {
+    "student_header": "AuLock Mobile RBAC Architecture",
+    "user_label": "User",
+    "active_role": "Active Role",
+    "role_student": "[ STUDENT ]",
+    "role_teacher": "[ TEACHER ]",
+    "hud_microcode": "HUD.SYS // 8 SOCRATIC LEARNING & COEXISTENCE MODULES",
+    "tabs": {
+      "profile": { "title": "1. MY PROFILE", "subtitle": "& Welcome" },
+      "afteria": { "title": "2. AFTER AI", "subtitle": "Missions" },
+      "live_classroom": { "title": "3. LIVE CLASSROOM", "subtitle": "Focus & Live" },
+      "tutors": { "title": "4. AI TUTORS", "subtitle": "by Subject" },
+      "squad": { "title": "5. ALPHA SQUAD", "subtitle": "Peer Guides" },
+      "nexus": { "title": "6. GAME AGORA", "subtitle": "Coexistence & Arena" },
+      "academic": { "title": "7. PERFORMANCE", "subtitle": "Analytics" },
+      "passport": { "title": "8. AuLock PASSPORT", "subtitle": "AuLock NFC" }
+    },
+    "teacher_tabs": {
+      "live": "1. LIVE CLASSROOM",
+      "evaluations": "2. EVALUATIONS",
+      "squads": "3. SQUADS & TEAMS",
+      "reports": "4. REPORTS",
+      "nexo": "5. COEXISTENCE NEXUS",
+      "settings": "6. SETTINGS"
+    },
+    "teacher_header": {
+      "role_badge": "TCH",
+      "subjects_label": "Subjects: Advanced Math & Calculus • Senior High A & Junior B",
+      "switch_to_student": "🎓 Switch to Student Role",
+      "school_360": "🏫 School 360° Role"
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "impact": "Impact",
+      "story": "Story",
+      "access": "Institutional Access",
+      "enter_app": "Enter Platform"
+    },
+    "hero": {
+      "badge": "Next-Generation School Operating System",
+      "title_main": "The Future of School Education",
+      "title_highlight": "Zero Distractions and Socratic AI",
+      "subtitle": "AuLock pairs smart physical NFC pouches with real-time multimodal AI tutoring to improve school climate, guarantee classroom focus, and enhance academic performance.",
+      "cta_primary": "Explore Portals",
+      "cta_secondary": "Request a Demo",
+      "stats_focus": "Classroom Focus",
+      "stats_focus_val": "100%",
+      "stats_students": "Connected Students",
+      "stats_students_val": "+15,000",
+      "stats_gpa": "GPA Improvement",
+      "stats_gpa_val": "+28%"
+    },
+    "features": {
+      "title": "AuLock Core Technology Pillars",
+      "subtitle": "Engineered for students, educators, and school leadership under high pedagogical standards.",
+      "card1_title": "Physical NFC Focus Mode",
+      "card1_desc": "Inserting the phone into the smart pouch records attendance and eliminates digital interruptions.",
+      "card2_title": "Socratic STEM Tutors",
+      "card2_desc": "Multimodal vision powered by Google Gemini inspects notebook exercises, detects mistakes, and provides step-by-step guidance without giving away answers.",
+      "card3_title": "Squads & Coexistence",
+      "card3_desc": "Interactive cooperative missions and gamified peer dynamics that strengthen the school climate."
+    },
+    "modal": {
+      "title": "Request an Institutional Demo",
+      "subtitle": "Leave your details to schedule a personalized session for your school.",
+      "name": "Full Name",
+      "institution": "School or Institution",
+      "email": "Email Address",
+      "phone": "Contact Phone",
+      "city": "City",
+      "type": "Institution Type",
+      "message": "Comment or Requirement",
+      "submit": "Submit Request",
+      "success": "Thank you for your interest. Our institutional team will contact you shortly."
+    },
+    "footer": {
+      "copyright": "© 2026 AuLock Technologies. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact"
+    }
+  },
+  "portal": {
+    "header_title": "AuLock Educational Ecosystem",
+    "header_subtitle": "Select your institutional access portal based on your user role",
+    "back_to_home": "Back to Home",
+    "cards": {
+      "school": {
+        "title": "Schools",
+        "subtitle": "Comprehensive School Management",
+        "description": "Institutional platform for schools, teacher administration, attendance, and curricular tracking.",
+        "badge": "Institutional Mode"
+      },
+      "tutor": {
+        "title": "Tutor Pro",
+        "subtitle": "24/7 AI Mentorship",
+        "description": "Personalized academic support, instant question resolution, and specialist virtual tutors.",
+        "badge": "Personalized AI"
+      },
+      "preu": {
+        "title": "College Prep",
+        "subtitle": "High-Performance Prep",
+        "description": "Intensive training for college admission and standardized tests with predictive analytics.",
+        "badge": "Standardized Testing"
+      },
+      "homeschool": {
+        "title": "Homeschooling",
+        "subtitle": "Autonomous Learning",
+        "description": "Advanced tools for families, private tutors, and self-regulated learning at home.",
+        "badge": "Family Mode"
+      }
+    },
+    "enter_button": "Enter Portal"
+  },
+  "login": {
+    "title": "Sign In to AuLock",
+    "subtitle": "Enter your credentials or access via QR code scan",
+    "email_label": "Institutional Email",
+    "email_placeholder": "name@school.org",
+    "password_label": "Password",
+    "password_placeholder": "••••••••",
+    "btn_login": "Sign In",
+    "btn_qr": "Scan QR Code",
+    "demo_badge": "Quick Demo Access",
+    "as_student": "Enter as Student",
+    "as_teacher": "Enter as Teacher",
+    "as_admin": "Enter as Principal"
+  },
+  "student": {
+    "focus_mode": {
+      "active": "FOCUS MODE ACTIVATED (AuLock NFC Case)",
+      "session_info": "Live Session: Senior High A - Science • Attendance Recorded",
+      "tap_out": "Remove Case (TAP OUT)"
+    },
+    "timer_banner": {
+      "title": "TEACHER CLASSROOM TIMER IN PROGRESS",
+      "active_session": "Prof. Carlos Rivas / María González - Active Session",
+      "synced": "● LIVE SYNCED"
+    },
+    "official_notice": {
+      "badge": "🚨 OFFICIAL INSTITUTIONAL NOTICE",
+      "confirm_button": "Confirm Reading & Acknowledge"
+    },
+    "profile": {
+      "career": "SENIOR HIGH // SAN AGUSTÍN HIGH SCHOOL, STEM SPECIALIZATION / ALFA STEM",
+      "badge_logic": "★ 7.0 Logic & STEM",
+      "badge_squad": "🌟 Peer Tutor Squad",
+      "badge_civic": "🛡️ Civic Education",
+      "analytics_title": "Academic Analytics",
+      "gpa_label": "GPA / Overall Average:",
+      "attendance_label": "NFC Attendance:",
+      "attendance_val": "100% RECORDED",
+      "missions_label": "Socratic Missions:",
+      "missions_val": "5/5 COMPLETED"
+    },
+    "action_buttons": {
+      "feel_today": "How do you feel today?",
+      "safe_report": "Safe & Secure Report",
+      "evaluate_class": "Evaluate Class",
+      "sos": "SOS Help Button"
+    }
+  },
+  "tutors": {
+    "header_title": "SOCRATIC TUTORING CENTER // SUBJECT SPECIALISTS",
+    "header_subtitle": "Deep conversational multimodal assistance and digital analytical whiteboard with LaTeX.",
+    "api_key_active": "● Gemini API Active",
+    "api_key_connect": "⚙️ Connect Gemini API Key",
+    "live_camera_button": "🔴 Live Camera",
+    "scan_button": "📷 Scan",
+    "input_placeholder": "Ask a math or science question...",
+    "btn_send": "SEND",
+    "whiteboard_title": "SOCRATIC WHITEBOARD OF",
+    "formula_label": "// CORE FORMULA / GOVERNING MODEL:",
+    "step1_title": "Base Reading",
+    "step2_title": "Socratic Review",
+    "step3_title": "Next Logical Step",
+    "key_banner_text": "To read notebook photos with real-time AI, connect your Gemini API Key",
+    "key_banner_btn": "Connect",
+    "key_modal_title": "Configure Google Gemini API Key",
+    "key_modal_desc": "Enter your Google Gemini API Key to enable real multimodal vision with Gemini 1.5 Flash Vision and live Socratic reasoning.",
+    "key_modal_secure": "Your key is stored safely in your browser local storage (localStorage).",
+    "key_modal_save": "Save Key"
+  },
+  "modals": {
+    "emoji_title": "How are you feeling right now?",
+    "emoji_desc": "Your answer helps educators and school counselors provide you with the best support.",
+    "emoji_saved": "Check-in recorded! Thank you for sharing your mood.",
+    "report_title": "Safe Coexistence Reporting Channel",
+    "report_desc": "Send a confidential notification to the school counseling team.",
+    "rating_title": "Formative Class Feedback",
+    "rating_desc": "How was the pace and clarity of today's class?"
+  },
+  "nexus": {
+    "title": "AuLock Nexus",
+    "subtitle": "Your educational command center",
+    "cards": {
+      "edu": {
+        "title": "Wellbeing and Academic Focus",
+        "description": "Tools to boost your learning and concentration.",
+        "action": "Explore"
+      },
+      "lab": {
+        "title": "Vibe Coding Laboratory",
+        "description": "Create, experiment, and code with Ada's assistance.",
+        "action": "Enter Lab"
+      },
+      "family": {
+        "title": "Mental Health and Home",
+        "description": "Resources for family balance and wellbeing.",
+        "action": "View Resources"
+      }
+    }
+  },
+  "lab": {
+    "title": "AuLock Vibe-Studio",
+    "xp_label": "Tech XP",
+    "ada": {
+      "name": "Ada",
+      "role": "Vibe Copilot",
+      "intro": "Hi! I am Ada, your Vibe Coding copilot. Tell me what you want to create and I will write the code for you!"
+    },
+    "preview": {
+      "title": "Preview",
+      "placeholder": "Your creation will appear here..."
+    }
+  }
+}

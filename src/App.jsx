@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { UIProvider } from './context/UIContext';
 import { LiveClassroomProvider } from './context/LiveClassroomContext';
 import { FocusModeProvider } from './context/FocusModeProvider';
+import { LanguageProvider } from './context/LanguageContext';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import QRLogin from './pages/QRLogin';
@@ -31,61 +32,63 @@ import DebugBanner from './components/DebugBanner';
 function App() {
   return (
     <AuthProvider>
-      <UIProvider>
-        <LiveClassroomProvider>
-          <FocusModeProvider>
-            <DebugBanner />
-            <Routes>
-              {/* --- Public Routes --- */}
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/portal" element={<PortalSelector />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/access" element={<QRLogin />} />
-              <Route path="/qr-login" element={<QRLogin />} />
+      <LanguageProvider>
+        <UIProvider>
+          <LiveClassroomProvider>
+            <FocusModeProvider>
+              <DebugBanner />
+              <Routes>
+                {/* --- Public Routes --- */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/portal" element={<PortalSelector />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/access" element={<QRLogin />} />
+                <Route path="/qr-login" element={<QRLogin />} />
 
-              {/* --- Direct Access Routes --- */}
-              <Route path="/academic-passport" element={<AcademicPassport />} />
-              <Route path="/core-intelligence" element={<AuLockCoreIntelligence />} />
-              <Route path="/school-dashboard" element={<AuLockCoreIntelligence />} />
-              <Route path="/school-admin" element={<AuLockCoreIntelligence />} />
-              <Route path="/colegio-360-master" element={<AuLockCoreIntelligence />} />
-              <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
-              <Route path="/student-dashboard" element={<StudentWorkspace />} />
-              <Route path="/after-ia" element={<AfterIAPortal />} />
-              <Route path="/debate" element={<DebateArena />} />
-              <Route path="/squads" element={<Squads />} />
+                {/* --- Direct Access Routes --- */}
+                <Route path="/academic-passport" element={<AcademicPassport />} />
+                <Route path="/core-intelligence" element={<AuLockCoreIntelligence />} />
+                <Route path="/school-dashboard" element={<AuLockCoreIntelligence />} />
+                <Route path="/school-admin" element={<AuLockCoreIntelligence />} />
+                <Route path="/colegio-360-master" element={<AuLockCoreIntelligence />} />
+                <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
+                <Route path="/student-dashboard" element={<StudentWorkspace />} />
+                <Route path="/after-ia" element={<AfterIAPortal />} />
+                <Route path="/debate" element={<DebateArena />} />
+                <Route path="/squads" element={<Squads />} />
 
-              {/* --- Protected App Routes --- */}
-              <Route path="/app" element={<LayoutSwitcher />}>
-                <Route index element={<LayoutSwitcher />} />
-                <Route path="tutor" element={<AICampus />} />
-                <Route path="pre-u" element={<StudentWorkspace />} />
-                <Route path="school" element={<AuLockCoreIntelligence />} />
-                <Route path="student-dashboard" element={<StudentWorkspace />} />
-                <Route path="ai-campus" element={<AICampus />} />
-                <Route path="ai-chat/:assistantId" element={<ChatInterface />} />
-                <Route path="store" element={<Store />} />
-                <Route path="squads" element={<Squads />} />
-                <Route path="evolution" element={<MyEvolution />} />
-                <Route path="teacher-dashboard" element={<TeacherDashboard />} />
-                <Route path="academic-passport" element={<AcademicPassport />} />
-                <Route path="core-intelligence" element={<AuLockCoreIntelligence />} />
-                <Route path="school-dashboard" element={<AuLockCoreIntelligence />} />
-                <Route path="subject/:id" element={<SubjectDetail />} />
-                <Route path="debate" element={<DebateArena />} />
-                <Route path="live-class" element={<LiveClass />} />
-              </Route>
+                {/* --- Protected App Routes --- */}
+                <Route path="/app" element={<LayoutSwitcher />}>
+                  <Route index element={<LayoutSwitcher />} />
+                  <Route path="tutor" element={<AICampus />} />
+                  <Route path="pre-u" element={<StudentWorkspace />} />
+                  <Route path="school" element={<AuLockCoreIntelligence />} />
+                  <Route path="student-dashboard" element={<StudentWorkspace />} />
+                  <Route path="ai-campus" element={<AICampus />} />
+                  <Route path="ai-chat/:assistantId" element={<ChatInterface />} />
+                  <Route path="store" element={<Store />} />
+                  <Route path="squads" element={<Squads />} />
+                  <Route path="evolution" element={<MyEvolution />} />
+                  <Route path="teacher-dashboard" element={<TeacherDashboard />} />
+                  <Route path="academic-passport" element={<AcademicPassport />} />
+                  <Route path="core-intelligence" element={<AuLockCoreIntelligence />} />
+                  <Route path="school-dashboard" element={<AuLockCoreIntelligence />} />
+                  <Route path="subject/:id" element={<SubjectDetail />} />
+                  <Route path="debate" element={<DebateArena />} />
+                  <Route path="live-class" element={<LiveClass />} />
+                </Route>
 
-              {/* Nexus Routes */}
-              <Route path="/nexus" element={<NexusHub />} />
-              <Route path="/nexus/lab" element={<VibeStudio />} />
+                {/* Nexus Routes */}
+                <Route path="/nexus" element={<NexusHub />} />
+                <Route path="/nexus/lab" element={<VibeStudio />} />
 
-              {/* Catch all */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </FocusModeProvider>
-        </LiveClassroomProvider>
-      </UIProvider>
+                {/* Catch all */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </FocusModeProvider>
+          </LiveClassroomProvider>
+        </UIProvider>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

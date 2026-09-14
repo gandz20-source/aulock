@@ -1,16 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 export default function TeacherHeaderNav({ activeTab = 'live', setActiveTab }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const tabs = [
-    { id: 1, key: 'live', name: '1. LIVE CLASSROOM', color: 'cyan', border: 'border-cyan-400 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.5)] bg-cyan-950/80' },
-    { id: 2, key: 'evaluations', name: '2. EVALUATIONS', color: 'magenta', border: 'border-fuchsia-500 text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.5)] bg-fuchsia-950/80' },
-    { id: 3, key: 'squads', name: '3. SQUADS & TEAMS', color: 'indigo', border: 'border-indigo-400 text-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.5)] bg-indigo-950/80' },
-    { id: 4, key: 'reports', name: '4. REPORTS', color: 'green', border: 'border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] bg-emerald-950/80' },
-    { id: 5, key: 'nexo', name: '5. COEXISTENCE NEXUS', color: 'blue', border: 'border-sky-400 text-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.5)] bg-sky-950/80' },
-    { id: 6, key: 'settings', name: '6. SETTINGS', color: 'orange', border: 'border-amber-500 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.5)] bg-amber-950/80' },
+    { id: 1, key: 'live', name: t('nav.teacher_tabs.live'), color: 'cyan', border: 'border-cyan-400 text-cyan-300 shadow-[0_0_20px_rgba(6,182,212,0.5)] bg-cyan-950/80' },
+    { id: 2, key: 'evaluations', name: t('nav.teacher_tabs.evaluations'), color: 'magenta', border: 'border-fuchsia-500 text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.5)] bg-fuchsia-950/80' },
+    { id: 3, key: 'squads', name: t('nav.teacher_tabs.squads'), color: 'indigo', border: 'border-indigo-400 text-indigo-300 shadow-[0_0_20px_rgba(99,102,241,0.5)] bg-indigo-950/80' },
+    { id: 4, key: 'reports', name: t('nav.teacher_tabs.reports'), color: 'green', border: 'border-emerald-400 text-emerald-300 shadow-[0_0_20px_rgba(52,211,153,0.5)] bg-emerald-950/80' },
+    { id: 5, key: 'nexo', name: t('nav.teacher_tabs.nexo'), color: 'blue', border: 'border-sky-400 text-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.5)] bg-sky-950/80' },
+    { id: 6, key: 'settings', name: t('nav.teacher_tabs.settings'), color: 'orange', border: 'border-amber-500 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.5)] bg-amber-950/80' },
   ];
 
   return (
@@ -20,32 +23,35 @@ export default function TeacherHeaderNav({ activeTab = 'live', setActiveTab }) {
       <div className="flex flex-wrap items-center justify-between border-b border-cyan-900/60 pb-3 gap-3">
         <div className="flex items-center space-x-3">
           <span className="px-2.5 py-1 bg-cyan-500 text-slate-950 font-black text-xs rounded-xl shadow font-mono">
-            TCH
+            {t('nav.teacher_header.role_badge')}
           </span>
           <div>
             <h1 className="text-xl md:text-2xl font-orbitron font-extrabold text-white tracking-wider">
               Prof. María González
             </h1>
             <p className="text-xs text-cyan-400 font-mono">
-              Subjects: Advanced Math & Calculus • Senior High A & Junior B
+              {t('nav.teacher_header.subjects_label')}
             </p>
           </div>
         </div>
 
         {/* Top Control Action Buttons */}
-        <div className="flex items-center space-x-2 text-xs font-bold font-mono">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-bold font-mono">
           <button 
             onClick={() => navigate('/student-dashboard')}
-            className="px-3 py-1.5 rounded-xl bg-cyan-950 border border-cyan-400 text-cyan-300 hover:bg-cyan-900 transition flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-xl bg-cyan-950 border border-cyan-400 text-cyan-300 hover:bg-cyan-900 transition flex items-center gap-1.5 cursor-pointer"
           >
-            🎓 Switch to Student Role
+            {t('nav.teacher_header.switch_to_student')}
           </button>
           <button 
             onClick={() => navigate('/school-dashboard')}
-            className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1.5"
+            className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1.5 cursor-pointer"
           >
-            🏫 School 360° Role
+            {t('nav.teacher_header.school_360')}
           </button>
+
+          <LanguageSwitcher />
+
           <span className="w-8 h-8 rounded-full bg-slate-900 border border-cyan-500/60 flex items-center justify-center text-cyan-300 shadow">
             👤
           </span>

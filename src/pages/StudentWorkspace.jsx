@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { recordStudentActivity } from '../services/VocationalEngine';
 import { submitSecretTeacherRating } from '../services/DataImportService';
 import { generateLearnYourWayResponse, analyzeExerciseImageWithGemini, generateFormativeFeedback, generateDailyCulturalMessage } from '../services/GeminiService';
@@ -129,6 +130,7 @@ const INITIAL_SQUAD_MESSAGES = [
 
 const StudentWorkspace = () => {
     const { profile } = useAuth();
+    const { t } = useLanguage();
     const { isPhoneInCase, currentSession, handleNfcEvent } = useFocusMode();
     const [activeTab, setActiveTab] = useState('profile');
 
@@ -609,15 +611,15 @@ const StudentWorkspace = () => {
                             <span className="relative inline-flex rounded-full h-4 w-4 bg-white"></span>
                         </span>
                         <div>
-                            <h4 className="font-black text-sm uppercase tracking-wide">MODO ENFOQUE ACTIVADO (Funda AuLock NFC)</h4>
-                            <p className="text-xs text-sky-100">Sesión en Vivo: {currentSession?.className || '4° Medio A - Ciencias MINEDUC'} • Asistencia Registrada</p>
+                            <h4 className="font-black text-sm uppercase tracking-wide">{t('student.focus_mode.active')}</h4>
+                            <p className="text-xs text-sky-100">{t('student.focus_mode.session_info')}</p>
                         </div>
                     </div>
                     <button
                         onClick={() => handleNfcEvent({ tagId: 'NFC_CASE_TOKEN_01', studentId: profile?.id || 'STUDENT_123' })}
-                        className="px-3.5 py-1.5 bg-white/20 hover:bg-white/30 text-white font-bold text-xs rounded-xl border border-white/40 transition-all"
+                        className="px-3.5 py-1.5 bg-white/20 hover:bg-white/30 text-white font-bold text-xs rounded-xl border border-white/40 transition-all cursor-pointer"
                     >
-                        Retirar Estuche (TAP OUT)
+                        {t('student.focus_mode.tap_out')}
                     </button>
                 </div>
             )}
@@ -630,15 +632,15 @@ const StudentWorkspace = () => {
                         <div className="flex items-center gap-3">
                             <span className="text-2xl animate-bounce">⏱️</span>
                             <div>
-                                <span className="text-[10px] text-cyan-300 font-bold font-orbitron uppercase block">LIVE TEACHER CLASSROOM TIMER IN PROGRESS</span>
-                                <h3 className="text-sm font-bold text-white font-sans">Prof. Carlos Rivas / María González - Sesión Activa</h3>
+                                <span className="text-[10px] text-cyan-300 font-bold font-orbitron uppercase block">{t('student.timer_banner.title')}</span>
+                                <h3 className="text-sm font-bold text-white font-sans">{t('student.timer_banner.active_session')}</h3>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 bg-slate-900 px-5 py-2.5 rounded-2xl border border-cyan-500 shrink-0">
                             <span className="text-2xl font-black font-orbitron text-amber-300">
                                 {String(Math.floor(classTimer.remainingSeconds / 60)).padStart(2, '0')}:{String(classTimer.remainingSeconds % 60).padStart(2, '0')}
                             </span>
-                            <span className="px-2.5 py-1 bg-emerald-950 text-emerald-300 text-[10px] font-bold rounded-lg border border-emerald-600 animate-pulse">● LIVE SYNCED</span>
+                            <span className="px-2.5 py-1 bg-emerald-950 text-emerald-300 text-[10px] font-bold rounded-lg border border-emerald-600 animate-pulse">{t('student.timer_banner.synced')}</span>
                         </div>
                     </div>
                 )}
@@ -649,7 +651,7 @@ const StudentWorkspace = () => {
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
                                 <span className="px-2.5 py-0.5 bg-amber-500 text-slate-950 font-black text-[10px] rounded-lg uppercase tracking-wider">
-                                    🚨 OFFICIAL INSTITUTIONAL NOTICE
+                                    {t('student.official_notice.badge')}
                                 </span>
                                 <span className="text-xs text-amber-300 font-bold">{dispatchedAlert.category}</span>
                             </div>
@@ -664,7 +666,7 @@ const StudentWorkspace = () => {
                             }}
                             className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-orbitron font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0"
                         >
-                            Confirm Reading & Acknowledge
+                            {t('student.official_notice.confirm_button')}
                         </button>
                     </div>
                 )}
@@ -700,19 +702,19 @@ const StudentWorkspace = () => {
 
                             {/* RIGHT COLUMN: ACADEMIC ANALYTICS & SOCRATIC PROGRESS */}
                             <div className="col-span-1">
-                                <DataCard title="Academic Analytics" colorBorder="emerald" icon="📊">
+                                <DataCard title={t('student.profile.analytics_title')} colorBorder="emerald" icon="📊">
                                     <div className="space-y-3 font-mono text-xs">
                                         <div className="flex justify-between items-center bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-                                            <span className="text-slate-300">GPA / Overall Average:</span>
+                                            <span className="text-slate-300">{t('student.profile.gpa_label')}</span>
                                             <strong className="text-amber-300 text-xl font-orbitron">6.14</strong>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-                                            <span className="text-slate-300">NFC Attendance:</span>
-                                            <strong className="text-emerald-400 text-xs font-orbitron">100% RECORDED</strong>
+                                            <span className="text-slate-300">{t('student.profile.attendance_label')}</span>
+                                            <strong className="text-emerald-400 text-xs font-orbitron">{t('student.profile.attendance_val')}</strong>
                                         </div>
                                         <div className="flex justify-between items-center bg-slate-900/90 p-3 rounded-2xl border border-slate-800">
-                                            <span className="text-slate-300">Socratic Missions:</span>
-                                            <strong className="text-cyan-300 text-xs font-orbitron">5/5 COMPLETED</strong>
+                                            <span className="text-slate-300">{t('student.profile.missions_label')}</span>
+                                            <strong className="text-cyan-300 text-xs font-orbitron">{t('student.profile.missions_val')}</strong>
                                         </div>
                                     </div>
                                 </DataCard>
@@ -724,25 +726,25 @@ const StudentWorkspace = () => {
                         <div className="flex flex-wrap items-center justify-center gap-4 pt-6 border-t border-cyan-900/50">
                             <ActionButton
                                 icon="❓"
-                                text="How do you feel today?"
+                                text={t('student.action_buttons.feel_today')}
                                 color="yellow"
                                 onClick={() => setShowEmojiCheckin(true)}
                             />
                             <ActionButton
                                 icon="🔒"
-                                text="Safe & Secure Report"
+                                text={t('student.action_buttons.safe_report')}
                                 color="green"
                                 onClick={() => setShowReportModal(true)}
                             />
                             <ActionButton
                                 icon="⚙️"
-                                text="Evaluate Class"
+                                text={t('student.action_buttons.evaluate_class')}
                                 color="purple"
                                 onClick={() => setShowTeacherRatingModal(true)}
                             />
                             <ActionButton
                                 icon="🆘"
-                                text="SOS Help Button"
+                                text={t('student.action_buttons.sos')}
                                 color="red"
                                 onClick={() => alert("🆘 Pedagogical help request sent to school staff.")}
                             />

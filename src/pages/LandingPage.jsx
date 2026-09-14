@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 import FounderStoryBanner from '../components/FounderStoryBanner';
 import './LandingPage.css';
 
 const LandingPage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { t } = useLanguage();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalForm, setModalForm] = useState({
         name: '',
@@ -45,7 +48,7 @@ const LandingPage = () => {
     const handleModalSubmit = (e) => {
         e.preventDefault();
         console.log('Form submitted:', modalForm);
-        alert('Thank you for your interest. Our institutional team will contact you shortly to empower education in ' + (modalForm.city || 'your school') + '.');
+        alert(t('landing.modal.success', 'Thank you for your interest. Our institutional team will contact you shortly to empower education in ') + (modalForm.city || 'your school') + '.');
         setIsModalOpen(false);
         setModalForm({
             name: '',
@@ -91,10 +94,10 @@ const LandingPage = () => {
                     </div>
 
                     <ul className="nav__menu" id="navMenu">
-                        <li className="nav__item"><a href="#solucion" className="nav__link">Solution</a></li>
-                        <li className="nav__item"><a href="#ciencia" className="nav__link">Science</a></li>
-                        <li className="nav__item"><a href="#nosotros" className="nav__link">About Us</a></li>
-                        <li className="nav__item"><a href="#contacto" className="nav__link">Contact</a></li>
+                        <li className="nav__item"><a href="#solucion" className="nav__link">{t('landing.nav.features', 'Solution')}</a></li>
+                        <li className="nav__item"><a href="#ciencia" className="nav__link">{t('landing.nav.impact', 'Science')}</a></li>
+                        <li className="nav__item"><a href="#nosotros" className="nav__link">{t('landing.nav.story', 'About Us')}</a></li>
+                        <li className="nav__item"><a href="#contacto" className="nav__link">{t('landing.nav.access', 'Contact')}</a></li>
                     </ul>
 
                     <button className="nav__toggle" id="navToggle" aria-label="Toggle menu">
@@ -103,9 +106,10 @@ const LandingPage = () => {
                         <span></span>
                     </button>
 
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button className="btn btn-primary" onClick={handleLogin} style={{ padding: '0.5rem 1.5rem', fontSize: '0.9rem' }}>
-                            {user ? 'Go to Dashboard' : 'Sign In'}
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                        <LanguageSwitcher />
+                        <button className="btn btn-primary" onClick={handleLogin} style={{ padding: '0.5rem 1.25rem', fontSize: '0.9rem' }}>
+                            {user ? t('landing.nav.enter_app', 'Go to Dashboard') : t('login.btn_login', 'Sign In')}
                         </button>
                     </div>
                 </nav>
@@ -120,16 +124,16 @@ const LandingPage = () => {
                                 <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" strokeWidth="2"
                                     strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
-                            <span>NFC Technology & Google Workspace Ecosystem</span>
+                            <span>{t('landing.hero.badge', 'NFC Technology & Google Workspace Ecosystem')}</span>
                         </div>
 
                         <h1 className="hero__title">
-                            <span className="title-line">AuLock: Transforming</span>
-                            <span className="title-line title-gradient">Focus into Academic Success</span>
+                            <span className="title-line">{t('landing.hero.title_main', 'AuLock: Transforming')}</span>
+                            <span className="title-line title-gradient">{t('landing.hero.title_highlight', 'Focus into Academic Success')}</span>
                         </h1>
 
                         <p className="hero__description">
-                            In the era of digital distraction, AuLock balances technology with discipline. We are not here to ban devices, but to turn them into tools for high productivity and deep learning.
+                            {t('landing.hero.subtitle', 'In the era of digital distraction, AuLock balances technology with discipline. We are not here to ban devices, but to turn them into tools for high productivity and deep learning.')}
                         </p>
 
                         <div className="hero__cta">
@@ -137,29 +141,29 @@ const LandingPage = () => {
                                 <svg style={{ width: '20px', height: '20px', marginRight: '8px' }} viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/>
                                 </svg>
-                                <span>Connect with Google Classroom</span>
+                                <span>{t('landing.hero.cta_primary', 'Connect with Google Classroom')}</span>
                             </button>
                             <a href="https://youtube.com/shorts/" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
                                 <svg className="btn-icon-left" viewBox="0 0 24 24" fill="none">
                                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
                                     <path d="M10 8l6 4-6 4V8z" fill="currentColor" />
                                 </svg>
-                                <span>Watch Demo</span>
+                                <span>{t('landing.hero.cta_secondary', 'Watch Demo')}</span>
                             </a>
                         </div>
 
                         <div className="hero__stats">
                             <div className="stat">
-                                <div className="stat__number">95%</div>
-                                <div className="stat__label">Improvement in Concentration</div>
+                                <div className="stat__number">{t('landing.hero.stats_focus_val', '100%')}</div>
+                                <div className="stat__label">{t('landing.hero.stats_focus', 'Improvement in Concentration')}</div>
                             </div>
                             <div className="stat">
-                                <div className="stat__number">Beta 🚀</div>
-                                <div className="stat__label">Development Phase // Seeking First Adopters</div>
+                                <div className="stat__number">{t('landing.hero.stats_students_val', '+15,000')}</div>
+                                <div className="stat__label">{t('landing.hero.stats_students', 'Connected Students')}</div>
                             </div>
                             <div className="stat">
-                                <div className="stat__number">4.9★</div>
-                                <div className="stat__label">Average Rating</div>
+                                <div className="stat__number">{t('landing.hero.stats_gpa_val', '+28%')}</div>
+                                <div className="stat__label">{t('landing.hero.stats_gpa', 'GPA Improvement')}</div>
                             </div>
                         </div>
                     </div>
@@ -200,10 +204,10 @@ const LandingPage = () => {
             <section className="section solution" id="solucion">
                 <div className="container">
                     <div className="section__header">
-                        <span className="section__tag">🌟 Why Choose AuLock?</span>
-                        <h2 className="section__title">Three Pillars Redefining Learning</h2>
+                        <span className="section__tag">🌟 {t('landing.features.title', 'Why Choose AuLock?')}</span>
+                        <h2 className="section__title">{t('landing.features.subtitle', 'Three Pillars Redefining Learning')}</h2>
                         <p className="section__description">
-                            Specifically engineered for educational institutions seeking discipline without deprivation and transparent automation.
+                            {t('landing.features.subtitle', 'Specifically engineered for educational institutions seeking discipline without deprivation and transparent automation.')}
                         </p>
                     </div>
 
@@ -220,9 +224,9 @@ const LandingPage = () => {
                                     <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Gamified Focus</h3>
+                            <h3 className="feature-title">{t('landing.features.card1_title', 'Gamified Focus')}</h3>
                             <p className="feature-description">
-                                We transform attendance and attention management into a motivating game. Students maintain their "Focus Score" (100 PS) and earn weekly benefits through consistency.
+                                {t('landing.features.card1_desc', 'We transform attendance and attention management into a motivating game. Students maintain their "Focus Score" (100 PS) and earn weekly benefits through consistency.')}
                             </p>
                         </div>
 
@@ -235,9 +239,9 @@ const LandingPage = () => {
                                     <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Full Google Integration</h3>
+                            <h3 className="feature-title">{t('landing.features.card2_title', 'Full Google Integration')}</h3>
                             <p className="feature-description">
-                                AuLock lives inside your school ecosystem. We synchronize your Google Classroom courses, Google Calendar schedules, and generate automated PDF reports in Google Drive.
+                                {t('landing.features.card2_desc', 'AuLock lives inside your school ecosystem. We synchronize your Google Classroom courses, Google Calendar schedules, and generate automated PDF reports in Google Drive.')}
                             </p>
                         </div>
 
@@ -248,9 +252,9 @@ const LandingPage = () => {
                                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                                 </svg>
                             </div>
-                            <h3 className="feature-title">Socratic Artificial Intelligence</h3>
+                            <h3 className="feature-title">{t('landing.features.card3_title', 'Socratic Artificial Intelligence')}</h3>
                             <p className="feature-description">
-                                Our AI engine does not hand out easy answers; it guides the student using the Socratic method, stimulating deep reasoning and critical thinking.
+                                {t('landing.features.card3_desc', 'Our AI engine does not hand out easy answers; it guides the student using the Socratic method, stimulating deep reasoning and critical thinking.')}
                             </p>
                         </div>
                     </div>
@@ -1014,46 +1018,46 @@ const LandingPage = () => {
                         </svg>
                     </button>
                     <div className="modal-content">
-                        <h2 className="modal-title">Request Information</h2>
-                        <p className="modal-subtitle">Leave us your contact details and our team will reach out promptly.</p>
+                        <h2 className="modal-title">{t('landing.modal.title', 'Request Information')}</h2>
+                        <p className="modal-subtitle">{t('landing.modal.subtitle', 'Leave us your contact details and our team will reach out promptly.')}</p>
 
                         <form className="contact__form" id="modalForm" onSubmit={handleModalSubmit}>
                             <div className="form-group">
-                                <label htmlFor="modalName">Full Name *</label>
+                                <label htmlFor="modalName">{t('landing.modal.name', 'Full Name')} *</label>
                                 <input type="text" id="modalName" name="name" required placeholder="e.g. Sarah Jenkins" value={modalForm.name} onChange={handleInputChange} />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label htmlFor="modalEmail">Institutional Email *</label>
+                                    <label htmlFor="modalEmail">{t('landing.modal.email', 'Institutional Email')} *</label>
                                     <input type="email" id="modalEmail" name="email" required placeholder="name@school.edu" value={modalForm.email} onChange={handleInputChange} />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="modalPhone">Contact Phone *</label>
+                                    <label htmlFor="modalPhone">{t('landing.modal.phone', 'Contact Phone')} *</label>
                                     <input type="tel" id="modalPhone" name="phone" required placeholder="+1 555 123 4567" value={modalForm.phone} onChange={handleInputChange} />
                                 </div>
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="modalRegion">Region / State *</label>
+                                <label htmlFor="modalRegion">{t('landing.modal.region', 'Region / State')} *</label>
                                 <input type="text" id="modalRegion" name="region" required placeholder="State / Province / Region" value={modalForm.region} onChange={handleInputChange} />
                             </div>
 
                             <div className="form-row">
                                 <div className="form-group">
-                                    <label htmlFor="modalCity">City *</label>
+                                    <label htmlFor="modalCity">{t('landing.modal.city', 'City')} *</label>
                                     <input type="text" id="modalCity" name="city" required placeholder="e.g. Concepción" value={modalForm.city} onChange={handleInputChange} />
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="modalAddress">Entity Address *</label>
+                                    <label htmlFor="modalAddress">{t('landing.modal.address', 'Entity Address')} *</label>
                                     <input type="text" id="modalAddress" name="address" required placeholder="Street Name and Number" value={modalForm.address} onChange={handleInputChange} />
                                 </div>
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="modalInstitutionType">Institution Type *</label>
+                                <label htmlFor="modalInstitutionType">{t('landing.modal.type', 'Institution Type')} *</label>
                                 <select id="modalInstitutionType" name="institutionType" required value={modalForm.institutionType} onChange={handleInputChange}>
-                                    <option value="">Select Type</option>
+                                    <option value="">{t('landing.modal.select_type', 'Select Type')}</option>
                                     <option value="Public School / District">Public School / District</option>
                                     <option value="Charter / Subsidized School">Charter / Subsidized School</option>
                                     <option value="Private K-12 Academy">Private K-12 Academy</option>
@@ -1063,15 +1067,15 @@ const LandingPage = () => {
                             </div>
 
                             <div className="form-group">
-                                <label htmlFor="modalMessage">Additional Comments (Optional)</label>
+                                <label htmlFor="modalMessage">{t('landing.modal.message', 'Additional Comments (Optional)')}</label>
                                 <textarea id="modalMessage" name="message" rows="3" placeholder="Any specific requirements or questions?" value={modalForm.message} onChange={handleInputChange}></textarea>
                             </div>
 
                             <button type="submit" className="btn btn-primary btn-full">
-                                Submit Request
+                                {t('landing.modal.submit', 'Submit Request')}
                             </button>
                             <p className="form-note">
-                                Upon submission, your request will be assigned to an institutional specialist.
+                                {t('landing.modal.note', 'Upon submission, your request will be assigned to an institutional specialist.')}
                             </p>
                         </form>
                     </div>

@@ -3,8 +3,10 @@ import { handleTutorQueryService, analyzeExerciseImageWithGemini, getGeminiApiKe
 import MathRenderer from '../common/MathRenderer';
 import { Camera, X, Sparkles, Key, Check, Radio } from 'lucide-react';
 import SocraticLiveCameraModal from './SocraticLiveCameraModal';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function EliteSocraticWhiteboardFixed() {
+  const { t } = useLanguage();
   const [apiKeyPresent, setApiKeyPresent] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [customKeyInput, setCustomKeyInput] = useState('');
@@ -238,11 +240,11 @@ export default function EliteSocraticWhiteboardFixed() {
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
             <h1 className="text-base md:text-lg font-orbitron font-extrabold text-white tracking-widest uppercase">
-              CENTRO DE TUTORÍA SOCRÁTICA // ESPECIALISTAS DE MATERIA
+              {t('tutors.header_title', 'CENTRO DE TUTORÍA SOCRÁTICA // ESPECIALISTAS DE MATERIA')}
             </h1>
           </div>
           <p className="text-[11px] text-cyan-400/80 mt-1">
-            Asistencia conversacional multimodal profunda y pizarra digital de desarrollo analítico con LaTeX.
+            {t('tutors.header_subtitle', 'Asistencia conversacional multimodal profunda y pizarra digital de desarrollo analítico con LaTeX.')}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -258,7 +260,7 @@ export default function EliteSocraticWhiteboardFixed() {
             }`}
           >
             <Key className="w-3 h-3" />
-            <span>{apiKeyPresent ? '● Gemini API Activa' : '⚙️ Conectar Gemini API Key'}</span>
+            <span>{apiKeyPresent ? t('tutors.api_key_active', '● Gemini API Activa') : t('tutors.api_key_connect', '⚙️ Conectar Gemini API Key')}</span>
           </button>
         </div>
       </header>
@@ -294,7 +296,7 @@ export default function EliteSocraticWhiteboardFixed() {
               <img src={selectedSpecialist.avatar} alt="Active" className="w-10 h-10 rounded-full object-cover border border-fuchsia-400 shrink-0" />
               <div>
                 <h3 className="text-xs font-orbitron font-bold text-white">{selectedSpecialist.name}</h3>
-                <span className="text-[9px] font-bold text-green-400">● Tutor Activo</span>
+                <span className="text-[9px] font-bold text-green-400">● {t('common.active', 'Activo')}</span>
               </div>
             </div>
 
@@ -350,14 +352,14 @@ export default function EliteSocraticWhiteboardFixed() {
               <div className="p-2 bg-amber-950/40 border border-amber-500/40 rounded-xl flex items-center justify-between gap-2 text-[11px] text-amber-300">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <Key className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span className="truncate">Para leer fotos con IA en vivo, conecta tu Gemini API Key</span>
+                  <span className="truncate">{t('tutors.key_banner_text', 'Para leer fotos con IA en vivo, conecta tu Gemini API Key')}</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setShowKeyModal(true)}
                   className="px-2.5 py-1 bg-amber-400 hover:bg-amber-300 text-black font-extrabold text-[10px] rounded-lg shrink-0 transition"
                 >
-                  Conectar
+                  {t('tutors.key_banner_btn', 'Conectar')}
                 </button>
               </div>
             )}
@@ -391,7 +393,7 @@ export default function EliteSocraticWhiteboardFixed() {
                 title="Modo Cámara en Vivo y Tutoría por Voz (Live Socratic Lens)"
               >
                 <Radio className="w-3.5 h-3.5 text-rose-200" />
-                <span>🔴 En Vivo</span>
+                <span>{t('tutors.live_camera_button', '🔴 En Vivo')}</span>
               </button>
 
               <button
@@ -401,14 +403,14 @@ export default function EliteSocraticWhiteboardFixed() {
                 title="Escanear cuaderno con foto fija (The Socratic Lens)"
               >
                 <Camera className="w-3.5 h-3.5 text-emerald-200" />
-                <span>📷 Escanear</span>
+                <span>{t('tutors.scan_button', '📷 Escanear')}</span>
               </button>
 
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Pregunta o consulta matemática..."
+                placeholder={t('tutors.input_placeholder', 'Pregunta o consulta matemática...')}
                 className="flex-1 bg-gray-900 border border-cyan-700 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-fuchsia-500 font-mono"
               />
               <button
@@ -416,7 +418,7 @@ export default function EliteSocraticWhiteboardFixed() {
                 disabled={loading || (!query.trim() && !capturedImage)}
                 className="px-3 py-2 bg-fuchsia-900 border border-fuchsia-400 text-white font-orbitron font-bold text-xs rounded-xl hover:bg-fuchsia-800 transition disabled:opacity-50 cursor-pointer uppercase shrink-0"
               >
-                ENVIAR
+                {t('tutors.btn_send', 'ENVIAR')}
               </button>
             </form>
           </div>
@@ -431,7 +433,7 @@ export default function EliteSocraticWhiteboardFixed() {
             {/* TÍTULO DE LA PIZARRA DINÁMICAMENTE ENLAZADO AL PROFESOR SELECCIONADO */}
             <div className="flex justify-between items-center pb-3 mb-4 border-b border-cyan-900 relative z-10">
               <h3 className="text-xs font-orbitron font-extrabold text-fuchsia-300 uppercase truncate max-w-[70%]">
-                // PIZARRA SOCRÁTICA DE {selectedSpecialist.name.toUpperCase()}
+                // {t('tutors.whiteboard_title', 'PIZARRA SOCRÁTICA DE')} {selectedSpecialist.name.toUpperCase()}
               </h3>
               <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-2.5 py-0.5 rounded border border-emerald-800">
                 {boardContent.topic}
@@ -440,7 +442,7 @@ export default function EliteSocraticWhiteboardFixed() {
 
             {/* Bloque Principal de Fórmula o Concepto Central con MathRenderer LaTeX */}
             <div className="mb-4 p-4 bg-cyan-950/40 border border-cyan-500/40 rounded-xl relative z-10">
-              <span className="text-[9px] font-orbitron font-bold text-cyan-400 uppercase tracking-widest">// FÓRMULA / MODELO CENTRAL:</span>
+              <span className="text-[9px] font-orbitron font-bold text-cyan-400 uppercase tracking-widest">{t('tutors.formula_label', '// FÓRMULA / MODELO CENTRAL:')}</span>
               <div className="mt-1">
                 <MathRenderer content={`$$${boardContent.coreFormula.replace(/^\$\$|\$\$$/g, '')}$$`} />
               </div>
@@ -492,7 +494,7 @@ export default function EliteSocraticWhiteboardFixed() {
               <div className="flex items-center gap-2">
                 <Key className="w-5 h-5 text-cyan-400" />
                 <h3 className="text-sm font-bold font-orbitron text-white uppercase tracking-wider">
-                  Configurar Gemini API Key
+                  {t('tutors.key_modal_title', 'Configurar Gemini API Key')}
                 </h3>
               </div>
               <button 
@@ -504,7 +506,7 @@ export default function EliteSocraticWhiteboardFixed() {
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed mb-4 font-sans">
-              Ingresa tu <strong>Google Gemini API Key</strong> para habilitar el reconocimiento visual multimodal real con <strong>Gemini 1.5 Flash Vision</strong> y razonamiento socrático en vivo.
+              {t('tutors.key_modal_desc', 'Ingresa tu Google Gemini API Key para habilitar el reconocimiento visual multimodal real con Gemini 1.5 Flash Vision y razonamiento socrático en vivo.')}
             </p>
 
             <div className="space-y-3 mb-5">
@@ -516,7 +518,7 @@ export default function EliteSocraticWhiteboardFixed() {
                 className="w-full bg-black/80 border border-cyan-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
               />
               <span className="text-[10px] text-cyan-400/80 block">
-                La clave se almacena de forma segura en el almacenamiento local de tu navegador (localStorage).
+                {t('tutors.key_modal_secure', 'La clave se almacena de forma segura en el almacenamiento local de tu navegador (localStorage).')}
               </span>
             </div>
 
@@ -527,7 +529,7 @@ export default function EliteSocraticWhiteboardFixed() {
                   onClick={handleRemoveApiKey}
                   className="px-3 py-1.5 text-xs text-red-400 border border-red-500/40 rounded-xl hover:bg-red-950/40 transition"
                 >
-                  Desconectar
+                  {t('common.disconnect', 'Desconectar')}
                 </button>
               )}
               <div className="flex items-center gap-2 ml-auto">
@@ -536,7 +538,7 @@ export default function EliteSocraticWhiteboardFixed() {
                   onClick={() => setShowKeyModal(false)}
                   className="px-3 py-1.5 text-xs text-slate-400 hover:text-white"
                 >
-                  Cancelar
+                  {t('common.cancel', 'Cancelar')}
                 </button>
                 <button
                   type="button"
@@ -544,7 +546,7 @@ export default function EliteSocraticWhiteboardFixed() {
                   className="px-4 py-1.5 text-xs font-bold bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl transition flex items-center gap-1.5"
                 >
                   <Check className="w-3.5 h-3.5" />
-                  Guardar Clave
+                  {t('tutors.key_modal_save', 'Guardar Clave')}
                 </button>
               </div>
             </div>
