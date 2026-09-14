@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-import FounderStoryBanner from '../components/FounderStoryBanner';
 import './LandingPage.css';
 
 const LandingPage = () => {
@@ -194,11 +193,6 @@ const LandingPage = () => {
                     <div className="gradient-orb orb-3"></div>
                 </div>
             </section>
-
-            {/* BANNER HISTORIA DEL FUNDADOR & PARTICIPACIÓN EN XPRIZE */}
-            <div className="container">
-                <FounderStoryBanner />
-            </div>
 
             {/* SECTION 1: WHY CHOOSE AULOCK? (CARDS SECTION) */}
             <section className="section solution" id="solucion">
