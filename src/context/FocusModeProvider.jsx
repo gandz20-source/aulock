@@ -1,9 +1,32 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useAuth } from './AuthContext';
 import { supabase } from '../config/supabase';
 
 const FocusModeContext = createContext();
 
 export const FocusModeProvider = ({ children }) => {
+    const location = useLocation();
+    const { profile } = useAuth();
+
+    // Check if the current user is active as a student
+    const isStudentRole = profile?.role === 'alumno' || profile?.role === 'student';
+
+    // Helper: Verify if current route is an active student workspace (never on landing page or public routes)
+    const isStudentWorkspaceRoute = (pathname) => {
+        const p = (pathname || '').toLowerCase();
+        // Public pages (landing page aulock.cl, portal selector, login) are NEVER monitored
+        if (!p || p === '/' || p === '/portal' || p === '/login' || p === '/access' || p === '/qr-login') {
+            return false;
+        }
+        // Teacher/admin/school management routes are NEVER monitored
+        if (p.includes('teacher') || p.includes('school') || p.includes('core-intelligence') || p.includes('colegio-360') || p.includes('admin')) {
+            return false;
+        }
+        // Student views and application dashboard
+        return p.includes('student') || p.startsWith('/app') || p === '/academic-passport' || p === '/after-ia' || p === '/debate' || p === '/squads' || p.startsWith('/nexus');
+    };
+
     // 1. Session Persistence & Absolute Timestamps
     const [isPhoneInCase, setIsPhoneInCase] = useState(() => {
         return localStorage.getItem('aulock_phone_in_case') === 'true';
@@ -107,12 +130,20 @@ export const FocusModeProvider = ({ children }) => {
         };
     }, [isTeacherActive, sessionStartTime, isTabFocused]);
 
+    // Automatically dismiss focus warning if navigating outside student workspace
+    useEffect(() => {
+        if (!isStudentRole || !isStudentWorkspaceRoute(location.pathname)) {
+            setShowWarningModal(false);
+        }
+    }, [location.pathname, isStudentRole]);
+
     // 4. Page Visibility API Audit (Decoupled from timer resets)
     useEffect(() => {
         const handleVisibilityChange = () => {
             const currentPath = (window.location.pathname || '').toLowerCase();
-            // NEVER trigger out-of-focus warning on teacher or school admin routes
-            if (currentPath.includes('teacher') || currentPath.includes('school') || currentPath.includes('core-intelligence') || currentPath.includes('admin')) {
+
+            // STRICTLY ONLY trigger focus audit if user is currently acting as a student AND on an active student workspace page
+            if (!isStudentRole || !isStudentWorkspaceRoute(currentPath)) {
                 return;
             }
 
@@ -135,26 +166,35 @@ export const FocusModeProvider = ({ children }) => {
 
                 // Trigger warning alert modal
                 setShowWarningModal(true);
-                console.warn("⚠️ ¡Atención! Salida de pestaña detectada. -3 puntos de enfoque. (El temporizador maestro continúa intacto).");
+                console.warn("⚠️ ¡Atención! Salida de pestaña detectada en sesión de alumno. -3 puntos de enfoque.");
             } else {
                 // Tab restored: Re-sync focus and compute exact current elapsed time immediately!
                 setIsTabFocused(true);
-                const currentElapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
-                setTeacherTimer(currentElapsed);
-                console.info("👁️ Foco restaurado. Temporizador sincronizado con precisión:", currentElapsed, "segundos.");
+                if (sessionStartTime) {
+                    const currentElapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+                    setTeacherTimer(currentElapsed);
+                    console.info("👁️ Foco restaurado. Temporizador sincronizado con precisión:", currentElapsed, "segundos.");
+                }
+            }
+        };
+
+        const handleFocus = () => {
+            const currentPath = (window.location.pathname || '').toLowerCase();
+            if (!isStudentRole || !isStudentWorkspaceRoute(currentPath)) return;
+            setIsTabFocused(true);
+            if (sessionStartTime) {
+                setTeacherTimer(Math.floor((Date.now() - sessionStartTime) / 1000));
             }
         };
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        window.addEventListener('focus', () => {
-            setIsTabFocused(true);
-            setTeacherTimer(Math.floor((Date.now() - sessionStartTime) / 1000));
-        });
+        window.addEventListener('focus', handleFocus);
 
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('focus', handleFocus);
         };
-    }, [sessionStartTime]);
+    }, [sessionStartTime, isStudentRole, location.pathname]);
 
     // 5. Live Questions & Point Recovery (+2 points up to max 100)
     const submitLiveAnswer = (selectedIndex) => {
@@ -266,8 +306,8 @@ export const FocusModeProvider = ({ children }) => {
         }}>
             {children}
 
-            {/* ⚠️ VISUAL WARNING ALERT MODAL */}
-            {showWarningModal && (
+            {/* ⚠️ VISUAL WARNING ALERT MODAL (Strictly active only for students inside student workspace) */}
+            {showWarningModal && isStudentRole && isStudentWorkspaceRoute(location.pathname) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
                     <div className="bg-gray-950 border-2 border-red-500 p-6 md:p-8 rounded-3xl max-w-md w-full text-center space-y-4 shadow-[0_0_50px_rgba(239,68,68,0.5)] font-mono">
                         <div className="w-16 h-16 bg-red-950/80 border-2 border-red-500 rounded-full flex items-center justify-center mx-auto animate-bounce">
