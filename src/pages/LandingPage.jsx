@@ -150,21 +150,6 @@ const LandingPage = () => {
                                 <span>{t('landing.hero.cta_secondary', 'Watch Demo')}</span>
                             </a>
                         </div>
-
-                        <div className="hero__stats">
-                            <div className="stat">
-                                <div className="stat__number">{t('landing.hero.stats_focus_val', '100%')}</div>
-                                <div className="stat__label">{t('landing.hero.stats_focus', 'Improvement in Concentration')}</div>
-                            </div>
-                            <div className="stat">
-                                <div className="stat__number">{t('landing.hero.stats_students_val', '+15,000')}</div>
-                                <div className="stat__label">{t('landing.hero.stats_students', 'Connected Students')}</div>
-                            </div>
-                            <div className="stat">
-                                <div className="stat__number">{t('landing.hero.stats_gpa_val', '+28%')}</div>
-                                <div className="stat__label">{t('landing.hero.stats_gpa', 'GPA Improvement')}</div>
-                            </div>
-                        </div>
                     </div>
 
                     <div className="hero__visual">
